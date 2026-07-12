@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คู่มือประกอบ: เจาะลึกโค้ดการวิเคราะห์และคำนวณขนาดแผลเบาหวาน (DFU Project)</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Styling CSS -->
+    <style>
+        :root {
+            --bg-main: #0b0f19;
+            --bg-sidebar: #0f1524;
+            --bg-panel: #141b2d;
+            --bg-code: #070a12;
+            --primary: #10b981;
+            --primary-grad: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+            --accent: #3b82f6;
+            --border: #223049;
+            --text-title: #ffffff;
+            --text-body: #94a3b8;
+            --text-muted: #4b5563;
+            --success: #10b981;
+            --radius-lg: 16px;
+            --radius-md: 8px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Sarabun', 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-body);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Sidebar Menu */
+        aside {
+            width: 320px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            flex-shrink: 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            width: 36px;
+            height: 36px;
+            background: var(--primary-grad);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .brand-text h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            color: var(--text-title);
+            line-height: 1.2;
+        }
+
+        .brand-text p {
+            font-size: 9px;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .menu-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+        }
+
+        .menu-item button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            padding: 10px 14px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--text-body);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            cursor: pointer;
+            text-align: left;
+            transition: var(--transition);
+        }
+
+        .menu-item button:hover {
+            background-color: rgba(16, 185, 129, 0.04);
+            color: var(--primary);
+        }
+
+        .menu-item.active button {
+            background: var(--primary-grad);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+        }
+
+        /* Workspace Grid Layout */
+        .workspace {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .top-bar {
+            min-height: 70px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 24px;
+            background-color: var(--bg-sidebar);
+            flex-shrink: 0;
+        }
+
+        .top-bar-title-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-bar h3 {
+            font-family: 'Outfit', 'Sarabun', sans-serif;
+            color: var(--text-title);
+            font-size: 16px;
+            line-height: 1.2;
+        }
+
+        .btn-copy {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-body);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: var(--transition);
+        }
+
+        .btn-copy:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .split-container {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden;
+            height: calc(100vh - 70px);
+        }
+
+        /* Sub Navigation for Packages/Folders */
+        .sub-nav {
+            display: flex;
+            gap: 6px;
+            background-color: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border);
+            padding: 10px 24px;
+            overflow-x: auto;
+            flex-shrink: 0;
+        }
+
+        .sub-nav-btn {
+            background-color: var(--bg-main);
+            border: 1px solid var(--border);
+            color: var(--text-body);
+            padding: 6px 14px;
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .sub-nav-btn:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+            color: var(--text-title);
+        }
+
+        .sub-nav-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Center: Code View */
+        .code-view {
+            flex-grow: 1;
+            background-color: var(--bg-code);
+            overflow-y: auto;
+            padding: 24px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12.5px;
+            line-height: 20px;
+            border-right: 1px solid var(--border);
+            height: 100%;
+        }
+
+        .code-line {
+            display: flex;
+            min-height: 20px;
+            transition: var(--transition);
+        }
+
+        .code-line.highlighted {
+            background-color: rgba(16, 185, 129, 0.12);
+            border-left: 3px solid var(--success);
+            padding-left: 2px;
+        }
+
+        .line-num {
+            width: 40px;
+            color: var(--text-muted);
+            text-align: right;
+            padding-right: 15px;
+            user-select: none;
+            border-right: 1px solid var(--border);
+            margin-right: 15px;
+        }
+
+        .line-content {
+            white-space: pre;
+            color: #d1d5db;
+        }
+
+        /* Right: Interactive Explanation Cards */
+        .explanation-pane {
+            width: 440px;
+            background-color: var(--bg-sidebar);
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            flex-shrink: 0;
+            height: 100%;
+        }
+
+        .explanation-card {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .explanation-card:hover {
+            border-color: rgba(16, 185, 129, 0.4);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+        }
+
+        .explanation-card.active {
+            border-color: var(--success);
+            background: linear-gradient(to bottom, var(--bg-panel) 0%, rgba(16, 185, 129, 0.02) 100%);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.05);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header span {
+            font-size: 13.5px;
+            color: var(--text-title);
+            font-weight: 600;
+        }
+
+        .card-tag {
+            font-size: 10px;
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-body);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Interactive Tabs inside Card */
+        .tabs-container {
+            display: flex;
+            gap: 4px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 6px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 10.5px;
+            font-weight: 600;
+            padding: 4px 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .tab-btn:hover {
+            color: var(--text-body);
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .tab-btn.active {
+            color: var(--success);
+            background-color: rgba(16, 185, 129, 0.08);
+        }
+
+        .tab-content {
+            font-size: 12.5px;
+            line-height: 18px;
+            color: var(--text-body);
+            min-height: 60px;
+        }
+
+        /* Highlighting syntax styles */
+        .c-keyword { color: #f472b6; font-weight: bold; }
+        .c-class { color: #60a5fa; font-weight: bold; }
+        .c-func { color: #fbbf24; }
+        .c-comment { color: #6b7280; font-style: italic; }
+        .c-string { color: #34d399; }
+        .c-number { color: #a78bfa; }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar Menu -->
+    <aside>
+        <div class="brand">
+            <div class="logo">AI</div>
+            <div class="brand-text">
+                <h2>DFU Image Engine</h2>
+                <p>เจาะลึกคำนวณแผลเบาหวาน</p>
+            </div>
+        </div>
+        <ul class="menu-list">
+            <li class="menu-item active" data-file="project_structure">
+                <button>📂 1. โครงสร้างโฟลเดอร์ & Config</button>
+            </li>
+            <li class="menu-item" data-file="ai_services">
+                <button>🧠 2. เอนจินโมเดล AI & QR</button>
+            </li>
+            <li class="menu-item" data-file="local_sandbox">
+                <button>🔬 3. สคริปต์สแกน Sandbox</button>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Workspace Workspace -->
+    <div class="workspace">
+        <div class="top-bar">
+            <div class="top-bar-title-container">
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <h3 id="topBarTitle" style="margin: 0;">โครงสร้างโฟลเดอร์และตั้งค่าหลัก</h3>
+                    <span id="topBarStatus" style="font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: bold; color: white; display: none;"></span>
+                </div>
+                <span style="font-size: 10px; color: var(--text-muted); font-family: 'Courier New'; margin-top: 4px;" id="topBarPath">/server</span>
+            </div>
+            <button class="btn-copy" id="btn-copy-main" onclick="copyEntireActiveFile()">Copy Code</button>
+        </div>
+
+        <!-- Sub navigation menu (Only visible for folders) -->
+        <div class="sub-nav" id="subNav">
+            <!-- Buttons dynamically load here -->
+        </div>
+
+        <!-- Split Screen View -->
+        <div class="split-container">
+            <!-- Left Pane: Code View -->
+            <div class="code-view" id="codePane">
+                <!-- Lines render dynamically here -->
+            </div>
+
+            <!-- Right Pane: Explanation Cards -->
+            <div class="explanation-pane" id="explanationPane">
+                <!-- Cards render dynamically here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive JS Controller -->
+    <script>
+        const fileDatabase = {
+            project_structure: {
+                isFolder: true,
+                subFiles: {
+                    folders: {
+                        name: "ผังไดเรกทอรี",
+                        fileStatus: "📁 โฟลเดอร์แนวทางจัดระเบียบโครงสร้าง",
+                        path: "Folder Layout Map",
+                        rawCode: `# ผังการย้ายและจัดโครงสร้างโฟลเดอร์โปรเจกต์ DFU
+D:/University memory/year4 [2569]/project_ICT/y4/Deep_Learning-Based_System_for_Segmentation_and_Monitoring_of_Diabetic/
+├── server/                           # [1] โฟลเดอร์สำหรับบริการระบบหลังบ้าน (FastAPI)
+│   ├── weights/                      # [2] โฟลเดอร์เก็บไฟล์น้ำหนักโมเดล AI (model.pth)
+│   │   └── model.pth                 # ไฟล์น้ำหนักประสาทเทียมดิบ (best_model.pth)
+│   │
+│   ├── app/
+│   │   ├── services/                 # [3] โฟลเดอร์ใหม่เก็บคำสั่งวิเคราะห์กราฟิกและ AI
+│   │   │   ├── __init__.py           # สารบัญสำหรับการดึงคำสั่งย่อยข้ามโมดูล
+│   │   │   ├── qr_detector.py        # โค้ดสำหรับตรวจสติกเกอร์ QR Code ด้วย pyzbar
+│   │   │   ├── wound_segmenter.py    # โค้ดสำหรับการรันโมเดลคัดแยกแผล U-Net PyTorch
+│   │   │   └── image_rectifier.py    # โค้ดคณิตศาสตร์ Homography Warp ปรับระนาบตรง
+│   │   │
+│   │   └── static/                   # [4] โฟลเดอร์สำหรับการเปิดแชร์รูปภาพ
+│   │       └── wounds/               # เก็บรูปถ่ายแผลขอบเขียวเพื่อส่งให้ React ดึงไปโชว์
+│   │
+│   └── scratch/                      # [5] โฟลเดอร์เก็บโค้ดทดสอบรัน Sandbox`,
+                        htmlCode: [
+                            `<span class="c-comment"># ผังการย้ายและจัดโครงสร้างโฟลเดอร์โปรเจกต์ DFU</span>`,
+                            `D:/University memory/year4 [2569]/project_ICT/y4/Deep_Learning-Based_System_for_Segmentation_and_Monitoring_of_Diabetic/`,
+                            `<span class="c-class">├── server/</span>                           <span class="c-comment"># [1] โฟลเดอร์สำหรับบริการระบบหลังบ้าน (FastAPI)</span>`,
+                            `<span class="c-class">│   ├── weights/</span>                      <span class="c-comment"># [2] โฟลเดอร์เก็บไฟล์น้ำหนักโมเดล AI (model.pth)</span>`,
+                            `│   │   └── <span class="c-keyword">model.pth</span>                 <span class="c-comment"># ไฟล์น้ำหนักประสาทเทียมดิบ (best_model.pth)</span>`,
+                            `│   │`,
+                            `<span class="c-class">│   ├── app/</span>`,
+                            `<span class="c-class">│   │   ├── services/</span>                 <span class="c-comment"># [3] โฟลเดอร์ใหม่เก็บคำสั่งวิเคราะห์กราฟิกและ AI</span>`,
+                            `│   │   │   ├── <span class="c-keyword">__init__.py</span>           <span class="c-comment"># สารบัญสำหรับการดึงคำสั่งย่อยข้ามโมดูล</span>`,
+                            `│   │   │   ├── <span class="c-keyword">qr_detector.py</span>        <span class="c-comment"># โค้ดสำหรับตรวจสติกเกอร์ QR Code ด้วย pyzbar</span>`,
+                            `│   │   │   ├── <span class="c-keyword">wound_segmenter.py</span>    <span class="c-comment"># โค้ดสำหรับการรันโมเดลคัดแยกแผล U-Net PyTorch</span>`,
+                            `│   │   │   └── <span class="c-keyword">image_rectifier.py</span>    <span class="c-comment"># โค้ดคณิตศาสตร์ Homography Warp ปรับระนาบตรง</span>`,
+                            `│   │   │`,
+                            `<span class="c-class">│   │   └── static/</span>                   <span class="c-comment"># [4] โฟลเดอร์สำหรับการเปิดแชร์รูปภาพ</span>`,
+                            `│   │       └── <span class="c-keyword">wounds/</span>               <span class="c-comment"># เก็บรูปถ่ายแผลขอบเขียวเพื่อส่งให้ React ดึงไปโชว์</span>`,
+                            `│   │`,
+                            `<span class="c-class">│   └── scratch/</span>                      <span class="c-comment"># [5] โฟลเดอร์เก็บโค้ดทดสอบรัน Sandbox</span>`
+                        ],
+                        explanations: [
+                            {
+                                title: "📁 1. ภาพรวมการจัดสัดส่วนห้องประมวลผลแผลเบาหวาน",
+                                lines: [3, 17],
+                                what: "แบ่งแยกโค้ดกราฟิกและโมเดล AI ออกมาตั้งเป็นคลาสอิสระในโฟลเดอร์ services/ และจัดสร้างห้อง static/wounds/ สำหรับวางรูปภาพผลลัพธ์สุดท้าย",
+                                get: "แผนภาพระบบหลังบ้านที่เป็นระเบียบ คลีน สะอาดตา ปราศจากขยะหรือตัวดีบัก JSON สะสมในเครื่องรันไทม์",
+                                why: "ช่วยแยกสิทธิ์ในการพัฒนาชัดเจน ทำให้เมื่อคุณต้องการเปลี่ยนประเภทโมเดล AI หรืออัปเกรดตรรกะตรวจจับ QR จะสามารถสแกนพิกัดปรับแก้ได้ในจุดเดียวโดยไม่รบกวนโครงสร้างเว็บ API ตัวหลักครับ"
+                            }
+                        ]
+                    },
+                    config: {
+                        name: "config.py",
+                        fileStatus: "🔧 แก้ไขเพิ่มเติมในคลาส Settings เดิม (ห้ามเขียนทับ!)",
+                        path: "server/app/core/config.py",
+                        rawCode: `from pydantic_settings import BaseSettings, SettingsConfigDict
+import os
+import torch
+
+class Settings(BaseSettings):
+    PROJECT_NAME: str = "Deep Learning-Based System for Segmentation and Monitoring of Diabetic Foot Ulcer"
+    API_V1_STR: str = "/api/v1"
+    DATABASE_URL: str
+
+    # --- โค้ดตั้งค่าเสริมสำหรับคำนวณสเกลแผล (เพิ่มเติมเข้าคลาสเดิม) ---
+    MODEL_PATH: str = "weights/model.pth"
+    STATIC_DIR: str = "static/wounds"
+    QR_SIZE_CM: float = 2.0
+    TARGET_PX_PER_CM: float = 100.0   # มาตรฐานมาตรวัด: 1 cm = 100 พิกเซลหน้าตรง
+    MAX_WARPED_DIM: int = 5000         # ขีดจำกัดพื้นที่พิกเซลสูงสุดป้องกันการบิดเบี้ยว
+    THRESHOLD: float = 0.5             # เกณฑ์คัดแยกแผล U-Net
+
+    @property
+    def DEVICE(self) -> str:
+        return "cuda" if torch.cuda.is_available() else "cpu"
+
+    model_config = SettingsConfigDict(
+        env_file="../.env",
+        env_file_encoding="utf-8",
+        extra="ignore"
+    )
+
+settings = Settings()
+
+# ประกันความมีอยู่ของโฟลเดอร์เก็บภาพแผล
+os.makedirs(settings.STATIC_DIR, exist_ok=True)`,
+                        htmlCode: [
+                            `<span class="c-keyword">from</span> pydantic_settings <span class="c-keyword">import</span> BaseSettings, SettingsConfigDict`,
+                            `<span class="c-keyword">import</span> os`,
+                            `<span class="c-keyword">import</span> torch`,
+                            ``,
+                            `<span class="c-class">class</span> <span class="c-class">Settings</span>(BaseSettings):`,
+                            `    PROJECT_NAME: <span class="c-keyword">str</span> = <span class="c-string">"Deep Learning-Based..."</span>`,
+                            `    API_V1_STR: <span class="c-keyword">str</span> = <span class="c-string">"/api/v1"</span>`,
+                            `    DATABASE_URL: <span class="c-keyword">str</span>`,
+                            ``,
+                            `    <span class="c-comment"># --- โค้ดตั้งค่าเสริมสำหรับคำนวณสเกลแผล (เพิ่มเติมเข้าคลาสเดิม) ---</span>`,
+                            `    MODEL_PATH: <span class="c-keyword">str</span> = <span class="c-string">"weights/model.pth"</span>`,
+                            `    STATIC_DIR: <span class="c-keyword">str</span> = <span class="c-string">"static/wounds"</span>`,
+                            `    QR_SIZE_CM: <span class="c-keyword">float</span> = <span class="c-number">2.0</span>`,
+                            `    TARGET_PX_PER_CM: <span class="c-keyword">float</span> = <span class="c-number">100.0</span>   <span class="c-comment"># 1 cm = 100 px</span>`,
+                            `    MAX_WARPED_DIM: <span class="c-keyword">int</span> = <span class="c-number">5000</span>`,
+                            `    THRESHOLD: <span class="c-keyword">float</span> = <span class="c-number">0.5</span>`,
+                            ``,
+                            `    <span class="c-func">@property</span>`,
+                            `    <span class="c-keyword">def</span> <span class="c-func">DEVICE</span>(self) -> <span class="c-keyword">str</span>:`,
+                            `        <span class="c-keyword">return</span> <span class="c-string">"cuda"</span> <span class="c-keyword">if</span> torch.cuda.is_available() <span class="c-keyword">else</span> <span class="c-string">"cpu"</span>`,
+                            ``,
+                            `    model_config = SettingsConfigDict(`,
+                            `        env_file=<span class="c-string">"../.env"</span>,`,
+                            `        env_file_encoding=<span class="c-string">"utf-8"</span>,`,
+                            `        extra=<span class="c-string">"ignore"</span>`,
+                            `    )`,
+                            ``,
+                            `settings = Settings()`,
+                            ``,
+                            `<span class="c-comment"># ประกันความมีอยู่ของโฟลเดอร์เก็บภาพแผล</span>`,
+                            `os.makedirs(settings.STATIC_DIR, exist_ok=<span class="c-keyword">True</span>)`
+                        ],
+                        explanations: [
+                            {
+                                title: "⚙️ 1. ล็อกมาตรฐานสเกลรูปภาพให้เทียบกันได้ข้ามเวลา",
+                                lines: [11, 16],
+                                what: "ตั้งเกณฑ์มาตรวัดสากลให้ระยะ 1 ซม. ในโลกจริงแปลงค่าเท่ากับระยะ 100 จุดพิกเซลบนภาพหน้าตรงเสมอกันทุกรูป",
+                                get: "ตัวแปรสเกลปรับคงที่ ซึ่งช่วยตัดปัญหาความใกล้-ไกลของกล้องถ่ายรูปมือถือได้อย่างเด็ดขาด",
+                                why: "เมื่อพยาบาลถ่ายภาพแผลคนไข้มาจากระยะห่างที่ไม่เท่ากัน การแปลงสัดส่วนให้อยู่บนกฎมาตรวัด 100 px/cm เดียวกันทั้งหมด จะช่วยให้เราวัดขนาดความก้าวหน้าการรักษาย้อนหลังได้สมจริงไม่ลวงตา"
+                            }
+                        ]
+                    }
+                }
+            },
+            ai_services: {
+                isFolder: true,
+                subFiles: {
+                    qr_detector: {
+                        name: "qr_detector.py",
+                        fileStatus: "🆕 สร้างไฟล์ใหม่ทั้งหมด",
+                        path: "server/app/services/qr_detector.py",
+                        rawCode: `import cv2
+from pyzbar import pyzbar
+import numpy as np
+
+def detect_qr(image_path, qr_size_cm=2.0):
+    img = cv2.imread(image_path)
+    if img is None: return None
+    
+    qr_list = pyzbar.decode(img)
+    if not qr_list or len(qr_list[0].polygon) != 4:
+        return None
+        
+    qr = qr_list[0]
+    polygon = [[p.x, p.y] for p in qr.polygon]
+    pts = np.array(polygon, dtype=np.float32)
+    
+    qr_area_px = float(cv2.contourArea(pts))
+    side_lengths = [np.linalg.norm(pts[i] - pts[(i + 1) % 4]) for i in range(4)]
+    px_per_cm = float(np.mean(side_lengths)) / qr_size_cm
+    
+    return {
+        "px_per_cm": px_per_cm,
+        "polygon": polygon
+    }`,
+                        htmlCode: [
+                            `<span class="c-keyword">import</span> cv2`,
+                            `<span class="c-keyword">from</span> pyzbar <span class="c-keyword">import</span> pyzbar`,
+                            `<span class="c-keyword">import</span> numpy <span class="c-keyword">as</span> np`,
+                            ``,
+                            `<span class="c-keyword">def</span> <span class="c-func">detect_qr</span>(image_path, qr_size_cm=<span class="c-number">2.0</span>):`,
+                            `    img = cv2.imread(image_path)`,
+                            `    <span class="c-keyword">if</span> img <span class="c-keyword">is None</span>: <span class="c-keyword">return None</span>`,
+                            ``,
+                            `    qr_list = pyzbar.decode(img)`,
+                            `    <span class="c-keyword">if not</span> qr_list <span class="c-keyword">or</span> len(qr_list[<span class="c-number">0</span>].polygon) != <span class="c-number">4</span>:`,
+                            `        <span class="c-keyword">return None</span>`,
+                            ``,
+                            `    qr = qr_list[<span class="c-number">0</span>]`,
+                            `    polygon = [[p.x, p.y] <span class="c-keyword">for</span> p in qr.polygon]`,
+                            `    pts = np.array(polygon, dtype=np.float32)`,
+                            ``,
+                            `    qr_area_px = float(cv2.contourArea(pts))`,
+                            `    side_lengths = [np.linalg.norm(pts[i] - pts[(i + 1) % 4]) for i in range(4)]`,
+                            `    px_per_cm = float(np.mean(side_lengths)) / qr_size_cm`,
+                            ``,
+                            `    <span class="c-keyword">return</span> {`,
+                            `        <span class="c-string">"px_per_cm"</span>: px_per_cm,`,
+                            `        <span class="c-string">"polygon"</span>: polygon`,
+                            `    }`
+                        ],
+                        explanations: [
+                            {
+                                title: "🔍 1. สแกนตรวจสอบหาขอบมุมของสติกเกอร์ QR Code",
+                                lines: [9, 14],
+                                what: "เรียกไลบรารีสแกนตรวจหาตำแหน่งของ QR Code และกวาดเอาพิกัดมุมยอดสี่เหลี่ยมทั้ง 4 ทิศทางมาจัดวางเป็นคีย์พิกเซลสำหรับการแปลงระนาบหน้าตรง",
+                                get: "ชุดพิกัดราบและตั้ง (X, Y) ทั้ง 4 มุมของแผ่นสติกเกอร์รอบตัวแผล",
+                                why: "หากสติกเกอร์โดนนิ้วพยาบาลเบียดบังหรือแสงสว่างแยงจ้าจนสแกนจับพิกัดออกมาไม่ครบ 4 ยอดมุม ระบบจะล็อกแจ้งเตือนให้ทำการอัปโหลดรูปใหม่ทันที ป้องกันแอปพลิเคชันหลังบ้านประมวลผลเพี้ยนล่มครับ"
+                            },
+                            {
+                                title: "📐 2. สูตรเชือกผูกรองเท้ามัดพื้นที่ QR โค้งเฉียง",
+                                lines: [17, 19],
+                                what: "คำนวณบวกลบคูณไขว้หาพิกัดพื้นที่สติกเกอร์ด้วยคำสั่งระดับแกนหลัก <code>cv2.contourArea</code> และหาความยาวเฉลี่ยของทั้งสี่ด้านเพื่อแปลงออกมาเป็นสเกลกล้อง",
+                                get: "ระดับพิกเซลที่ถูกวัดขนาดมาเสถียร โดยไม่ต้องกังวลเรื่องทิศทางการหมุนของกล้องถ่ายแผล",
+                                why: "เพราะสติกเกอร์ที่ติดบนส้นเท้าคนไข้มีโอกาสเอียงเฉียงไปมา การคูณความกว้างความสูงแบบทั่วไปจะเกิดค่าเบวเกินจริง การใช้หลักการโยงมัดเชือก Shoelace จะให้พื้นที่ราบจริงที่เที่ยงตรงที่สุด"
+                            }
+                        ]
+                    },
+                    wound_segmenter: {
+                        name: "wound_segmenter.py",
+                        fileStatus: "🆕 สร้างไฟล์ใหม่ทั้งหมด",
+                        path: "server/app/services/wound_segmenter.py",
+                        rawCode: `import torch
+import torchvision.transforms as transforms
+from PIL import Image
+import cv2
+import numpy as np
+import segmentation_models_pytorch as smp
+
+def load_model(model_path, device):
+    model = smp.Unet(encoder_name="efficientnet-b4", encoder_weights=None, in_channels=3, classes=1)
+    state_dict = torch.load(model_path, map_location=device)
+    model.load_state_dict(state_dict, strict=False)
+    model.to(device).eval()
+    return model
+
+def segment_wound(image_path, model, device, threshold=0.5):
+    img = cv2.imread(image_path)
+    h, w = img.shape[:2]
+    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    img_pil = Image.fromarray(img_rgb)
+    
+    transform = transforms.Compose([
+        transforms.Resize((512, 512)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
+    img_tensor = transform(img_pil).unsqueeze(0).to(device)
+    
+    with torch.no_grad():
+        logits = model(img_tensor)
+        prob = torch.sigmoid(logits).squeeze().cpu().numpy()
+        
+    prob_resized = cv2.resize(prob, (w, h), interpolation=cv2.INTER_LINEAR)
+    mask = (prob_resized > threshold).astype(np.uint8) * 255
+    
+    wound_pixels_prob = prob[prob > threshold]
+    if len(wound_pixels_prob) > 0:
+        eps = 1e-7
+        p = wound_pixels_prob
+        entropy = - (p * np.log2(p + eps) + (1 - p) * np.log2(1 - p + eps))
+        avg_entropy = float(np.mean(entropy))
+        confidence = float(np.mean(wound_pixels_prob))
+    else:
+        avg_entropy, confidence = 0.0, 0.0
+        
+    return {"mask": mask, "confidence": confidence, "avg_entropy": avg_entropy, "img": img}`,
+                        htmlCode: [
+                            `<span class="c-keyword">import</span> torch`,
+                            `<span class="c-keyword">import</span> torchvision.transforms <span class="c-keyword">as</span> transforms`,
+                            `<span class="c-keyword">from</span> PIL <span class="c-keyword">import</span> Image`,
+                            `<span class="c-keyword">import</span> cv2`,
+                            `<span class="c-keyword">import</span> numpy <span class="c-keyword">as</span> np`,
+                            `<span class="c-keyword">import</span> segmentation_models_pytorch <span class="c-keyword">as</span> smp`,
+                            ``,
+                            `<span class="c-keyword">def</span> <span class="c-func">load_model</span>(model_path, device):`,
+                            `    model = smp.Unet(encoder_name=<span class="c-string">"efficientnet-b4"</span>, encoder_weights=<span class="c-keyword">None</span>, in_channels=<span class="c-number">3</span>, classes=<span class="c-number">1</span>)`,
+                            `    state_dict = torch.load(model_path, map_location=device)`,
+                            `    model.load_state_dict(state_dict, strict=<span class="c-keyword">False</span>)`,
+                            `    model.to(device).eval()`,
+                            `    <span class="c-keyword">return</span> model`,
+                            ``,
+                            `<span class="c-keyword">def</span> <span class="c-func">segment_wound</span>(image_path, model, device, threshold=<span class="c-number">0.5</span>):`,
+                            `    img = cv2.imread(image_path)`,
+                            `    h, w = img.shape[:2]`,
+                            `    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)`,
+                            `    img_pil = Image.fromarray(img_rgb)`,
+                            ``,
+                            `    transform = transforms.Compose([`,
+                            `        transforms.Resize((<span class="c-number">512</span>, <span class="c-number">512</span>)),`,
+                            `        transforms.ToTensor(),`,
+                            `        transforms.Normalize(mean=[<span class="c-number">0.485</span>, <span class="c-number">0.456</span>, <span class="c-number">0.406</span>], std=[<span class="c-number">0.229</span>, <span class="c-number">0.224</span>, <span class="c-number">0.225</span>])`,
+                            `    ])`,
+                            `    img_tensor = transform(img_pil).unsqueeze(<span class="c-number">0</span>).to(device)`,
+                            ``,
+                            `    <span class="c-keyword">with</span> torch.no_grad():`,
+                            `        logits = model(img_tensor)`,
+                            `        prob = torch.sigmoid(logits).squeeze().cpu().numpy()`,
+                            ``,
+                            `    prob_resized = cv2.resize(prob, (w, h), interpolation=cv2.INTER_LINEAR)`,
+                            `    mask = (prob_resized > threshold).astype(np.uint8) * <span class="c-number">255</span>`,
+                            ``,
+                            `    wound_pixels_prob = prob[prob > threshold]`,
+                            `    <span class="c-keyword">if</span> len(wound_pixels_prob) > <span class="c-number">0</span>:`,
+                            `        eps = <span class="c-number">1e-7</span>`,
+                            `        p = wound_pixels_prob`,
+                            `        entropy = - (p * np.log2(p + eps) + (<span class="c-number">1</span> - p) * np.log2(<span class="c-number">1</span> - p + eps))`,
+                            `        avg_entropy = float(np.mean(entropy))`,
+                            `        confidence = float(np.mean(wound_pixels_prob))`,
+                            `    <span class="c-keyword">else</span>:`,
+                            `        avg_entropy, confidence = <span class="c-number">0.0</span>, <span class="c-number">0.0</span>`,
+                            ``,
+                            `    <span class="c-keyword">return</span> {<span class="c-string">"mask"</span>: mask, <span class="c-string">"confidence"</span>: confidence, <span class="c-string">"avg_entropy"</span>: avg_entropy, <span class="c-string">"img"</span>: img}`
+                        ],
+                        explanations: [
+                            {
+                                title: "🧠 1. ตัวปัญญาประดิษฐ์ U-Net ข้อมูลขอบแผลผ่านสะพานเชื่อม",
+                                lines: [8, 13],
+                                what: "เรียก SMP โหลดสถาปัตยกรรมคัดแผล โดยใช้สะพานเชื่อมพิกัดคม (Skip Connections) ยิงข้อมูลรายละเอียดพิกัดขอบบาดแผลจากฝั่งซ้าย (Encoder) ส่งข้ามไปประกบฝั่งขวา (Decoder) เกลี่ยเฉลี่ยสีให้อัตโนมัติ",
+                                get: "ขอบเขตบาดแผลคนไข้รอบนอกที่เรียบเนียน ไม่ขรุขระเป็นรอยหยักขั้นบันไดพิกเซล",
+                                why: "เนื่องจากการบีบอัดภาพเพื่อวิเคราะห์ลักษณะแผล จะทำให้ลายขอบแผลคม ๆ สูญหาย การใช้สะพานเชื่อม Skip Connections จะช่วยประกบพิกัดเดิมทำให้ AI ชี้กรอบขอบเส้นแผลได้อย่างแม่นยำสูง"
+                            },
+                            {
+                                title: "🔬 2. การวัดระดับความลังเลขอบแผล (Shannon Entropy)",
+                                lines: [35, 42],
+                                what: "วิเคราะห์ระดับความไม่มั่นใจของ AI ตามขอบแผล (เปรียบเสมือนจิ้มถามว่า พิกเซลขอบนี้แดงช้ำอักเสบเป็นแผลหรือยัง? ถ้าตอบ 50/50 ลังเลสุด Entropy จะเท่ากับ 1.0)",
+                                get: "ดัชนีเอนโทรปีเฉลี่ย ใช้ส่งเป็นตัวชี้วัดความอักเสบแดงเรื่อรอบแผลส่งตรงหาพยาบาลบนหน้าเว็บ",
+                                why: "ช่วยเตือนกรณีที่ขนาดแผลดูภายนอกอาจจะเท่าเดิม แต่ค่าความลังเลขอบผิวหนังกลับเพิ่มขึ้น บ่งชี้ว่าเนื้อเยื่อรอบข้างกำลังเกิดอาการเปื่อยอักเสบ (Erythema) แพทย์จะได้ปรับยาต้านเชื้อได้ไวขึ้นครับ"
+                            }
+                        ]
+                    },
+                    image_rectifier: {
+                        name: "image_rectifier.py",
+                        fileStatus: "🆕 สร้างไฟล์ใหม่ทั้งหมด",
+                        path: "server/app/services/image_rectifier.py",
+                        rawCode: `import cv2
+import numpy as np
+
+def warp_image_and_mask(img, mask, qr_polygon, qr_size_cm=2.0, target_px_per_cm=100.0, max_warped_dim=5000):
+    src_pts = np.array([
+        [qr_polygon[0][0], qr_polygon[0][1]],
+        [qr_polygon[3][0], qr_polygon[3][1]],
+        [qr_polygon[2][0], qr_polygon[2][1]],
+        [qr_polygon[1][0], qr_polygon[1][1]]
+    ], dtype="float32")
+    
+    qr_side_px = qr_size_cm * target_px_per_cm
+    dst_pts_ref = np.array([
+        [0.0, 0.0],
+        [qr_side_px, 0.0],
+        [qr_side_px, qr_side_px],
+        [0.0, qr_side_px]
+    ], dtype="float32")
+    
+    H = cv2.getPerspectiveTransform(src_pts, dst_pts_ref)
+    h, w = img.shape[:2]
+    corners = np.array([[0,0], [w-1,0], [w-1,h-1], [0,h-1]], dtype=np.float32).reshape(-1,1,2)
+    warped_corners = cv2.perspectiveTransform(corners, H)
+    x_coords, y_coords = warped_corners[:,0,0], warped_corners[:,0,1]
+    min_x, max_x = np.min(x_coords), np.max(x_coords)
+    min_y, max_y = np.min(y_coords), np.max(y_coords)
+    warped_w, warped_h = int(np.ceil(max_x - min_x)), int(np.ceil(max_y - min_y))
+    
+    if warped_w > max_warped_dim or warped_h > max_warped_dim:
+        raise ValueError("มุมกล้องถ่ายภาพเอียงลาดชันมากเกินไป กรุณาจัดตั้งกล้องทำมุมตั้งฉากและขนานกับแผลมากขึ้น")
+        
+    translation_matrix = np.array([[1, 0, -min_x], [0, 1, -min_y], [0, 0, 1]], dtype="float32")
+    H_final = np.dot(translation_matrix, H)
+    
+    warped_img = cv2.warpPerspective(img, H_final, (warped_w, warped_h))
+    warped_mask = cv2.warpPerspective(mask, H_final, (warped_w, warped_h), flags=cv2.INTER_NEAREST)
+    
+    return warped_img, warped_mask, warped_w, warped_h`,
+                        htmlCode: [
+                            `<span class="c-keyword">import</span> cv2`,
+                            `<span class="c-keyword">import</span> numpy <span class="c-keyword">as</span> np`,
+                            ``,
+                            `<span class="c-keyword">def</span> <span class="c-func">warp_image_and_mask</span>(img, mask, qr_polygon, qr_size_cm=<span class="c-number">2.0</span>, target_px_per_cm=<span class="c-number">100.0</span>, max_warped_dim=<span class="c-number">5000</span>):`,
+                            `    src_pts = np.array([`,
+                            `        [qr_polygon[0][0], qr_polygon[0][1]],  <span class="c-comment"># Top-Left</span>`,
+                            `        [qr_polygon[3][0], qr_polygon[3][1]],  <span class="c-comment"># Top-Right</span>`,
+                            `        [qr_polygon[2][0], qr_polygon[2][1]],  <span class="c-comment"># Bottom-Right</span>`,
+                            `        [qr_polygon[1][0], qr_polygon[1][1]]   <span class="c-comment"># Bottom-Left</span>`,
+                            `    ], dtype=<span class="c-string">"float32"</span>)`,
+                            ``,
+                            `    qr_side_px = qr_size_cm * target_px_per_cm`,
+                            `    dst_pts_ref = np.array([`,
+                            `        [<span class="c-number">0.0</span>, <span class="c-number">0.0</span>],`,
+                            `        [qr_side_px, <span class="c-number">0.0</span>],`,
+                            `        [qr_side_px, qr_side_px],`,
+                            `        [<span class="c-number">0.0</span>, qr_side_px]`,
+                            `    ], dtype=<span class="c-string">"float32"</span>)`,
+                            ``,
+                            `    H = cv2.getPerspectiveTransform(src_pts, dst_pts_ref)`,
+                            `    h, w = img.shape[:2]`,
+                            `    corners = np.array([[0,0], [w-1,0], [w-1,h-1], [0,h-1]], dtype=np.float32).reshape(-1,1,2)`,
+                            `    warped_corners = cv2.perspectiveTransform(corners, H)`,
+                            `    x_coords, y_coords = warped_corners[:,0,0], warped_corners[:,0,1]`,
+                            `    min_x, max_x = np.min(x_coords), np.max(x_coords)`,
+                            `    min_y, max_y = np.min(y_coords), np.max(y_coords)`,
+                            `    warped_w, warped_h = int(np.ceil(max_x - min_x)), int(np.ceil(max_y - min_y))`,
+                            ``,
+                            `    <span class="c-keyword">if</span> warped_w > max_warped_dim <span class="c-keyword">or</span> warped_h > max_warped_dim:`,
+                            `        <span class="c-keyword">raise</span> ValueError(<span class="c-string">"มุมกล้องถ่ายภาพเอียงลาดชันมากเกินไป กรุณาจัดตั้งกล้องทำมุมตั้งฉากและขนานกับแผลมากขึ้น"</span>)`,
+                            ``,
+                            `    translation_matrix = np.array([[<span class="c-number">1</span>, <span class="c-number">0</span>, -min_x], [<span class="c-number">0</span>, <span class="c-number">1</span>, -min_y], [<span class="c-number">0</span>, <span class="c-number">0</span>, <span class="c-number">1</span>]], dtype=<span class="c-string">"float32"</span>)`,
+                            `    H_final = np.dot(translation_matrix, H)`,
+                            ``,
+                            `    warped_img = cv2.warpPerspective(img, H_final, (warped_w, warped_h))`,
+                            `    warped_mask = cv2.warpPerspective(mask, H_final, (warped_w, warped_h), flags=cv2.INTER_NEAREST)`,
+                            ``,
+                            `    <span class="c-keyword">return</span> warped_img, warped_mask, warped_w, warped_h`
+                        ],
+                        explanations: [
+                            {
+                                title: "📐 1. บิดดึงมุมแผ่นยางเบี้ยว ๆ ให้ตรงเป๊ะ (Homography)",
+                                lines: [5, 20],
+                                what: "ดึงมุมขอบของสติกเกอร์ที่เอียงบิดเฉียงในรูปต้นฉบับ ให้กลับมาตึงราบเรียบตรงเป็นทรงจัตุรัสขนานขอบกล้อง 90 องศา (พิกัด 200x200 พิกเซลคงที่)",
+                                get: "รูปถ่ายระนาบขนานตรงที่ไม่มีความลาดเอียงและสัดส่วนแผลสมบูรณ์ขึ้น",
+                                why: "เมื่อสติกเกอร์กลับมาระนาบตรงแล้ว พื้นที่รอบผิวทั้งหมดและแผลเบาหวานก็จะถูกยืดระนาบให้แบนเรียบหน้าตรงเสมอกัน ช่วยให้วัดขนาดพื้นที่ได้อย่างคงที่ไม่มีผิดเพี้ยนจากมุมถ่ายกล้องครับ"
+                            },
+                            {
+                                title: "↔️ 2. เลื่อนภาพชดเชยค่าลบ ป้องกันรูปแผลแหว่งหาย",
+                                lines: [31, 33],
+                                what: "บวกค่าระยะเลื่อน <code>-min_x</code> และ <code>-min_y</code> กลับเข้าไปในเมทริกซ์การยืด $H$ เพื่อเลื่อนเฟรมพิกเซลที่ติดลบให้ขยับมาในเฟรมบวกหลัก",
+                                get: "ภาพถ่ายปรับมุมใหม่ที่บาดแผลยังคงแสดงครบถ้วนบนเฟรมหน้าจอ ไม่หลุดขอบสีดำทับ",
+                                why: "เนื่องจากการบิดเฉียงภาพจะทำให้พิกัดนอกแกน QR code เยื้องไปในย่านพิกัดติดลบ ซึ่งโปรแกรมคอมพิวเตอร์จะขลิบตัดแรเงาสีดำทับหน้าผิวแผลทิ้งไป ทำให้หาพื้นที่แผลกว้างผิดรูป"
+                            }
+                        ]
+                    }
+                }
+            },
+            local_sandbox: {
+                isFolder: false,
+                name: "test_segmentation.py",
+                        fileStatus: "🆕 สร้างไฟล์ใหม่ทั้งหมด",
+                path: "server/scratch/test_segmentation.py",
+                rawCode: `import sys
+import os
+import cv2
+import numpy as np
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from app.core.config import *
+from app.services.qr_detector import detect_qr
+from app.services.wound_segmenter import load_model, segment_wound
+from app.services.image_rectifier import warp_image_and_mask
+
+def run_sandbox(image_path):
+    print("🚀 สตาร์ททดสอบเอนจิน AI & ปรับสเกลภาพแผล...")
+    model = load_model(MODEL_PATH, DEVICE)
+    qr_data = detect_qr(image_path, QR_SIZE_CM)
+    if not qr_data:
+        print("❌ ไม่พบป้ายอ้างอิง QR Code!")
+        return
+    wound_data = segment_wound(image_path, model, DEVICE, THRESHOLD)
+    warped_img, warped_mask, warped_w, warped_h = warp_image_and_mask(
+        wound_data["img"], wound_data["mask"], qr_data["polygon"],
+        QR_SIZE_CM, TARGET_PX_PER_CM, MAX_WARPED_DIM
+    )
+    pixels_rectified = int(np.sum(warped_mask > 0))
+    scale_factor = 4.0 / (200.0 * 200.0) # 0.0001
+    area_cm2 = pixels_rectified * scale_factor
+    print("="*50)
+    print(f"📊 ผลคำนวณพื้นที่แผลจริง: {area_cm2:.4f} cm²")
+    print(f"📉 ระดับ Shannon Entropy : {wound_data['avg_entropy']:.4f}")
+    print(f"🩹 พิกเซลแผลหน้าตรง       : {pixels_rectified:,} px")
+    print("="*50)
+
+if __name__ == "__main__":
+    run_sandbox("inputs/test.jpg")`,
+                htmlCode: [
+                    `<span class="c-keyword">import</span> sys`,
+                    `<span class="c-keyword">import</span> os`,
+                    `<span class="c-keyword">import</span> cv2`,
+                    `<span class="c-keyword">import</span> numpy <span class="c-keyword">as</span> np`,
+                    ``,
+                    `<span class="c-comment"># นำทางพาธเข้าถึงโมดูลหลักหลังบ้าน</span>`,
+                    `sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), <span class="c-string">".."</span>)))`,
+                    ``,
+                    `<span class="c-keyword">from</span> app.core.config <span class="c-keyword">import</span> *`,
+                    `<span class="c-keyword">from</span> app.services.qr_detector <span class="c-keyword">import</span> detect_qr`,
+                    `<span class="c-keyword">from</span> app.services.wound_segmenter <span class="c-keyword">import</span> load_model, segment_wound`,
+                    `<span class="c-keyword">from</span> app.services.image_rectifier <span class="c-keyword">import</span> warp_image_and_mask`,
+                    ``,
+                    `<span class="c-keyword">def</span> <span class="c-func">run_sandbox</span>(image_path):`,
+                    `    print(<span class="c-string">"🚀 สตาร์ททดสอบเอนจิน AI & ปรับสเกลภาพแผล..."</span>)`,
+                    `    model = load_model(MODEL_PATH, DEVICE)`,
+                    ``,
+                    `    qr_data = detect_qr(image_path, QR_SIZE_CM)`,
+                    `    <span class="c-keyword">if not</span> qr_data:`,
+                    `        print(<span class="c-string">"❌ ไม่พบป้ายอ้างอิง QR Code!"</span>)`,
+                    `        <span class="c-keyword">return</span>`,
+                    `    wound_data = segment_wound(image_path, model, DEVICE, THRESHOLD)`,
+                    ``,
+                    `    warped_img, warped_mask, warped_w, warped_h = warp_image_and_mask(`,
+                    `        wound_data[<span class="c-string">"img"</span>], wound_data[<span class="c-string">"mask"</span>], qr_data[<span class="c-string">"polygon"</span>],`,
+                    `        QR_SIZE_CM, TARGET_PX_PER_CM, MAX_WARPED_DIM`,
+                    `    )`,
+                    `    pixels_rectified = int(np.sum(warped_mask > <span class="c-number">0</span>))`,
+                    `    scale_factor = <span class="c-number">4.0</span> / (<span class="c-number">200.0</span> * <span class="c-number">200.0</span>) <span class="c-comment"># 0.0001</span>`,
+                    `    area_cm2 = pixels_rectified * scale_factor`,
+                    ``,
+                    `    print(<span class="c-string">"="</span>*<span class="c-number">50</span>)`,
+                    `    print(f<span class="c-string">"📊 ผลคำนวณพื้นที่แผลจริง: {area_cm2:.4f} cm²"</span>)`,
+                    `    print(f<span class="c-string">"📉 ระดับ Shannon Entropy : {wound_data['avg_entropy']:.4f}"</span>)`,
+                    `    print(f<span class="c-string">"🩹 พิกเซลแผลหน้าตรง       : {pixels_rectified:,} px"</span>)`,
+                    `    print(<span class="c-string">"="</span>*<span class="c-number">50</span>)`,
+                    ``,
+                    `<span class="c-keyword">if</span> __name__ == <span class="c-string">"__main__"</span>:`,
+                    `    run_sandbox(<span class="c-string">"inputs/test.jpg"</span>)`
+                ],
+                explanations: [
+                    {
+                        title: "🧪 1. สคริปต์เดี่ยว Sandbox สำหรับจำลองการยิงภาพคำนวณ",
+                        what: "เป็นโมดูลเดี่ยวสำหรับให้ผู้พัฒนาหรือแอดมินใช้ยิงรันรูปแผลดิบในเครื่องวินโดวส์เพื่อดูผลวิเคราะห์ขนาด ซม. โดยไม่ต้องเปิดเซิร์ฟเวอร์เว็บ API หรือง้างระบบฐานข้อมูลจริงให้ยุ่งยาก",
+                        get: "รายงานพื้นที่ตารางเซนติเมตร และค่าความลังเลขอบแผล โชว์ออกทางหน้าจอ PowerShell ทันที",
+                        why: "เพื่อให้เราดีบักแก้จุดบกพร่องและจูนความหนาแน่นพิกเซลของภาพเอียงในแรมให้เสถียรที่สุดก่อนนำเอาคลาสบริการ AI ไปผูกระบบให้พยาบาลรันใช้งานบนตู้จำลอง Docker จริง"
+                    }
+                ]
+            }
+        };
+
+        let activeFile = "project_structure";
+
+        // Helper to update top bar status badge dynamically
+        function updateStatusBadge(statusText) {
+            const statusEl = document.getElementById("topBarStatus");
+            if (statusText) {
+                statusEl.innerText = statusText;
+                statusEl.style.display = "inline-block";
+                if (statusText.includes("แก้ไขเพิ่มเติม")) {
+                    statusEl.style.backgroundColor = "#d97706"; // Warning gold/orange
+                } else if (statusText.includes("สร้างใหม่")) {
+                    statusEl.style.backgroundColor = "#059669"; // Success green
+                } else {
+                    statusEl.style.backgroundColor = "var(--accent)"; // Info blue/purple
+                }
+            } else {
+                statusEl.style.display = "none";
+            }
+        }
+
+        // Load Sidebar File Menu
+        function loadFile(fileKey) {
+            activeFile = fileKey;
+            const fileData = fileDatabase[fileKey];
+
+            // Render Navbar Sub-tabs
+            const subNav = document.getElementById("subNav");
+            subNav.innerHTML = "";
+
+            if (fileData.isFolder) {
+                subNav.style.display = "flex";
+                Object.keys(fileData.subFiles).forEach((subKey, idx) => {
+                    const subFile = fileData.subFiles[subKey];
+                    const btn = document.createElement("button");
+                    btn.className = `sub-nav-btn ${idx === 0 ? 'active' : ''}`;
+                    btn.innerText = subFile.name;
+                    btn.onclick = () => loadSubFile(subKey, btn);
+                    subNav.appendChild(btn);
+                });
+
+                // Auto-load first subfile
+                const firstSubKey = Object.keys(fileData.subFiles)[0];
+                loadSubFile(firstSubKey, subNav.querySelector(".sub-nav-btn"));
+            } else {
+                subNav.style.display = "none";
+                document.getElementById("topBarTitle").innerText = fileData.name;
+                document.getElementById("topBarPath").innerText = fileData.path;
+                updateStatusBadge(fileData.fileStatus);
+                renderCodePane(fileData);
+                renderExplanationPane(fileData, null);
+            }
+        }
+
+        // Load Sub-file within Folder
+        function loadSubFile(subKey, buttonElement) {
+            document.querySelectorAll(".sub-nav-btn").forEach(btn => btn.classList.remove("active"));
+            buttonElement.classList.add("active");
+
+            const fileData = fileDatabase[activeFile];
+            const subFileData = fileData.subFiles[subKey];
+
+            document.getElementById("topBarTitle").innerText = subFileData.name;
+            document.getElementById("topBarPath").innerText = subFileData.path;
+            updateStatusBadge(subFileData.fileStatus);
+
+            renderCodePane(subFileData);
+            renderExplanationPane(subFileData, subKey);
+        }
+
+        // Render Code Lines
+        function renderCodePane(codeData) {
+            const codePane = document.getElementById("codePane");
+            codePane.innerHTML = "";
+
+            codeData.htmlCode.forEach((lineText, idx) => {
+                const lineNum = idx + 1;
+                const lineDiv = document.createElement("div");
+                lineDiv.className = "code-line";
+                lineDiv.id = `code-line-${lineNum}`;
+                lineDiv.innerHTML = `<span class="line-num">${lineNum}</span><span class="line-content">${lineText || ' '}</span>`;
+                lineDiv.addEventListener("click", () => highlightLine(lineNum, codeData));
+                codePane.appendChild(lineDiv);
+            });
+        }
+
+        // Render Explanation Cards
+        function renderExplanationPane(codeData, subFileKey) {
+            const explanationPane = document.getElementById("explanationPane");
+            explanationPane.innerHTML = "";
+
+            codeData.explanations.forEach((exp, idx) => {
+                const card = document.createElement("div");
+                card.className = "explanation-card";
+                card.id = `exp-card-${idx}`;
+                card.innerHTML = `
+                    <div class="card-header">
+                        <span>${exp.title}</span>
+                        <span class="card-tag">บรรทัดที่ ${exp.lines[0]} - ${exp.lines[1]}</span>
+                    </div>
+                    <div class="tabs-container">
+                        <button class="tab-btn active" onclick="switchCardTab(this, ${idx}, 'what', '${subFileKey}')">🔎 คืออะไร</button>
+                        <button class="tab-btn" onclick="switchCardTab(this, ${idx}, 'get', '${subFileKey}')">🎁 ได้อะไร</button>
+                        <button class="tab-btn" onclick="switchCardTab(this, ${idx}, 'why', '${subFileKey}')">💡 ทำไมต้องทำ</button>
+                    </div>
+                    <div class="tab-content" id="card-content-${idx}">
+                        ${exp.what}
+                    </div>
+                `;
+
+                card.addEventListener("click", () => {
+                    highlightLinesRange(exp.lines[0], exp.lines[1]);
+                    document.querySelectorAll('.explanation-card').forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                });
+
+                explanationPane.appendChild(card);
+            });
+        }
+
+        // Highlight single line click
+        function highlightLine(lineNum, codeData) {
+            document.querySelectorAll(".code-line").forEach(l => l.classList.remove("highlighted"));
+            const targetLine = document.getElementById(`code-line-${lineNum}`);
+            if (targetLine) targetLine.classList.add("highlighted");
+
+            const explanations = codeData.explanations;
+            const expIdx = explanations.findIndex(exp => lineNum >= exp.lines[0] && lineNum <= exp.lines[1]);
+
+            if (expIdx !== -1) {
+                document.querySelectorAll('.explanation-card').forEach(c => c.classList.remove('active'));
+                const card = document.getElementById(`exp-card-${expIdx}`);
+                if (card) {
+                    card.classList.add('active');
+                    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+        }
+
+        // Highlight lines range click
+        function highlightLinesRange(start, end) {
+            document.querySelectorAll(".code-line").forEach(l => l.classList.remove("highlighted"));
+            for (let i = start; i <= end; i++) {
+                const line = document.getElementById(`code-line-${i}`);
+                if (line) line.classList.add("highlighted");
+            }
+            const firstLine = document.getElementById(`code-line-${start}`);
+            if (firstLine) {
+                firstLine.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        // Card Tab Switching
+        function switchCardTab(button, cardIdx, type, subFileKey) {
+            event.stopPropagation();
+            const card = button.closest('.explanation-card');
+            card.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            const contentDiv = document.getElementById(`card-content-${cardIdx}`);
+            let expData;
+
+            const fileData = fileDatabase[activeFile];
+            if (fileData.isFolder) {
+                expData = fileData.subFiles[subFileKey].explanations[cardIdx];
+            } else {
+                expData = fileData.explanations[cardIdx];
+            }
+
+            if (type === 'what') {
+                contentDiv.innerHTML = expData.what;
+            } else if (type === 'get') {
+                contentDiv.innerHTML = expData.get;
+            } else if (type === 'why') {
+                contentDiv.innerHTML = expData.why;
+            }
+        }
+
+        // Copy Entire Active Code Text to Clipboard
+        function copyEntireActiveFile() {
+            const fileData = fileDatabase[activeFile];
+            let raw = fileData.rawCode;
+
+            if (fileData.isFolder) {
+                const activeBtn = document.querySelector(".sub-nav-btn.active");
+                if (activeBtn) {
+                    const subFileName = activeBtn.innerText;
+                    const subFileKey = Object.keys(fileData.subFiles).find(key => fileData.subFiles[key].name === subFileName);
+                    raw = fileData.subFiles[subFileKey].rawCode;
+                }
+            }
+
+            navigator.clipboard.writeText(raw).then(() => {
+                const copyBtn = document.getElementById("btn-copy-main");
+                const originalText = copyBtn.innerText;
+                copyBtn.innerText = "Copied!";
+                copyBtn.style.color = "var(--success)";
+                copyBtn.style.borderColor = "var(--success)";
+                setTimeout(() => {
+                    copyBtn.innerText = originalText;
+                    copyBtn.style.color = "var(--text-body)";
+                    copyBtn.style.borderColor = "var(--border)";
+                }, 2000);
+            });
+        }
+
+        // Sidebar Item Click Handlers
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function () {
+                document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+                this.classList.add('active');
+                const fileKey = this.getAttribute('data-file');
+                loadFile(fileKey);
+            });
+        });
+
+        // Initialize First View
+        window.onload = () => {
+            loadFile("project_structure");
+        };
+    </script>
+</body>
+
+</html>

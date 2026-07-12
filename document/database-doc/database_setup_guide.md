@@ -66,7 +66,7 @@ server/
 เพื่อให้โครงการ DFU รันได้อย่างปลอดภัยในเครื่องและง่ายต่อการโยกย้ายระบบ เราทำสิ่งแวดล้อมผ่านระบบ Docker ดังนี้:
 
 ### 3.1 การแยกสายต่อดีบี DATABASE_URL และ DATABASE_URL_DOCKER
-เนื่องจากแอปของเราจะทำงานอยู่บน 2 วงแลนเครือข่ายที่ตัดขาดจากกัน (Windows Host OS และ Docker Network Namespace) จึงแยกตัวแปรเชื่อมโยงดังนี้:
+เนื่องแอปของเราจะทำงานอยู่บน 2 วงแลนเครือข่ายที่ตัดขาดจากกัน (Windows Host OS และ Docker Network Namespace) จึงแยกตัวแปรเชื่อมโยงดังนี้:
 * **`DATABASE_URL` (โลก Windows ภายนอกตู้):** เชื่อมผ่าน `localhost:5430` (พอร์ตภายนอกที่แมปไว้เพื่อกันชนกับดีบีอื่นในเครื่องวินโดวส์หลัก) ใช้เวลาที่คุณพิมพ์รันคำสั่งโดยตรงบน Terminal เช่น `alembic upgrade` หรือ `python seed.py`
 * **`DATABASE_URL_DOCKER` (โลก Docker ภายในตู้ปิด):** เชื่อมผ่าน `db:5432` ใช้เมื่อแอปหลังบ้าน FastAPI ถูกสั่งบูตรันขึ้นมาภายในตู้จำลอง เพื่อคุยหาตู้ฐานข้อมูลผ่านทางลัดสายแลนเสมือน (หากในตู้ FastAPI ไปสั่งชี้ต่อ localhost:5430 มันจะหาตัวแอปเอง และแจ้งดีดการเชื่อมต่อ Connection Refused ทันที)
 
@@ -137,7 +137,7 @@ server/
 
 ไฟล์ `server/app/db/session.py` ทำหน้าที่เป็น **"ผู้บริหารจัดการท่อส่งสัญญาณเชื่อมต่อฐานข้อมูล (Database Connection Manager)"** โดยมีคำอธิบายกลไกการทำงานของโค้ดดังนี้:
 * **`create_engine` และ `settings.DATABASE_URL`**:
-  - `create_engine` เป็นฟังก์ชันหลักของ SQLAlchemy สำหรับสร้างตัวเชื่อมต่อทางกายภาพ (TCP/IP Connection Socket) วิ่งเข้าหา PostgreSQL ผ่านพิกัด URL ที่โหลดมาจากระบบความปลอดภัยใน `config.py`
+  - `create_engine` เป็นฟังก์ชันหลัก of SQLAlchemy สำหรับสร้างตัวเชื่อมต่อทางกายภาพ (TCP/IP Connection Socket) วิ่งเข้าหา PostgreSQL ผ่านพิกัด URL ที่โหลดมาจากระบบความปลอดภัยใน `config.py`
 * **`pool_pre_ping=True` (กลไกตรวจสอบสายตายอัจฉริยะ)**:
   - ในการทำงานจริง บางครั้งสายเชื่อมต่อฐานข้อมูลที่ถูกเปิดทิ้งไว้อาจจะถูกตัดขาดเงียบ ๆ (Idle timeout) เนื่องจากฐานข้อมูลปิดตัวชั่วคราวหรือเน็ตเวิร์กหน่วง
   - หากไม่มีคำสั่งนี้ เมื่อแอป FastAPI ยิงคิวรีข้อมูลคนไข้ผ่านท่อเดิมที่ชำรุด ระบบจะเกิดข้อผิดพลาดระเบิดแครช (Database Lost Connection) ส่งผลให้หน้าเว็บล่ม
@@ -312,7 +312,246 @@ graph TD
 
 ---
 
-✍️ **การทำงานร่วมกันต่อ**:
-ลำดับขั้นตอนนี้จะถูกใช้เป็นแนวทางหลักในการพัฒนาทีละขั้นจนเสร็จสิ้นกระบวนการครับ 
+## 🔧 12. ปัญหาที่พบบ่อยในการติดตั้งจริงและการแก้ไขเชิงลึก (Real-world Troubleshooting & Docker Best Practices)
 
-หากคุณเห็นชอบกับแผนงานและลำดับขั้นตอนการพัฒนานี้แล้ว **รบกวนช่วยพิมพ์ตอบกลับในแชทนี้ว่า "เริ่มสร้างโครงสร้างระบบได้เลย"** เพื่อให้ผมดำเนินการสร้างโฟลเดอร์และตั้งค่าไฟล์ฐานข้อมูลพร้อมระบบ Migration บนเครื่องจริงของคุณครับ!
+ในการประกอบระบบจริงผ่าน Docker และสภาพแวดล้อมที่รองรับ Deep Learning มักมีประเด็นท้าทายหลายประการเกี่ยวกับการตั้งค่าเครือข่ายจำลองและเวอร์ชันไลบรารี ซึ่งได้รับการวิเคราะห์และแก้ไขเชิงลึกเพื่อการทำงานที่มั่นคงในระยะยาว (LTS) ดังนี้ครับ:
+
+### 12.1 ปัญหาโมดูลประมวลผลภาพ OpenCV เจ๊งบนตู้ Docker (`libgl1-mesa-glx` has no candidate)
+
+* **ข้อผิดพลาดจริงที่ปรากฏ (Stack Trace):**
+  ```text
+  failed to solve: process "/bin/sh -c apt-get update && apt-get install -y \
+      libzbar0 \
+      libgl1-mesa-glx \
+      libglib2.0-0 \
+      && rm -rf /var/lib/apt/lists/*" did not complete successfully: exit code: 100
+  E: Package 'libgl1-mesa-glx' has no installation candidate
+  ```
+
+* **การวิเคราะห์ทางเทคนิคเชิงลึก (Clinical/Technical Analysis):**
+  * ไลบรารีการประมวลผลรูปภาพและ AI ของระบบหลังบ้าน เช่น **OpenCV** (ใช้ตัดขอบพิกเซลแผล) และ **PyZbar** (ใช้สแกน QR Code/Barcode) จำเป็นต้องเรียกใช้งานโมดูลระบบปฏิบัติการภายนอกเพื่อประมวลผลกราฟิก (OpenGL) และดึงรหัสสัญญาณฮาร์ดแวร์
+  * ภาพรากเดิมของตู้ระบุ `FROM python:3.10-slim` ซึ่งไม่มีการล็อกระบบปฏิบัติการเบื้องหลัง ทำให้ Docker ดึงเวอร์ชันล่าสุดของ Debian 12 (Bookworm) มาใช้โดยอัตโนมัติ 
+  * ใน Debian 12 ทางทีมผู้พัฒนาลินุกซ์ได้ตัดสินใจยกเลิก (Deprecated) และ **ถอดถอนกลุ่มแพ็กเกจ `libgl1-mesa-glx` ออกจากคลังถาวร** และแยกย่อยฟังก์ชันออกเป็นแพ็กเกจใหม่ชื่อ `libgl1` และ `libglx-mesa0`
+  * หากเราฝืนสั่งดาวน์โหลดด้วยคำสั่งเดิมบนระบบปฏิบัติการรุ่นใหม่ ระบบจะแจ้งเออร์เรอร์หาไฟล์ติดตั้งไม่เจอทันที
+
+* **วิธีการแก้ไขและเหตุผลด้านความเสถียร (Resolution & Rationale):**
+  * ทำการเปลี่ยนการระบุอิมเมจตั้งต้นใน `server/Dockerfile` จาก `FROM python:3.10-slim` เป็น **`FROM python:3.10-slim-bullseye`**
+  * เป็นการ **ล็อกฐานตู้จำลองไว้บนระบบปฏิบัติการ Linux Debian 11 (Bullseye) LTS** อย่างถาวร ซึ่งเป็นรุ่นเสถียรที่ใช้งานแพ็กเกจควบคุม `libgl1-mesa-glx` ร่วมกับ PyTorch และ OpenCV ได้อย่างไร้รอยต่อที่สุด และป้องกันการบิวต์ล้มเหลวจากการอัปเดตแบบกะทันหันของลินุกซ์ในอนาคต
+
+---
+
+### 12.2 ปัญหาระบบจัดข้อความแจ้งเตือนของ Alembic แครช (`KeyError: 'formatter_generic'`)
+
+* **ข้อผิดพลาดจริงที่ปรากฏ (Stack Trace):**
+  ```text
+  File "/app/alembic/env.py", line 26, in <module>
+    fileConfig(config.config_file_name)
+  File "/usr/local/lib/python3.10/logging/config.py", line 72, in fileConfig
+    formatters = _create_formatters(cp)
+  File "/usr/local/lib/python3.10/logging/config.py", line 117, in _create_formatters
+    class_name = cp[sectname].get("class")
+  KeyError: 'formatter_generic'
+  ```
+
+* **การวิเคราะห์ทางเทคนิคเชิงลึก (Clinical/Technical Analysis):**
+  * เมื่อ Alembic เริ่มสตาร์ท สคริปต์ `env.py` จะเปิดอ่านตัวแปรตั้งค่าล็อกเกอร์ข้อความผ่านคำสั่ง `fileConfig(config.config_file_name)` ซึ่งจะวิ่งไปเปิดไฟล์ `alembic.ini`
+  * ตัวแปลภาษาไพธอน (`configparser`) จะแกะหัวข้อหลัก `[loggers]`, `[handlers]`, และ `[formatters]` 
+  * เนื่องจากในตอนแรก `alembic.ini` มีการประกาศคีย์ไว้ที่ `keys = generic` แต่ **ไม่มีการสร้างรายละเอียดการจัดวางพารามิเตอร์จริงในส่วนของ `[formatter_generic]`** ที่ท้ายไฟล์ 
+  * ระบบ Python Logger จึงเกิดข้อผิดพลาดไม่สามารถแมปพิกัดคีย์ที่ระบุกับเซกชันในไฟล์ได้ จึงขัดข้องด้วยข้อผิดพลาด `KeyError`
+
+* **วิธีการแก้ไขและเหตุผลด้านความเสถียร (Resolution & Rationale):**
+  * ทำการกรอกและประกาศบล็อกการจัดรูปข้อความแจ้งเตือน (Logger Configuration Blocks) ให้สมบูรณ์แบบที่ด้านล่างของไฟล์ `server/alembic.ini` ดังนี้:
+    ```ini
+    [loggers]
+    keys = root,sqlalchemy,alembic
+    [handlers]
+    keys = console
+    [formatters]
+    keys = generic
+    
+    [logger_root]
+    level = WARNING
+    handlers = console
+    qualname =
+    
+    [logger_sqlalchemy]
+    level = INFO
+    handlers =
+    qualname = sqlalchemy.engine
+    
+    [logger_alembic]
+    level = INFO
+    handlers =
+    qualname = alembic
+    
+    [handler_console]
+    class = StreamHandler
+    args = (sys.stdout,)
+    level = NOTSET
+    formatter = generic
+    
+    [formatter_generic]
+    format = %(levelname)-5.5s [%(name)s] %(message)s
+    datefmt = %H:%M:%S
+    ```
+  * การตั้งค่านี้ช่วยให้ระบบแจ้งเหตุการณ์ (Logging Engine) สามารถกรองแยกสถานะการรันได้อย่างชัดเจน โดยสามารถแสดงรหัสคำสั่ง SQL ที่ถูกแปลจาก SQLAlchemy และแจ้งสถานะการทำงานของ Alembic ออกสู่หน้าจอได้อย่างปลอดภัย
+
+---
+
+### 12.3 ปัญหาพิมพ์เขียวการแปลตัวแปรสร้างสคริปต์หลุดหาย (`script.py.mako` FileNotFoundError)
+
+* **ข้อผิดพลาดจริงที่ปรากฏ (Stack Trace):**
+  ```text
+  File "/usr/local/lib/python3.10/site-packages/alembic/script/base.py", line 593, in _generate_template
+    util.template_to_file(src, dest, self.output_encoding, **kw)
+  File "/usr/local/lib/python3.10/site-packages/alembic/util/pyfiles.py", line 25, in template_to_file
+    template = Template(filename=template_file)
+  FileNotFoundError: [Errno 2] No such file or directory: 'alembic/script.py.mako'
+  ```
+
+* **การวิเคราะห์ทางเทคนิคเชิงลึก (Clinical/Technical Analysis):**
+  * ระบบ Alembic ทำงานเป็นโค้ดเจเนอเรเตอร์ (Code Generator) โดยเมื่อตรวจพบตารางใหม่ มันจะต้องทำการเขียนโค้ด Python ไฟล์ใหม่ขึ้นมา 
+  * โดยตัวเขียนโปรแกรมจะใช้เอนจินประมวลผลเทมเพลตที่ชื่อ **Mako Template Engine** ซึ่งต้องการไฟล์พิมพ์เขียวแม่แบบ `.mako` สำหรับการปั๊มโครงสร้างคำสั่ง `upgrade()` และ `downgrade()`
+  * เนื่องจากตัวโฟลเดอร์โครงการ มีเฉพาะไฟล์ `env.py` แต่ **ไม่มีไฟล์ `script.py.mako` และโฟลเดอร์เป้าหมายปลายทางอย่าง `versions/`** ปรากฏอยู่จริงในโฟลเดอร์โครงการ ทำให้ไม่สามารถดำเนินกระบวนการเขียนไฟล์เวอร์ชันเซฟกลับมาได้
+
+* **วิธีการแก้ไขและเหตุผลด้านความเสถียร (Resolution & Rationale):**
+  * ทำการสร้างไฟล์ **`server/alembic/script.py.mako`** เพื่อทำหน้าที่เป็นแม่แบบพิมพ์เขียวมาตรฐานสากลของ Alembic:
+    ```python
+    """${message}
+    Revision ID: ${up_revision}
+    Revises: ${down_revision}
+    Create Date: ${create_date}
+    """
+    from typing import Sequence, Union
+    from alembic import op
+    import sqlalchemy as sa
+    ${imports if imports else ""}
+    
+    revision: str = ${repr(up_revision)}
+    down_revision: Union[str, None] = ${repr(down_revision)}
+    branch_labels: Union[str, Sequence[str], None] = ${repr(branch_labels)}
+    depends_on: Union[str, Sequence[str], None] = ${repr(depends_on)}
+    
+    def upgrade() -> None:
+        ${upgrades if upgrades else "pass"}
+        
+    def downgrade() -> None:
+        ${downgrades if downgrades else "pass"}
+    ```
+  * พร้อมทำการเปิดโฟลเดอร์ **`server/alembic/versions/`** เสริมเข้าไป เพื่อให้ตู้จำลองมีปลายทางในการวางสคริปต์ที่ประมวลผลออกมาได้จริงลงเครื่องคอมพิวเตอร์ของคุณ
+
+---
+
+### 12.4 ปัญหาเน็ตเวิร์กเชื่อมต่อดีบีข้ามระบบระหว่างเครื่อง Windows กับ Docker (`localhost` vs `db`)
+
+* **ข้อผิดพลาดจริงที่ปรากฏ (Stack Trace):**
+  ```text
+  sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) 
+  could not connect to server: Connection refused
+      Is the server running on host "localhost" (127.0.0.1) and accepting
+      TCP/IP connections on port 5430?
+  ```
+
+* **การวิเคราะห์ทางเทคนิคเชิงลึก (Clinical/Technical Analysis):**
+  * **เส้นทางเน็ตเวิร์กจำลอง (Docker Network Bridge):**
+    ```text
+    +--------------------------------------------------------------+
+    | [ เครื่องคอมพิวเตอร์ Windows ของคุณ (Host Machine) ]            |
+    |                                                              |
+    |  +------------------------+      +-------------------------+ |
+    |  |  DBeaver / pgAdmin     |      |  Docker Run Terminal    | |
+    |  |  (คุยผ่าน localhost:5430) |      |  (คุยผ่าน localhost:5430) | |
+    |  +-----------+------------+      +------------+------------+ |
+    |              |                                |          | |
+    +--------------|--------------------------------|----------|-+
+                   | (Port Mapping 5430:5432)       |          |
+                   v                                |          |
+    +--------------|--------------------------------|----------|-+
+    | [ Docker Network Bridge (วงเครือข่ายภายในตู้) ] |          |
+    |                                               v          |
+    |  +------------------------+      +------------+--------+ |
+    |  |  Container [db]        | <--- |  Container [api]    | |
+    |  |  (Postgres Port 5432)  |      |  (ต้องชี้หา db:5432)  | |
+    |  +------------------------+      +---------------------+ |
+    +----------------------------------------------------------+
+    ```
+  * **วิเคราะห์กลไก:** 
+    * บนเครื่องคอมพิวเตอร์หลักของคุณ คุณจองพอร์ต Postgres ไว้เป็น `5430:5432` ทำให้โปรแกรมหน้าต่างภายนอก (เช่น DBeaver) คุยกับ PostgreSQL ได้สำเร็จผ่าน `localhost:5430`
+    * แต่เมื่อคำสั่ง Alembic ถูกยิงเข้าไปประมวลผลอยู่ **ภายในตู้คอนเทนเนอร์ `api`** วงแลนเสมือนจะเปลี่ยนไป คำว่า `localhost` จะกลายเป็นตัวตู้ API เอง ไม่ใช่ตู้ฐานข้อมูล ส่งผลให้เกิดการปฏิเสธการเชื่อมต่อทันที
+  * **การซ้อนทับตัวแปรสิ่งแวดล้อม (Environment Overriding):**
+    * ในตัวแปร `.env` มีการตั้งค่า `DATABASE_URL_DOCKER` เพื่อใช้ชี้เป้าภายในโครงสร้างตู้โดยเฉพาะ
+    * หากเราไม่นำมันมาจับคู่เขียนทับ (Override) ค่า `DATABASE_URL` ตัวตู้ API จะยังดึงค่า localhost นอกตู้มาประมวลผล ซึ่งจะทำให้เกิดการแครชและคืนรหัส Internal Server Error 500 กลับมา
+
+* **วิธีการแก้ไขและเหตุผลด้านความเสถียร (Resolution & Rationale):**
+  * ในไฟล์ `docker-compose.yml` ภายใต้หัวข้อบริการ `api` ให้เติมบล็อกคำสั่ง `environment:` เพื่อผูกตัวแปรภายในคอนเทนเนอร์เข้ากับพิกัดเครือข่าย Docker ดังนี้:
+    ```yaml
+    environment:
+      - DATABASE_URL=${DATABASE_URL_DOCKER}
+    ```
+  * ส่งผลให้ตู้ API แปลงเป้าหมายไปหาชื่อคอนเทนเนอร์ `db:5432` อัตโนมัติในแรมขณะทำงาน ปราศจากการเปิดรหัสเข้าถึงผ่านที่อยู่ชำรุด
+
+---
+
+### 12.5 ปัญหาการระบุพารามิเตอร์เปิดระบบของ Uvicorn (`app.main` vs `main`)
+
+* **ข้อผิดพลาดจริงที่ปรากฏ (Stack Trace):**
+  * เบราว์เซอร์พยายามโหลดแล้วตอบกลับข้อความ `ERR_EMPTY_RESPONSE` และตู้คอนเทนเนอร์ขึ้นสถานะ Exited ดับลงทันทีหลังบูต
+
+* **การวิเคราะห์ทางเทคนิคเชิงลึก (Clinical/Technical Analysis):**
+  * ในภาษา Python การระบุโมดูลย่อยจะใช้เครื่องหมายจุด (`.`) เพื่อสืบค้นภายในแพ็กเกจย่อย (Subpackages)
+  * ในพิมพ์เขียว Dockerfile ตั้งค่าพื้นที่ปฏิบัติงานในตู้ที่ `/app` และคัดลอกไฟล์ทั้งหมดในโฟลเดอร์ `server` ไปวาง
+  * พิกัดโครงสร้างจริงภายในตู้จึงจัดวางไฟล์ไว้ดังนี้:
+    `/app/main.py` และมีห้องย่อยคือ `/app/app/` (เก็บ core, db, models)
+  * เนื่องจากไฟล์ `main.py` **วางอยู่นอกสุดของ Workspace** ไม่ได้อยู่ในโฟลเดอร์ `app/` 
+  * หากเราส่งคำสั่งเปิด Uvicorn ว่า `uvicorn app.main:app` ตัวแปลภาษาจะมองหาไฟล์ที่พิกัด `/app/app/main.py` ซึ่งไม่มีอยู่จริง ทำให้หน้าเว็บล่มลงกะทันหัน
+
+* **วิธีการแก้ไขและเหตุผลด้านความเสถียร (Resolution & Rationale):**
+  * ปรับแต่งคำสั่งรันบริการใน `docker-compose.yml` ให้ชี้เป้าหมายไฟล์ระดับ Root Directory ดังนี้:
+    `command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload`
+  * ช่วยให้ Uvicorn สามารถจับคู่เรียกตัวแปร FastAPI ในไฟล์ `main.py` ขึ้นมาทำงานได้อย่างรวดเร็ว
+
+---
+
+### 12.6 การจัดโครงสร้างสารบัญตำแหน่งร่างกาย 8 บริเวณทางการแพทย์ (Body Parts Design Rationale)
+
+* **ความสำคัญเชิงคลินิก (Clinical Significance):**
+  * แผลเบาหวานที่เท้า (Diabetic Foot Ulcer) มีความหลากหลายและอาจลุกลามขยายวงกว้างได้เร็ว การแบ่งขอบเขตอวัยวะในการตรวจจับของ AI จึงต้องสอดคล้องกับพิกัดการลงบันทึกแพทย์จริงและไม่ซ้อนทับกัน (Mutually Exclusive)
+  * การจัดพิกัดออกเป็น 8 บริเวณหลัก มีการประเมินดังนี้:
+    1. `BP001`: `Dorsum (หลังเท้า)` - พื้นผิวส่วนบนทั้งหมด
+    2. `BP002`: `Toes (นิ้วเท้า)` - ครอบคลุมนิ้วเท้าทั้ง 5 นิ้ว
+    3. `BP003`: `Plantar-Forefoot (ฝ่าเท้าส่วนหน้า/เนินปลายเท้า)` - บริเวณรับน้ำหนักด้านหน้า ใต้นิ้วเท้า
+    4. `BP004`: `Plantar-Midfoot (ฝ่าเท้าส่วนกลาง/อุ้งเท้า)` - พื้นที่เว้ากลางเท้า
+    5. `BP005`: `Plantar-Heel (ฝ่าเท้าส่วนหลัง/ส้นเท้า)` - ส้นเท้าด้านล่างจุดรับน้ำหนักหลัก
+    6. `BP006`: `Plantar-Whole (ฝ่าเท้าทั้งหมด/แผ่ขยายวงกว้าง)` - สำหรับกรณีคนไข้ที่มีแผลขนาดใหญ่มากและแผ่กระจายข้ามโซนรับน้ำหนัก
+    7. `BP007`: `Foot Borders (ขอบข้างเท้า)` - ด้านขอบข้างแนวขนานของฝ่าเท้า
+    8. `BP008`: `Ankle & Malleoli (ข้อเท้าและตาตุ่ม)` - พื้นที่รอยต่อด้านบนฝั่งกระดูกข้อเท้า
+  * การบันทึกคีย์เหล่านี้ในรูปแบบรหัสรหัสมาตรฐาน `BP001`-`BP008` (ขนาด `String(5)` ในตาราง SQLAlchemy) ช่วยให้วิศวกรซอฟต์แวร์สามารถจัดประเภทข้อมูลเก็บสถิติและดึงไปพล็อตวิเคราะห์กราฟความเร็วในการสมานแผลแยกบริเวณได้อย่างรวดเร็วและแม่นยำ
+
+---
+
+### 12.7 เทคนิคการเขียนสคริปต์ป้อนข้อมูลอย่างปลอดภัย (Idempotency Database Seeding)
+
+* **ความสำคัญทางเทคนิค (Technical Rationale):**
+  * สคริปต์การป้อนข้อมูลเบื้องต้น (`seed.py`) มักถูกรันซ้ำหลายครั้งระหว่างการพัฒนาและการอัปเกรดระบบ
+  * หากเราใช้คำสั่งเพิ่มข้อมูลแบบตรงไปตรงมา (`db.add()`) ทุกครั้งที่กดยิงคำสั่งซ้ำ ระบบจะพยายามยัดข้อมูลเดิมลงไป ซึ่งทำให้ฐานข้อมูลแจ้งข้อผิดพลาดคีย์หลักซ้ำซ้อน (Unique Constraint Violation) หรือทำให้ข้อมูลขยะเพิ่มขึ้นเรื่อย ๆ
+  * เราจึงออกแบบลูปในการสแกนตรวจสอบข้อมูลก่อนการแทรกค่าจริง (Idempotency):
+    ```python
+    for bodypart in bodypart_data:
+        if not db.query(BodyPart).filter_by(body_part_id=bodypart.body_part_id).first():
+            db.add(bodypart)
+    db.commit()
+    ```
+  * กลไกนี้ทำหน้าที่เสมือน **"การตรวจสอบรายชื่อก่อนเปิดประตู (Upsert Logic)"** หากตรวจพบว่าคีย์หลักอวัยวะชิ้นนั้นมีอยู่จริงในระบบแล้ว มันจะทำการข้ามข้อมูลแถวนั้นไปทันทีโดยไม่ประมวลผลเพิ่ม ช่วยให้เรากดยิงสคริปต์นี้กี่ครั้งก็ได้โดยที่ข้อมูลไม่เพี้ยนและไม่เกิดเออร์เรอร์ดีบีระเบิด
+
+---
+
+### 12.8 ความเสถียรและความพร้อมในการเชื่อมต่อสายดีบี (Database Connection Resilience)
+
+* **ความสำคัญทางเทคนิค (Technical Rationale):**
+  * ในสภาพแวดล้อมจริง คอนเทนเนอร์ API และ คอนเทนเนอร์ Database ทำงานแยกอิสระจากกัน 
+  * บางครั้งตัวตู้ดีบีอาจรีสตาร์ทตัวเพื่อจัดระเบียบข้อมูล หรืออินเทอร์เน็ตภายในตู้หน่วงจนสายขาด (Idle timeout)
+  * เราจึงเปิดคุณสมบัติ `pool_pre_ping=True` ในการประกาศสร้าง Database Engine:
+    ```python
+    engine = create_engine(settings.DATABASE_URL, pool_pre_ping=True)
+    ```
+  * กลไกนี้จะส่งสัญญาณทดสอบขนาดเล็กไปเคาะประตูทักทายดีบีก่อนเสมอทุกครั้งที่โค้ด FastAPI จะทำการยิงคิวรีข้อมูลคนไข้ หากสายเก่าขาดชำรุด ระบบจะสลัดสายเดิมทิ้งแล้วเชื่อมต่อให้ใหม่ทันที ช่วยป้องกันหน้าจอเออร์เรอร์เว็บล่มจากสาเหตุสายดีบีหมดอายุได้อย่างถาวร
