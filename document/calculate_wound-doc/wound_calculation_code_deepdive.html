@@ -23,8 +23,8 @@
             --accent: #3b82f6;
             --border: #223049;
             --text-title: #ffffff;
-            --text-body: #94a3b8;
-            --text-muted: #4b5563;
+            --text-body: #e2e8f0; /* ปรับให้อักษรสีขาวสว่างชัดขึ้นมาก (เดิม #94a3b8) */
+            --text-muted: #8892b0; /* ปรับให้อักษรคำอธิบายย่อยจางน้อยลง (เดิม #4b5563) */
             --success: #10b981;
             --radius-lg: 16px;
             --radius-md: 8px;
@@ -332,12 +332,12 @@
             }
         }
 
-        /* Token Styling */
-        .c-comment { color: #6a737d; font-style: italic; }
-        .c-keyword { color: #f97583; font-weight: bold; }
-        .c-string { color: #9ecbff; }
-        .c-class { color: #b392f0; font-weight: bold; }
-        .c-func { color: #79b8ff; }
+        /* Token Styling - ปรับเฉดสีให้อ่านง่าย คมสว่างคมชัด */
+        .c-comment { color: #8b949e; font-style: italic; } /* บรรเทาอาการคอมเมนต์กลืนหายไปกับพื้นหลังสีดำ */
+        .c-keyword { color: #ff7b72; font-weight: bold; }
+        .c-string { color: #a5d6ff; }
+        .c-class { color: #d2a8ff; font-weight: bold; }
+        .c-func { color: #79c0ff; }
         .c-decorator { color: #ffab70; }
         .c-number { color: #ff9b5e; }
     </style>
@@ -424,12 +424,22 @@ D:/University memory/year4 [2569]/project_ICT/y4/Deep_Learning-Based_System_for_
 │   │   │   ├── qr_detector.py        # โค้ดสแกนหาพิกัดยอดมุมและมาตราส่วนสติกเกอร์ QR
 │   │   │   ├── wound_segmenter.py    # โค้ดโหลด U-Net ทำนายขอบแผลพร้อมคำนวณ Entropy
 │   │   │   └── image_rectifier.py    # โค้ดดึงระนาบกล้องเอียงให้ตรงเฉลียงแบบ Homography
-│   │   │
-│   │   └── static/                   # [4] โฟลเดอร์แชร์ทรัพยากรหลัก
-│   │       └── wounds/               # เก็บรูปถ่ายแผลขอบเขียวหน้าตรงให้หน้าบ้าน React ดึงไปโชว์
+│   │
+│   ├── static/                       # [4] โฟลเดอร์แชร์ทรัพยากรหลัก (คู่ขนานกับแอปจริง)
+│   │   └── wounds/                   # เก็บรูปถ่ายแผล 4 รูปแบบหลัก (ใช้พื้นที่จัดเก็บร่วมกับ Sandbox):
+│   │       ├── {wound_id}_{uuid}_raw.jpg       # [รูปใช้งาน 1] รูปถ่ายดิบ
+│   │       ├── {wound_id}_{uuid}_rectified.jpg # [รูปใช้งาน 2] รูปสีแก้ระนาบตรง
+│   │       ├── {wound_id}_{uuid}_mask.png      # [รูปใช้งาน 3] รูปหน้ากากขาวดำ
+│   │       ├── {wound_id}_{uuid}_contour.jpg   # [รูปใช้งาน 4] รูปสเกลสีตีกรอบเขียว
+│   │       ├── test_raw.jpg                    # [รูปทดสอบ Sandbox 1]
+│   │       ├── test_rectified.jpg              # [รูปทดสอบ Sandbox 2]
+│   │       ├── test_mask.png                   # [รูปทดสอบ Sandbox 3]
+│   │       └── test_contour.jpg                # [รูปทดสอบ Sandbox 4]
 │   │
 │   └── sandbox/                      # [5] โฟลเดอร์สำหรับทดสอบจำลองรันระบบ (Sandbox)
-│       └── test_segmentation.py      # ตัวประเมินแบบรัน Sandbox ใน PowerShell บนวินโดวส์`,
+│       ├── inputs/
+│       │   └── test.png              # รูปดิบอินพุตจำลองการวิเคราะห์
+│       └── test_segmentation.py      # ตัวประเมินรัน Sandbox (เซฟรูปเอาต์พุตเข้าห้อง static/wounds ร่วมกัน)`,
                 htmlCode: [
                     `<span class="c-comment"># ผังการย้ายและจัดโครงสร้างโฟลเดอร์โปรเจกต์ DFU</span>`,
                     `D:/University memory/year4 [2569]/project_ICT/y4/Deep_Learning-Based_System_for_Segmentation_and_Monitoring_of_Diabetic/`,
@@ -444,11 +454,21 @@ D:/University memory/year4 [2569]/project_ICT/y4/Deep_Learning-Based_System_for_
                     `│   │   │   ├── <span class="c-keyword">wound_segmenter.py</span>    <span class="c-comment"># โค้ดโหลด U-Net ทำนายขอบแผลพร้อมคำนวณ Entropy</span>`,
                     `│   │   │   └── <span class="c-keyword">image_rectifier.py</span>    <span class="c-comment"># โค้ดดึงระนาบกล้องเอียงให้ตรงเฉลียงแบบ Homography</span>`,
                     `│   │   │`,
-                    `<span class="c-class">│   │   └── static/</span>                   <span class="c-comment"># [4] โฟลเดอร์แชร์ทรัพยากรหลัก</span>`,
-                    `│   │       └── <span class="c-keyword">wounds/</span>               <span class="c-comment"># เก็บรูปถ่ายแผลขอบเขียวหน้าตรงให้หน้าบ้าน React ดึงไปโชว์</span>`,
+                    `<span class="c-class">│   ├── static/</span>                       <span class="c-comment"># [4] โฟลเดอร์แชร์ทรัพยากรหลัก (คู่ขนานกับ app)</span>`,
+                    `│   │   └── <span class="c-keyword">wounds/</span>               <span class="c-comment"># เก็บรูปถ่ายแผล 4 รูปแบบหลัก (ใช้พื้นที่จัดเก็บร่วมกับ Sandbox):</span>`,
+                    `│   │       ├── <span class="c-string">{wound_id}_{uuid}_raw.jpg</span>       <span class="c-comment"># [รูปใช้งาน 1] รูปถ่ายดิบ</span>`,
+                    `│   │       ├── <span class="c-string">{wound_id}_{uuid}_rectified.jpg</span> <span class="c-comment"># [รูปใช้งาน 2] รูปสีแก้ระนาบตรง</span>`,
+                    `│   │       ├── <span class="c-string">{wound_id}_{uuid}_mask.png</span>      <span class="c-comment"># [รูปใช้งาน 3] รูปหน้ากากขาวดำ</span>`,
+                    `│   │       ├── <span class="c-string">{wound_id}_{uuid}_contour.jpg</span>   <span class="c-comment"># [รูปใช้งาน 4] รูปสเกลสีตีกรอบเขียว</span>`,
+                    `│   │       ├── <span class="c-string">test_raw.jpg</span>                    <span class="c-comment"># [รูปทดสอบ Sandbox 1]</span>`,
+                    `│   │       ├── <span class="c-string">test_rectified.jpg</span>              <span class="c-comment"># [รูปทดสอบ Sandbox 2]</span>`,
+                    `│   │       ├── <span class="c-string">test_mask.png</span>                   <span class="c-comment"># [รูปทดสอบ Sandbox 3]</span>`,
+                    `│   │       └── <span class="c-string">test_contour.jpg</span>                <span class="c-comment"># [รูปทดสอบ Sandbox 4]</span>`,
                     `│   │`,
                     `<span class="c-class">│   └── sandbox/</span>                      <span class="c-comment"># [5] โฟลเดอร์สำหรับทดสอบจำลองรันระบบ (Sandbox)</span>`,
-                    `│       └── <span class="c-keyword">test_segmentation.py</span>      <span class="c-comment"># ตัวประเมินแบบรัน Sandbox ใน PowerShell บนวินโดวส์</span>`
+                    `│       ├── <span class="c-keyword">inputs/</span>                   <span class="c-comment"># ไดเรกทอรีเก็บภาพอินพุตจำลอง</span>`,
+                    `│       │   └── <span class="c-string">test.png</span>              <span class="c-comment"># รูปดิบอินพุตจำลอง</span>`,
+                    `│       └── <span class="c-keyword">test_segmentation.py</span>      <span class="c-comment"># ตัวประเมินรัน Sandbox (เซฟรูปเอาต์พุตเข้าห้อง static/wounds ร่วมกัน)</span>`
                 ],
                 explanations: [
                     {
@@ -610,8 +630,8 @@ def test_db_connection(db:Session=Depends(get_db)):
 
 @app.post("/api/v1/wounds/calculate")
 async def calculate_wound(
-    patient_id: int = Form(...),
-    body_part_id: int = Form(...),
+    wound_id: str = Form(...),
+    user_id: str = Form(...),
     file: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
@@ -640,40 +660,51 @@ async def calculate_wound(
         settings.QR_SIZE_CM, settings.TARGET_PX_PER_CM, settings.MAX_WARPED_DIM
     )
     
-    # 5. คำนวณขนาดพื้นที่ตารางเซนติเมตรจริง (ซม.2)
+    # 5. คำนวณขนาดพื้นที่ตารางเซนติเมตรจริงแบบ Dynamic (ไม่ Hardcode)
     pixels_rectified = int(np.sum(warped_mask > 0))
-    scale_factor = 4.0 / (200.0 * 200.0)  # 0.0001 cm2/px
+    qr_side_px = settings.QR_SIZE_CM * settings.TARGET_PX_PER_CM
+    qr_area_real_cm2 = settings.QR_SIZE_CM * settings.QR_SIZE_CM
+    qr_area_rectified_px = qr_side_px * qr_side_px
+    scale_factor = qr_area_real_cm2 / qr_area_rectified_px
     area_cm2 = pixels_rectified * scale_factor
     
-    # 6. บันทึกรูปภาพจริงลงดิสก์พร้อมกัน 2 รูป (Naming Convention)
+    # 6. บันทึกรูปภาพจริงลงดิสก์พร้อมกัน 4 รูป (Naming Convention - เก็บ 4 สไตล์)
     contours, _ = cv2.findContours(warped_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     warped_img_contour = warped_img.copy()
     cv2.drawContours(warped_img_contour, contours, -1, (0, 255, 0), 2)
     
-    unique_filename = f"{patient_id}_{uuid.uuid4().hex}"
-    filename = f"{unique_filename}.jpg"
-    mask_filename = f"{unique_filename}_mask.png"
+    unique_filename = f"{wound_id}_{uuid.uuid4().hex}"
     
-    cv2.imwrite(os.path.join(settings.STATIC_DIR, filename), warped_img_contour)
-    cv2.imwrite(os.path.join(settings.STATIC_DIR, mask_filename), warped_mask)
+    # กำหนดพาธจัดเก็บสำหรับภาพทั้ง 4 รูปแบบ
+    raw_path = os.path.join(settings.STATIC_DIR, f"{unique_filename}_raw.jpg")
+    rectified_path = os.path.join(settings.STATIC_DIR, f"{unique_filename}_rectified.jpg")
+    mask_path = os.path.join(settings.STATIC_DIR, f"{unique_filename}_mask.png")
+    contour_path = os.path.join(settings.STATIC_DIR, f"{unique_filename}_contour.jpg")
     
-    # 7. บันทึกประวัติการวัดลงดีบี PostgreSQL
+    # บันทึกรูปภาพทั้งหมดลงในห้อง static/wounds
+    cv2.imwrite(raw_path, image)                   # 1. รูปดิบต้นฉบับก่อนแก้เอียง (Raw Image)
+    cv2.imwrite(rectified_path, warped_img)         # 2. รูปสีหน้าตรงหลังแก้เอียง (Rectified Color)
+    cv2.imwrite(mask_path, warped_mask)             # 3. รูปหน้ากากแผลขาวดำหน้าตรง (Rectified Mask)
+    cv2.imwrite(contour_path, warped_img_contour)   # 4. รูปสีหน้าตรงตีกรอบเส้นเขียว (Rectified Contour)
+    
+    # 7. บันทึกประวัติการวัดลงดีบี PostgreSQL (ตามตาราง WoundRecord ของจริง)
     record = WoundRecord(
-        patient_id=patient_id,
-        body_part_id=body_part_id,
-        image_path=f"/static/{filename}",  # บันทึกเฉพาะลิงก์ภาพสีหลัก
+        wound_id=wound_id,
+        user_id=user_id,
+        image_path=f"/static/wounds/{filename}",  # บันทึกเฉพาะลิงก์ภาพสีหลัก
+        area_pixel=pixels_rectified,
         area_cm2=area_cm2,
-        avg_entropy=wound_data["avg_entropy"]
+        note=None
     )
     db.add(record)
     db.commit()
     db.refresh(record)
     
     return {
-        "wound_record_id": record.wound_record_id,
+        "record_id": record.record_id,
         "image_path": record.image_path,
-        "area_cm2": record.area_cm2,
-        "avg_entropy": record.avg_entropy
+        "area_pixel": record.area_pixel,
+        "area_cm2": record.area_cm2
     }`,
                 htmlCode: [
                     `<span class="c-keyword">from</span> fastapi <span class="c-keyword">import</span> FastAPI, Depends, UploadFile, File, Form, HTTPException`,
@@ -721,7 +752,7 @@ async def calculate_wound(
                     `    <span class="c-keyword">return</span> [{<span class="c-string">"id"</span>: p.body_part_id, <span class="c-string">"name"</span>: p.body_part_name} <span class="c-keyword">for</span> p in parts]`,
                     ``,
                     `@app.post(<span class="c-string">"/api/v1/wounds/calculate"</span>)`,
-                    `<span class="c-keyword">async def</span> <span class="c-func">calculate_wound</span>(patient_id: int = Form(...), body_part_id: int = Form(...), file: UploadFile = File(...), db: Session = Depends(get_db)):`,
+                    `<span class="c-keyword">async def</span> <span class="c-func">calculate_wound</span>(wound_id: str = Form(...), user_id: str = Form(...), file: UploadFile = File(...), db: Session = Depends(get_db)):`,
                     `    contents = <span class="c-keyword">await</span> file.read()`,
                     `    nparr = np.frombuffer(contents, np.uint8)`,
                     `    image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)`,
@@ -734,21 +765,28 @@ async def calculate_wound(
                     `    wound_data = segment_wound(image, model, settings.DEVICE, settings.THRESHOLD)`,
                     `    warped_img, warped_mask, warped_w, warped_h = warp_image_and_mask(image, wound_data[<span class="c-string">"mask"</span>], qr_data[<span class="c-string">"polygon"</span>], settings.QR_SIZE_CM, settings.TARGET_PX_PER_CM, settings.MAX_WARPED_DIM)`,
                     `    pixels_rectified = int(np.sum(warped_mask > <span class="c-number">0</span>))`,
-                    `    scale_factor = <span class="c-number">4.0</span> / (<span class="c-number">200.0</span> * <span class="c-number">200.0</span>)`,
+                    `    qr_side_px = settings.QR_SIZE_CM * settings.TARGET_PX_PER_CM`,
+                    `    qr_area_real_cm2 = settings.QR_SIZE_CM * settings.QR_SIZE_CM`,
+                    `    qr_area_rectified_px = qr_side_px * qr_side_px`,
+                    `    scale_factor = qr_area_real_cm2 / qr_area_rectified_px`,
                     `    area_cm2 = pixels_rectified * scale_factor`,
                     `    contours, _ = cv2.findContours(warped_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)`,
                     `    warped_img_contour = warped_img.copy()`,
                     `    cv2.drawContours(warped_img_contour, contours, -1, (<span class="c-number">0</span>, <span class="c-number">255</span>, <span class="c-number">0</span>), <span class="c-number">2</span>)`,
-                    `    unique_filename = f<span class="c-string">"{patient_id}_{uuid.uuid4().hex}"</span>`,
-                    `    filename = f<span class="c-string">"{unique_filename}.jpg"</span>`,
-                    `    mask_filename = f<span class="c-string">"{unique_filename}_mask.png"</span>`,
-                    `    cv2.imwrite(os.path.join(settings.STATIC_DIR, filename), warped_img_contour)`,
-                    `    cv2.imwrite(os.path.join(settings.STATIC_DIR, mask_filename), warped_mask)`,
-                    `    record = WoundRecord(patient_id=patient_id, body_part_id=body_part_id, image_path=f<span class="c-string">"/static/{filename}"</span>, area_cm2=area_cm2, avg_entropy=wound_data[<span class="c-string">"avg_entropy"</span>])`,
+                    `    unique_filename = f<span class="c-string">"{wound_id}_{uuid.uuid4().hex}"</span>`,
+                    `    raw_path = os.path.join(settings.STATIC_DIR, f"{unique_filename}_raw.jpg")`,
+                    `    rectified_path = os.path.join(settings.STATIC_DIR, f"{unique_filename}_rectified.jpg")`,
+                    `    mask_path = os.path.join(settings.STATIC_DIR, f"{unique_filename}_mask.png")`,
+                    `    contour_path = os.path.join(settings.STATIC_DIR, f"{unique_filename}_contour.jpg")`,
+                    `    cv2.imwrite(raw_path, image)  <span class="c-comment"># 1. รูปดิบต้นฉบับก่อนแก้เอียง</span>`,
+                    `    cv2.imwrite(rectified_path, warped_img)  <span class="c-comment"># 2. รูปสีหน้าตรงหลังแก้เอียง</span>`,
+                    `    cv2.imwrite(mask_path, warped_mask)  <span class="c-comment"># 3. รูปหน้ากากขาวดำหน้าตรง</span>`,
+                    `    cv2.imwrite(contour_path, warped_img_contour)  <span class="c-comment"># 4. รูปสีหน้าตรงตีกรอบเส้นเขียว</span>`,
+                    `    record = WoundRecord(wound_id=wound_id, user_id=user_id, image_path=f<span class="c-string">"/static/wounds/{filename}"</span>, area_pixel=pixels_rectified, area_cm2=area_cm2, note=<span class="c-keyword">None</span>)`,
                     `    db.add(record)`,
                     `    db.commit()`,
                     `    db.refresh(record)`,
-                    `    <span class="c-keyword">return</span> {<span class="c-string">"wound_record_id"</span>: record.wound_record_id, <span class="c-string">"image_path"</span>: record.image_path, <span class="c-string">"area_cm2"</span>: record.area_cm2, <span class="c-string">"avg_entropy"</span>: record.avg_entropy}`
+                    `    <span class="c-keyword">return</span> {<span class="c-string">"record_id"</span>: record.record_id, <span class="c-string">"image_path"</span>: record.image_path, <span class="c-string">"area_pixel"</span>: record.area_pixel, <span class="c-string">"area_cm2"</span>: record.area_cm2}`
                 ],
                 explanations: [
                     {
@@ -763,7 +801,7 @@ async def calculate_wound(
                         lines: [16, 17],
                         what: "สั่งเมานต์ห้องจัดเก็บไฟล์ปลายทาง <code>static</code> บนเซิร์ฟเวอร์ ให้สืบค้นได้จาก URL ภายนอกข่ายที่ขึ้นต้นด้วย <code>/static</code> โดยตรง",
                         get: "พาสคีย์การมองเห็นภาพแผลหน้าตรงขอบเขียวทั้งหมดที่บันทึกอยู่ใน <code>static/wounds/...</code>",
-                        why: "เพื่อให้ React หน้ารายงานของพยาบาล สามารถเรียกใส่โค้ดแท็ก <code>&lt;img src='http://localhost:8000/static/wounds/filename_processed.jpg'&gt;</code> ดึงผลแผลขอบเขียวขึ้นจอได้ทันที"
+                        why: "เพื่อให้ React หน้ารายงานของพยาบาล สามารถเรียกใส่โค้ดแท็ก <code>&lt;img src='http://localhost:8000/static/wounds/{wound_id}_{uuid}_contour.jpg'&gt;</code> ดึงผลแผลขอบเขียวขึ้นจอได้ทันที"
                     },
                     {
                         title: "🚀 3. ระบบเซฟตี้สร้างห้องเก็บภาพก่อนการเมานต์ไฟล์ (Pre-mount Auto-Init)",
@@ -1192,23 +1230,31 @@ def run_sandbox(image_path):
         settings.QR_SIZE_CM, settings.TARGET_PX_PER_CM, settings.MAX_WARPED_DIM
     )
     
-    # 5. [ระบบสูตรสากลคงที่วิเคราะห์พื้นที่ ซม. จริงคงที่ (Scale Factor = 0.0001)]
+    # 5. [ระบบวิเคราะห์พื้นที่ ซม. จริงคำนวณแบบ Dynamic (ไม่ Hardcode)]
     # นับจำนวนพิกเซลแผลสีขาวในภาพแบนราบหน้าตรง
     pixels_rectified = int(np.sum(warped_mask > 0))
-    # หาอัตราส่วนพิกเซลต่อ cm2: ขนาดจริง QR 4 ซม.2 หารด้วยพื้นที่พิกเซลตรงของมัน (200x200 = 40,000 px)
-    scale_factor = 4.0 / (200.0 * 200.0) # 0.0001 cm2/px
+    # หาอัตราส่วนพิกเซลต่อ cm2 อิงตามตัวแปรหลัก
+    qr_side_px = settings.QR_SIZE_CM * settings.TARGET_PX_PER_CM
+    qr_area_real_cm2 = settings.QR_SIZE_CM * settings.QR_SIZE_CM
+    qr_area_rectified_px = qr_side_px * qr_side_px
+    scale_factor = qr_area_real_cm2 / qr_area_rectified_px
     area_cm2 = pixels_rectified * scale_factor
     
-    # 📌 บันทึกเซฟรูปภาพลงดิสก์จำลองเพื่อตรวจสอบผลลัพธ์ด้วยตาเปล่า (ตามหลักการ Naming Convention)
-    # 1. วาดเส้นขอบสีเขียวรอบแผลลงบนภาพสเกลสีหน้าตรง
+    # 📌 บันทึกเซฟรูปภาพลงโฟลเดอร์เก็บข้อมูลร่วมของระบบจริง (app/static/wounds) เพื่อให้หน้าบ้านดึงแสดงผลได้
     contours, _ = cv2.findContours(warped_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     warped_img_contour = warped_img.copy()
     cv2.drawContours(warped_img_contour, contours, -1, (0, 255, 0), 2)
     
-    # เซฟรูปสีขอบเขียว
-    cv2.imwrite("sandbox/test_processed.jpg", warped_img_contour)
-    # 2. เซฟรูปหน้ากากแผลขาวดำคู่กันโดยห้อยคำว่า _mask ต่อท้าย
-    cv2.imwrite("sandbox/test_processed_mask.png", warped_mask)
+    # คำนวณหาที่อยู่สัมบูรณ์ของห้อง static/wounds แบบ Dynamic โดยอิงตำแหน่งจากจุดรันสคริปต์
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # ถอยออกจากห้อง sandbox ไปที่ห้อง server (ซึ่ง static วางขนานอยู่)
+    static_wounds_dir = os.path.join(base_dir, "static", "wounds")
+    os.makedirs(static_wounds_dir, exist_ok=True)
+    
+    # เซฟรูปทดสอบทั้ง 4 สไตล์ลงในห้องจัดเก็บร่วมของระบบ
+    cv2.imwrite(os.path.join(static_wounds_dir, "test_raw.jpg"), image)                  # 1. รูปดิบต้นฉบับก่อนแก้เอียง
+    cv2.imwrite(os.path.join(static_wounds_dir, "test_rectified.jpg"), warped_img)        # 2. รูปสีหน้าตรงหลังแก้เอียง
+    cv2.imwrite(os.path.join(static_wounds_dir, "test_mask.png"), warped_mask)            # 3. รูปหน้ากากขาวดำหน้าตรง
+    cv2.imwrite(os.path.join(static_wounds_dir, "test_contour.jpg"), warped_img_contour)  # 4. รูปสีหน้าตรงตีกรอบเส้นเขียว
     
     print("="*50)
     print(f"📊 ผลคำนวณพื้นที่แผลจริง: {area_cm2:.4f} cm²")
@@ -1257,11 +1303,14 @@ if __name__ == "__main__":
                     `        image, wound_data[<span class="c-string">"mask"</span>], qr_data[<span class="c-string">"polygon"</span>],`,
                     `        settings.QR_SIZE_CM, settings.TARGET_PX_PER_CM, settings.MAX_WARPED_DIM`,
                     `    )`,
-                    `    <span class="c-comment"># 5. [ระบบสูตรสากลคงที่วิเคราะห์พื้นที่ ซม. จริงคงที่ (Scale Factor = 0.0001)]</span>`,
+                    `    <span class="c-comment"># 5. [ระบบวิเคราะห์พื้นที่ ซม. จริงคำนวณแบบ Dynamic (ไม่ Hardcode)]</span>`,
                     `    # นับจำนวนพิกเซลแผลสีขาวในภาพแบนราบหน้าตรง`,
                     `    pixels_rectified = int(np.sum(warped_mask > <span class="c-number">0</span>))`,
-                    `    # หาอัตราส่วนพิกเซลต่อ cm2: ขนาดจริง QR 4 ซม.2 หารด้วยพื้นที่พิกเซลตรงของมัน (200x200 = 40,000 px)`,
-                    `    scale_factor = <span class="c-number">4.0</span> / (<span class="c-number">200.0</span> * <span class="c-number">200.0</span>)  <span class="c-comment"># 0.0001 cm2/px</span>`,
+                    `    # หาอัตราส่วนพิกเซลต่อ cm2 อิงตามตัวแปรหลัก`,
+                    `    qr_side_px = settings.QR_SIZE_CM * settings.TARGET_PX_PER_CM`,
+                    `    qr_area_real_cm2 = settings.QR_SIZE_CM * settings.QR_SIZE_CM`,
+                    `    qr_area_rectified_px = qr_side_px * qr_side_px`,
+                    `    scale_factor = qr_area_real_cm2 / qr_area_rectified_px`,
                     `    area_cm2 = pixels_rectified * scale_factor`,
                     ``,
                     `    <span class="c-comment"># 📌 บันทึกเซฟรูปภาพลงดิสก์จำลองเพื่อตรวจสอบผลลัพธ์ด้วยตาเปล่า (ตามหลักการ Naming Convention)</span>`,
@@ -1270,10 +1319,15 @@ if __name__ == "__main__":
                     `    warped_img_contour = warped_img.copy()`,
                     `    cv2.drawContours(warped_img_contour, contours, -1, (<span class="c-number">0</span>, <span class="c-number">255</span>, <span class="c-number">0</span>), <span class="c-number">2</span>)`,
                     ``,
-                    `    # เซฟรูปสีขอบเขียว`,
-                    `    cv2.imwrite(<span class="c-string">"sandbox/test_processed.jpg"</span>, warped_img_contour)`,
-                    `    # 2. เซฟรูปหน้ากากแผลขาวดำคู่กันโดยห้อยคำว่า _mask ต่อท้าย`,
-                    `    cv2.imwrite(<span class="c-string">"sandbox/test_processed_mask.png"</span>, warped_mask)`,
+                    `    # คำนวณหาที่อยู่สัมบูรณ์ของห้อง static/wounds แบบ Dynamic`,
+                    `    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))`,
+                    `    static_wounds_dir = os.path.join(base_dir, <span class="c-string">"static"</span>, <span class="c-string">"wounds"</span>)`,
+                    `    os.makedirs(static_wounds_dir, exist_ok=<span class="c-keyword">True</span>)`,
+                    `    # เซฟรูปทดสอบทั้ง 4 สไตล์ลงในห้องจัดเก็บร่วมของระบบ`,
+                    `    cv2.imwrite(os.path.join(static_wounds_dir, <span class="c-string">"test_raw.jpg"</span>), image)  <span class="c-comment"># 1. รูปดิบอัปโหลดก่อนแก้เอียง</span>`,
+                    `    cv2.imwrite(os.path.join(static_wounds_dir, <span class="c-string">"test_rectified.jpg"</span>), warped_img)  <span class="c-comment"># 2. รูปสีระนาบตรง</span>`,
+                    `    cv2.imwrite(os.path.join(static_wounds_dir, <span class="c-string">"test_mask.png"</span>), warped_mask)  <span class="c-comment"># 3. รูปหน้ากากขาวดำตรง</span>`,
+                    `    cv2.imwrite(os.path.join(static_wounds_dir, <span class="c-string">"test_contour.jpg"</span>), warped_img_contour)  <span class="c-comment"># 4. รูปสีตีกรอบเขียวแก้เอียงตรง</span>`,
                     ``,
                     `    print(<span class="c-string">"="</span>*<span class="c-number">50</span>)`,
                     `    print(f<span class="c-string">"📊 ผลคำนวณพื้นที่แผลจริง: {area_cm2:.4f} cm²"</span>)`,
@@ -1294,18 +1348,18 @@ if __name__ == "__main__":
                         why: "เนื่องจากสคริปต์นี้ตั้งรันอยู่ในโฟลเดอร์ <code>sandbox/</code> ซึ่งไม่มีความเกี่ยวข้องกับโฟลเดอร์หลัก หากไม่บังคับชี้พาธย้อนขึ้น ไพธอนจะเปิดค้นหารันคำสั่งบริการ AI ของเราไม่เจออย่างเด็ดขาดครับ"
                     },
                     {
-                        title: "📊 2. สูตรทวีคูณแปลงพื้นที่ ซม. จริงคงที่ (Scale Factor 0.0001)",
-                        lines: [33, 38],
-                        what: "นับจำนวนพิกเซลขาวในแผลหน้าตรงทั้งหมด (Warped Mask) แล้วคูณไขว้สเกลคงที่ <b>0.0001 cm²/pixel</b> (ซึ่งได้มาจากการหารพื้นที่จริงของ QR 4 ซม.² ด้วยพื้นที่พิกเซลคงที่ของมันคือ 200x200 = 40,000 พิกเซล)",
+                        title: "📊 2. สูตรคำนวณสเกลพื้นที่แปลง ซม. จริงแบบ Dynamic (ไม่ Hardcode)",
+                        lines: [33, 40],
+                        what: "นับจำนวนพิกเซลขาวในแผลหน้าตรงทั้งหมด (Warped Mask) แล้วคูณไขว้สเกลคงที่ ซึ่งสกัดจากการคูณขนาดของด้านสติกเกอร์ในโลกจริง และอัตราความหนาแน่นเป้าหมายคงที่ในระดับคลาส Settings",
                         get: "รายงานผลลัพธ์ขนาดแผลจริงสะสมในโลกทางกายภาพหน่วยตารางเซนติเมตร (cm²)",
-                        why: "ช่วยให้เราได้ขนาดแผลที่เป็นจริง 100% โดยไม่ต้องพึ่งระนาบพิกเซลเบี้ยวจากกล้องถ่าย และได้มาตราส่วนเปรียบเทียบที่เที่ยงตรงสม่ำเสมอในทุกสัปดาห์ของการเข้าติดตามผล"
+                        why: "ช่วยให้เราได้ขนาดแผลที่เป็นจริง 100% โดยอ้างอิงตามค่าตัวแปรศูนย์กลาง ซึ่งยืดหยุ่นมากเมื่อต้องการขยายสัดส่วนภายหลัง"
                     },
                     {
-                        title: "🖼️ 3. การบันทึกรูปภาพสีคู่หน้ากากขาวดำ (Naming Convention Saving)",
-                        lines: [40, 49],
-                        what: "ดึงขอบพิกเซลแผลสีขาวมาวาดเส้นเป็นเส้นสีเขียวหนา 2 พิกเซลล้อมแผลในภาพหน้าตรง จากนั้นทำการเซฟภาพแผลสีคู่ขอบเขียวคู่ขนานไปกับภาพหน้ากากขาวดำลงบนดิสก์จริงที่พิกัด <code>sandbox/</code>",
-                        get: "ไฟล์ภาพสองไฟล์ที่ตรงพาสโครงสร้างจริง <code>test_processed.jpg</code> และ <code>test_processed_mask.png</code> เพื่อเปรียบเทียบทางกายภาพดวงตา",
-                        why: "เพื่อเป็นการจำลองระบบจัดเก็บข้อมูลแบบเป็นระบบระเบียบ ทำให้นักพัฒนาสามารถคลิกเปิดโฟลเดอร์ภาพดูคุณภาพการตีกรอบแผลของสมอง AI U-Net ได้อย่างแม่นยำชัดเจน"
+                        title: "🖼️ 3. การบันทึกรูปภาพแผลทดสอบสะสม 4 รูปแบบ (4-Image Clinical Storage)",
+                        lines: [40, 59],
+                        what: "ดึงพิกัดขอบพิกเซลแผลมาวาดขอบเส้นสีเขียวหนา 2 พิกเซลลงบนภาพตรง จากนั้นบันทึกรูปผลลัพธ์ทั้ง 4 สไตล์ (Raw, Rectified, Mask, Contour) ลงดิสก์จริงร่วมกับห้องเก็บข้อมูลจริง",
+                        get: "ไฟล์ภาพทั้ง 4 สไตล์ที่พิกัด <code>app/static/wounds/</code> ประกอบด้วย test_raw.jpg, test_rectified.jpg, test_mask.png และ test_contour.jpg เพื่อเปรียบเทียบประมวลผลแผลในแต่ละสเตจ",
+                        why: "เพื่อเป็นการวิเคราะห์การจัดเก็บข้อมูลภาพแบบเป็นระเบียบ ทำให้นักพัฒนาสามารถเปิดดูคุณภาพโมเดลได้แบบเป็นสัดส่วน และใช้หน้าต่างถังเก็บภาพขุดทดสอบร่วมกับระบบหลังบ้านได้ทันที"
                     }
                 ]
             }
