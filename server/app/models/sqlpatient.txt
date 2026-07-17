@@ -1,4 +1,0 @@
-INSERT INTO patients
-("HN", user_id, first_name, last_name, birth_date, gender, phone, admit_date)
-VALUES
-('HN0001', 'U003', 'สมชาย', 'ใจดี', '2002-05-10', 'ชาย', '0812345678', NOW());
