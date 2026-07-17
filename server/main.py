@@ -7,7 +7,6 @@ import os
 from app.core.config import settings
 from app.db.session import SessionLocal
 from app.models import Role, User, Nurse, Patient, BodyPart, Wound, WoundRecord, Appointment
-from services.
 
 
 os.makedirs(settings.STATIC_DIR, exist_ok=True)
