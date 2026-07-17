@@ -23,8 +23,8 @@
             --accent: #3b82f6;
             --border: #223049;
             --text-title: #ffffff;
-            --text-body: #e2e8f0; /* ปรับให้อักษรสีขาวสว่างชัดขึ้นมาก (เดิม #94a3b8) */
-            --text-muted: #8892b0; /* ปรับให้อักษรคำอธิบายย่อยจางน้อยลง (เดิม #4b5563) */
+            --text-body: #94a3b8;
+            --text-muted: #4b5563;
             --success: #10b981;
             --radius-lg: 16px;
             --radius-md: 8px;
@@ -332,12 +332,12 @@
             }
         }
 
-        /* Token Styling - ปรับเฉดสีให้อ่านง่าย คมสว่างคมชัด */
-        .c-comment { color: #8b949e; font-style: italic; } /* บรรเทาอาการคอมเมนต์กลืนหายไปกับพื้นหลังสีดำ */
-        .c-keyword { color: #ff7b72; font-weight: bold; }
-        .c-string { color: #a5d6ff; }
-        .c-class { color: #d2a8ff; font-weight: bold; }
-        .c-func { color: #79c0ff; }
+        /* Token Styling */
+        .c-comment { color: #6a737d; font-style: italic; }
+        .c-keyword { color: #f97583; font-weight: bold; }
+        .c-string { color: #9ecbff; }
+        .c-class { color: #b392f0; font-weight: bold; }
+        .c-func { color: #79b8ff; }
         .c-decorator { color: #ffab70; }
         .c-number { color: #ff9b5e; }
     </style>
@@ -416,7 +416,7 @@
 D:/University memory/year4 [2569]/project_ICT/y4/Deep_Learning-Based_System_for_Segmentation_and_Monitoring_of_Diabetic/
 ├── server/                           # [1] โฟลเดอร์หลักฝั่งหลังบ้าน (FastAPI)
 │   ├── weights/                      # [2] โฟลเดอร์สำหรับเก็บไฟล์น้ำหนักโมเดล AI (.pth)
-│   │   └── unet_efficientnet_b4_dfu.pth # ไฟล์น้ำหนักโมเดล U-Net (ระบุชื่อสถาปัตยกรรมชัดเจน)
+│   │   └── model.pth                 # ไฟล์น้ำหนักโมเดล U-Net (best_model.pth)
 │   │
 │   ├── app/
 │   │   ├── services/                 # [3] โฟลเดอร์ใหม่เก็บไลบรารีวิเคราะห์กราฟิกและ AI
@@ -424,28 +424,18 @@ D:/University memory/year4 [2569]/project_ICT/y4/Deep_Learning-Based_System_for_
 │   │   │   ├── qr_detector.py        # โค้ดสแกนหาพิกัดยอดมุมและมาตราส่วนสติกเกอร์ QR
 │   │   │   ├── wound_segmenter.py    # โค้ดโหลด U-Net ทำนายขอบแผลพร้อมคำนวณ Entropy
 │   │   │   └── image_rectifier.py    # โค้ดดึงระนาบกล้องเอียงให้ตรงเฉลียงแบบ Homography
+│   │   │
+│   │   └── static/                   # [4] โฟลเดอร์แชร์ทรัพยากรหลัก
+│   │       └── wounds/               # เก็บรูปถ่ายแผลขอบเขียวหน้าตรงให้หน้าบ้าน React ดึงไปโชว์
 │   │
-│   ├── static/                       # [4] โฟลเดอร์แชร์ทรัพยากรหลัก (คู่ขนานกับแอปจริง)
-│   │   └── wounds/                   # เก็บรูปถ่ายแผล 4 รูปแบบหลัก (ใช้พื้นที่จัดเก็บร่วมกับ Sandbox):
-│   │       ├── {wound_id}_{uuid}_raw.jpg       # [รูปใช้งาน 1] รูปถ่ายดิบ
-│   │       ├── {wound_id}_{uuid}_rectified.jpg # [รูปใช้งาน 2] รูปสีแก้ระนาบตรง
-│   │       ├── {wound_id}_{uuid}_mask.png      # [รูปใช้งาน 3] รูปหน้ากากขาวดำ
-│   │       ├── {wound_id}_{uuid}_contour.jpg   # [รูปใช้งาน 4] รูปสเกลสีตีกรอบเขียว
-│   │       ├── test_raw.jpg                    # [รูปทดสอบ Sandbox 1]
-│   │       ├── test_rectified.jpg              # [รูปทดสอบ Sandbox 2]
-│   │       ├── test_mask.png                   # [รูปทดสอบ Sandbox 3]
-│   │       └── test_contour.jpg                # [รูปทดสอบ Sandbox 4]
-│   │
-│   └── sandbox/                      # [5] โฟลเดอร์สำหรับทดสอบจำลองรันระบบ (Sandbox)
-│       ├── inputs/
-│       │   └── test.png              # รูปดิบอินพุตจำลองการวิเคราะห์
-│       └── test_segmentation.py      # ตัวประเมินรัน Sandbox (เซฟรูปเอาต์พุตเข้าห้อง static/wounds ร่วมกัน)`,
+│   └── scratch/                      # [5] โฟลเดอร์เก็บสคริปต์สุ่มและทดลองนอกข่าย
+│       └── test_segmentation.py      # ตัวประเมินแบบรัน Sandbox ใน PowerShell บนวินโดวส์`,
                 htmlCode: [
                     `<span class="c-comment"># ผังการย้ายและจัดโครงสร้างโฟลเดอร์โปรเจกต์ DFU</span>`,
                     `D:/University memory/year4 [2569]/project_ICT/y4/Deep_Learning-Based_System_for_Segmentation_and_Monitoring_of_Diabetic/`,
                     `<span class="c-class">├── server/</span>                           <span class="c-comment"># [1] โฟลเดอร์หลักฝั่งหลังบ้าน (FastAPI)</span>`,
                     `<span class="c-class">│   ├── weights/</span>                      <span class="c-comment"># [2] โฟลเดอร์สำหรับเก็บไฟล์น้ำหนักโมเดล AI (.pth)</span>`,
-                    `│   │   └── <span class="c-keyword">unet_efficientnet_b4_dfu.pth</span> <span class="c-comment"># ไฟล์น้ำหนักโมเดล U-Net (ระบุชื่อสถาปัตยกรรมชัดเจน)</span>`,
+                    `│   │   └── <span class="c-keyword">model.pth</span>                 <span class="c-comment"># ไฟล์น้ำหนักโมเดล U-Net (best_model.pth)</span>`,
                     `│   │`,
                     `<span class="c-class">│   ├── app/</span>`,
                     `<span class="c-class">│   │   ├── services/</span>                 <span class="c-comment"># [3] โฟลเดอร์ใหม่เก็บไลบรารีวิเคราะห์กราฟิกและ AI</span>`,
@@ -454,21 +444,11 @@ D:/University memory/year4 [2569]/project_ICT/y4/Deep_Learning-Based_System_for_
                     `│   │   │   ├── <span class="c-keyword">wound_segmenter.py</span>    <span class="c-comment"># โค้ดโหลด U-Net ทำนายขอบแผลพร้อมคำนวณ Entropy</span>`,
                     `│   │   │   └── <span class="c-keyword">image_rectifier.py</span>    <span class="c-comment"># โค้ดดึงระนาบกล้องเอียงให้ตรงเฉลียงแบบ Homography</span>`,
                     `│   │   │`,
-                    `<span class="c-class">│   ├── static/</span>                       <span class="c-comment"># [4] โฟลเดอร์แชร์ทรัพยากรหลัก (คู่ขนานกับ app)</span>`,
-                    `│   │   └── <span class="c-keyword">wounds/</span>               <span class="c-comment"># เก็บรูปถ่ายแผล 4 รูปแบบหลัก (ใช้พื้นที่จัดเก็บร่วมกับ Sandbox):</span>`,
-                    `│   │       ├── <span class="c-string">{wound_id}_{uuid}_raw.jpg</span>       <span class="c-comment"># [รูปใช้งาน 1] รูปถ่ายดิบ</span>`,
-                    `│   │       ├── <span class="c-string">{wound_id}_{uuid}_rectified.jpg</span> <span class="c-comment"># [รูปใช้งาน 2] รูปสีแก้ระนาบตรง</span>`,
-                    `│   │       ├── <span class="c-string">{wound_id}_{uuid}_mask.png</span>      <span class="c-comment"># [รูปใช้งาน 3] รูปหน้ากากขาวดำ</span>`,
-                    `│   │       ├── <span class="c-string">{wound_id}_{uuid}_contour.jpg</span>   <span class="c-comment"># [รูปใช้งาน 4] รูปสเกลสีตีกรอบเขียว</span>`,
-                    `│   │       ├── <span class="c-string">test_raw.jpg</span>                    <span class="c-comment"># [รูปทดสอบ Sandbox 1]</span>`,
-                    `│   │       ├── <span class="c-string">test_rectified.jpg</span>              <span class="c-comment"># [รูปทดสอบ Sandbox 2]</span>`,
-                    `│   │       ├── <span class="c-string">test_mask.png</span>                   <span class="c-comment"># [รูปทดสอบ Sandbox 3]</span>`,
-                    `│   │       └── <span class="c-string">test_contour.jpg</span>                <span class="c-comment"># [รูปทดสอบ Sandbox 4]</span>`,
+                    `<span class="c-class">│   │   └── static/</span>                   <span class="c-comment"># [4] โฟลเดอร์แชร์ทรัพยากรหลัก</span>`,
+                    `│   │       └── <span class="c-keyword">wounds/</span>               <span class="c-comment"># เก็บรูปถ่ายแผลขอบเขียวหน้าตรงให้หน้าบ้าน React ดึงไปโชว์</span>`,
                     `│   │`,
-                    `<span class="c-class">│   └── sandbox/</span>                      <span class="c-comment"># [5] โฟลเดอร์สำหรับทดสอบจำลองรันระบบ (Sandbox)</span>`,
-                    `│       ├── <span class="c-keyword">inputs/</span>                   <span class="c-comment"># ไดเรกทอรีเก็บภาพอินพุตจำลอง</span>`,
-                    `│       │   └── <span class="c-string">test.png</span>              <span class="c-comment"># รูปดิบอินพุตจำลอง</span>`,
-                    `│       └── <span class="c-keyword">test_segmentation.py</span>      <span class="c-comment"># ตัวประเมินรัน Sandbox (เซฟรูปเอาต์พุตเข้าห้อง static/wounds ร่วมกัน)</span>`
+                    `<span class="c-class">│   └── scratch/</span>                      <span class="c-comment"># [5] โฟลเดอร์เก็บสคริปต์สุ่มและทดลองนอกข่าย</span>`,
+                    `│       └── <span class="c-keyword">test_segmentation.py</span>      <span class="c-comment"># ตัวประเมินแบบรัน Sandbox ใน PowerShell บนวินโดวส์</span>`
                 ],
                 explanations: [
                     {
@@ -486,6 +466,7 @@ D:/University memory/year4 [2569]/project_ICT/y4/Deep_Learning-Based_System_for_
                 fileStatus: "🔧 แก้ไขเพิ่มเติมในคลาส Settings เดิม (ห้ามเขียนทับ!)",
                 rawCode: `from pydantic_settings import BaseSettings, SettingsConfigDict
 import os
+import torch
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Deep Learning-Based System for Segmentation and Monitoring of Diabetic Foot Ulcer"
@@ -493,13 +474,10 @@ class Settings(BaseSettings):
     DATABASE_URL: str
 
     # --- โค้ดตั้งค่าเสริมสำหรับคำนวณสเกลแผล (เพิ่มเติมเข้าคลาสเดิม) ---
-    # หาตำแหน่งพาธหลักแบบพิกัดสัมบูรณ์ของโฟลเดอร์ server/ ป้องกันบั๊กรันคนละชั้น directory
-    BASE_DIR: str = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    
-    # พาธจัดเก็บไฟล์น้ำหนักโครงข่ายประสาท U-Net AI (ดึงผ่าน BASE_DIR)
-    MODEL_PATH: str = os.path.join(BASE_DIR, "weights", "unet_efficientnet_b4_dfu.pth")
-    # ไดเรกทอรีจัดเก็บรูปภาพแผลหน้าตรงที่แชร์รูปผ่านเซิร์ฟเวอร์
-    STATIC_DIR: str = os.path.join(BASE_DIR, "static", "wounds")
+    # พาธจัดเก็บไฟล์น้ำหนักโครงข่ายประสาท U-Net AI
+    MODEL_PATH: str = "weights/model.pth"
+    # ไดเรกทอรีสำหรับแชร์รูปภาพแผลขอบเขียวหน้าตรงที่ประมวลผลแล้วให้ React ดึงไปแสดงผล
+    STATIC_DIR: str = "static/wounds"
     # ขนาดจริงทางกายภาพของขอบป้ายสติกเกอร์ QR Code อ้างอิงสเกล (หน่วยเซนติเมตร)
     QR_SIZE_CM: float = 2.0
     # อัตราส่วนมาตราส่วนมาตรฐานของโครงการ: ระยะ 1 เซนติเมตรในโลกจริง = 100 พิกเซลบนรูปหน้าตรง
@@ -511,7 +489,6 @@ class Settings(BaseSettings):
 
     @property
     def DEVICE(self) -> str:
-        import torch
         return "cuda" if torch.cuda.is_available() else "cpu"
 
     model_config = SettingsConfigDict(
@@ -520,10 +497,14 @@ class Settings(BaseSettings):
         extra="ignore"
     )
 
-settings = Settings()`,
+settings = Settings()
+
+# ประกันเสถียรภาพรันไทม์ บังคับตรวจจับและสร้างโฟลเดอร์แชร์รูปแผลในระบบหลังบ้านอัตโนมัติ
+os.makedirs(settings.STATIC_DIR, exist_ok=True)`,
                 htmlCode: [
                     `<span class="c-keyword">from</span> pydantic_settings <span class="c-keyword">import</span> BaseSettings, SettingsConfigDict`,
                     `<span class="c-keyword">import</span> os`,
+                    `<span class="c-keyword">import</span> torch`,
                     ``,
                     `<span class="c-class">class</span> <span class="c-class">Settings</span>(BaseSettings):`,
                     `    PROJECT_NAME: <span class="c-keyword">str</span> = <span class="c-string">"Deep Learning-Based..."</span>`,
@@ -531,12 +512,10 @@ settings = Settings()`,
                     `    DATABASE_URL: <span class="c-keyword">str</span>`,
                     ``,
                     `    <span class="c-comment"># --- โค้ดตั้งค่าเสริมสำหรับคำนวณสเกลแผล (เพิ่มเติมเข้าคลาสเดิม) ---</span>`,
-                    `    <span class="c-comment"># หาตำแหน่งพาธหลักแบบพิกัดสัมบูรณ์ของโฟลเดอร์ server/ ป้องกันบั๊กรันคนละชั้น directory</span>`,
-                    `    BASE_DIR: <span class="c-keyword">str</span> = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))`,
-                    `    <span class="c-comment"># พาธจัดเก็บไฟล์น้ำหนักโครงข่ายประสาท U-Net AI (ดึงผ่าน BASE_DIR)</span>`,
-                    `    MODEL_PATH: <span class="c-keyword">str</span> = os.path.join(BASE_DIR, <span class="c-string">"weights"</span>, <span class="c-string">"unet_efficientnet_b4_dfu.pth"</span>)`,
-                    `    <span class="c-comment"># ไดเรกทอรีจัดเก็บรูปภาพแผลหน้าตรงที่แชร์รูปผ่านเซิร์ฟเวอร์</span>`,
-                    `    STATIC_DIR: <span class="c-keyword">str</span> = os.path.join(BASE_DIR, <span class="c-string">"static"</span>, <span class="c-string">"wounds"</span>)`,
+                    `    <span class="c-comment"># พาธจัดเก็บไฟล์น้ำหนักโครงข่ายประสาท U-Net AI</span>`,
+                    `    MODEL_PATH: <span class="c-keyword">str</span> = <span class="c-string">"weights/model.pth"</span>`,
+                    `    <span class="c-comment"># ไดเรกทอรีสำหรับแชร์รูปภาพแผลขอบเขียวหน้าตรงที่ประมวลผลแล้วให้ React หน้าบ้านดึงไปแสดงผล</span>`,
+                    `    STATIC_DIR: <span class="c-keyword">str</span> = <span class="c-string">"static/wounds"</span>`,
                     `    <span class="c-comment"># ขนาดจริงทางกายภาพของขอบป้ายสติกเกอร์ QR Code อ้างอิงสเกล (หน่วยเซนติเมตร)</span>`,
                     `    QR_SIZE_CM: <span class="c-keyword">float</span> = <span class="c-number">2.0</span>`,
                     `    <span class="c-comment"># อัตราส่วนมาตราส่วนมาตรฐานของโครงการ: ระยะ 1 เซนติเมตรในโลกจริง = 100 พิกเซลบนรูปหน้าตรง</span>`,
@@ -548,7 +527,6 @@ settings = Settings()`,
                     ``,
                     `    <span class="c-func">@property</span>`,
                     `    <span class="c-keyword">def</span> <span class="c-func">DEVICE</span>(self) -> <span class="c-keyword">str</span>:`,
-                    `        <span class="c-keyword">import</span> torch`,
                     `        <span class="c-keyword">return</span> <span class="c-string">"cuda"</span> <span class="c-keyword">if</span> torch.cuda.is_available() <span class="c-keyword">else</span> <span class="c-string">"cpu"</span>`,
                     ``,
                     `    model_config = SettingsConfigDict(`,
@@ -557,22 +535,32 @@ settings = Settings()`,
                     `        extra=<span class="c-string">"ignore"</span>`,
                     `    )`,
                     ``,
-                    `settings = Settings()`
+                    `settings = Settings()`,
+                    ``,
+                    `<span class="c-comment"># ประกันเสถียรภาพรันไทม์ บังคับตรวจจับและสร้างโฟลเดอร์แชร์รูปแผลในระบบหลังบ้านอัตโนมัติ</span>`,
+                    `os.makedirs(settings.STATIC_DIR, exist_ok=<span class="c-keyword">True</span>)`
                 ],
                 explanations: [
                     {
                         title: "⚙️ 1. พารามิเตอร์มาตราส่วนโครงการ (DFU Scale Parameters)",
-                        lines: [9, 23],
-                        what: "เขียนเติมตัวแปรมาตรวัดแผลเข้าสู่คลาส <code>Settings</code> โดยล็อกค่าคงที่สากลให้สเกลรูปภาพแบบหน้าตรงมีอัตราความกว้างยาวคงที่คือ <b>1 ซม. = 100 พิกเซล</b> และหันมาหาที่อยู่แบบพิกัดจริงด้วย <code>os.path.join(BASE_DIR, ...)</code> เพื่อความสมบูรณ์แบบในการโยงพิกัด",
-                        get: "ตัวแปลเกณฑ์คำนวณและสเกลแผลที่เรียกใช้ได้จากทุกที่หลังบ้านผ่านตัวแปรกลาง <code>settings.MODEL_PATH</code> หรือ <code>settings.STATIC_DIR</code>",
+                        lines: [10, 22],
+                        what: "เขียนเติมตัวแปรมาตรวัดแผลเข้าสู่คลาส <code>Settings</code> โดยล็อกค่าคงที่สากลให้สเกลรูปภาพแบบหน้าตรงมีอัตราความกว้างยาวคงที่คือ <b>1 ซม. = 100 พิกเซล</b><br><br><strong>🔗 โครงสร้างต่อเนื่อง:</strong> นี่คือการแก้ไขต่อยอดจากคลาส <code>Settings</code> ดั้งเดิมใน <a href='../database-doc/database_setup_code_deepdive.html' style='color: #3b82f6; text-decoration: underline;' target='_blank'>database_setup_code_deepdive.html</a> โดยเรานำตัวแปรกลุ่มนี้ไปพิมพ์ต่อท้ายฟิลด์ <code>DATABASE_URL</code> ของเดิมในห้อง <code>config.py</code> จริง",
+                        get: "ตัวแปลเกณฑ์คำนวณและสเกลแผลที่เรียกใช้ได้จากทุกที่หลังบ้านผ่านตัวแปรกลาง <code>settings.QR_SIZE_CM</code> หรือ <code>settings.TARGET_PX_PER_CM</code>",
                         why: "เพื่อให้แผลที่ถ่ายจากคนละระยะ (เช่น บางรูปพยาบาลยื่นมือถือเข้าไปถ่ายใกล้ บางรูปถ่ายไกล) สามารถถูกบีบขยายระนาบกลับมาระดับ 100 px/cm เดียวกันทั้งหมด จะได้เทียบขนาดพื้นที่สะสมย้อนหลังได้เสถียร"
                     },
                     {
-                        title: "💻 2. อุปกรณ์รันความเร็วสูง CUDA/CPU Dynamic Selection (Lazy Import)",
-                        lines: [25, 28],
-                        what: "ใช้คำสั่งเช็กประสิทธิภาพเครื่องคอมพิวเตอร์ผ่านตัวแปร Property ว่ามีสิทธิ์เข้าใช้งานการประมวลผลผ่านการ์ดจอ Nvidia (CUDA) หรือไม่ โดยสั่งโหลดสมองกล AI PyTorch แบบขี้เกียจ (Lazy Import) เฉพาะเมื่อต้องการใช้งาน เพื่อป้องกันไม่ให้น้ำหนักของโมดูล PyTorch หน่วงการบูตรันของตัวจัดการดีบีอื่นๆ บนตัวเครื่อง",
+                        title: "💻 2. อุปกรณ์รันความเร็วสูง CUDA/CPU Dynamic Selection",
+                        lines: [24, 26],
+                        what: "ใช้คำสั่งเช็กประสิทธิภาพเครื่องคอมพิวเตอร์ผ่านตัวแปร Property ว่ามีสิทธิ์เข้าใช้งานการประมวลผลผ่านการ์ดจอ Nvidia (CUDA) หรือไม่ หากไม่มีระบบจะตีกลับมาใช้ประมวลผลบนการ์ดจอจำลอง CPU แทนอัตโนมัติ",
                         get: "การการันตีการรันระบบ AI โดยปราศจากอาการแอปแครชดับกลางทาง ไม่ว่าระบบจะรันบนเครื่องแอดมินหรือเซิร์ฟเวอร์จำลอง",
-                        why: "เพราะการโหลด <code>torch</code> บรรทัดแรกสุดจะหน่วงแรมการทำดีบีและสั่งรันข้ามเครื่องบ่อยครั้ง การโหลดเฉพาะเมื่อใช้จะล้างความช้าไปได้หมดจด"
+                        why: "การรัน U-Net PyTorch มีภาระงานประมวลผลพิกเซลแผลมหาศาล การย้ายงานลงการ์ดจอจะช่วยให้เว็บตอบสนองไวขึ้น 50 เท่า แต่ถ้าไม่มีการดักตีกลับไป CPU แอปจะแครชทันทีเมื่อระบบไม่มีการ์ดจอช่วยสนับสนุน"
+                    },
+                    {
+                        title: "📁 3. สถาปนาโฟลเดอร์เป้าหมาย (Auto Directory Creator)",
+                        lines: [35, 36],
+                        what: "เรียกใช้คำสั่งระดับระบบปฏิบัติการ <code>os.makedirs</code> ป้อนชื่อไดเรกทอรีเก็บรูปแผล (static/wounds) บังคับสร้างห้องทันทีหากยังตรวจไม่พบห้องดังกล่าวในเซิร์ฟเวอร์",
+                        get: "การประกันเสถียรภาพรันไทม์ ป้องกันไม่ให้โค้ด AI ค้างตอนบันทึกไฟล์ภาพแผลหลังขอบเขียวเพราะโฟลเดอร์ปลายทางขาดหาย",
+                        why: "ช่วยลดความผิดพลาดและขั้นตอนแมนนวลของทีมงาน ไม่ต้องมาคอยกดสร้างโฟลเดอร์ด้วยตนเอง ทำให้รันคอนเทนเนอร์และเซ็ตอัปเครื่องใหม่ใช้งานได้ในวินาทีเดียว"
                     }
                 ]
             },
@@ -580,37 +568,20 @@ settings = Settings()`,
                 name: "main.py",
                 path: "server/main.py",
                 fileStatus: "🔧 แก้ไขเพิ่มเติมโค้ดเดิม (ห้ามเขียนทับ!)",
-                rawCode: `from fastapi import FastAPI, Depends, UploadFile, File, Form, HTTPException
+                rawCode: `from fastapi import FastAPI, Depends
 from fastapi.staticfiles import StaticFiles  # ใช้สำหรับเปิดสิทธิ์เข้าถึง static files เช่น รูปภาพ
 from sqlalchemy.orm import Session
 from typing import List
-import os  # ใช้เช็คและสร้างโฟลเดอร์สำหรับแชร์รูปภาพแผลอัตโนมัติ
-import uuid
-import cv2
-import numpy as np
 
 from app.core.config import settings
 from app.db.session import SessionLocal
 from app.models import Role, User, Nurse, Patient, BodyPart, Wound, WoundRecord, Appointment
-from app.services.qr_detector import detect_qr
-from app.services.wound_segmenter import load_model, segment_wound
-from app.services.image_rectifier import warp_image_and_mask
-
-# --- ระบบยั่งยืน: สั่งรันสร้างโฟลเดอร์เก็บแผลทันทีก่อน Mount ป้องกันแอปล่มตั้งแต่โมดูลสตาร์ท ---
-os.makedirs(settings.STATIC_DIR, exist_ok=True)
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
+# --- โค้ดส่วนเปิดแชร์สิทธิ์แสดงภาพถ่ายแผล (เพิ่มเติมจากระบบฐานข้อมูลเดิม) ---
 # เปิดบริการแชร์ไดเรกทอรี static เพื่อให้ React ฝั่งหน้าบ้านดึงรูปภาพแผลหน้าตรงไปโชว์ได้
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# โหลดโมเดล U-Net AI ตรวจแผลเพียงครั้งเดียวตอนเริ่มระบบเพื่อป้องกันแรมรั่วไหล
-_model = None
-def get_wound_model():
-    global _model
-    if _model is None:
-        _model = load_model(settings.MODEL_PATH, settings.DEVICE)
-    return _model
 
 def get_db():
     db = SessionLocal()
@@ -626,114 +597,22 @@ def read_root():
 @app.get("/test-db-connection")
 def test_db_connection(db:Session=Depends(get_db)):
     parts = db.query(BodyPart).all()
-    return [{"id": p.body_part_id, "name": p.body_part_name} for p in parts]
-
-@app.post("/api/v1/wounds/calculate")
-async def calculate_wound(
-    wound_id: str = Form(...),
-    user_id: str = Form(...),
-    file: UploadFile = File(...),
-    db: Session = Depends(get_db)
-):
-    """
-    API รับรูปถ่ายแผลสดจากหน้าบ้าน React ➡️ ประมวลผล AI บนแรมสด ➡️ เซฟคู่สีขาวดำลงฮาร์ดดิสก์ ➡️ หยอดสถิติตัวเลขลงตู้ PostgreSQL
-    """
-    # 1. แปลงไฟล์อัปโหลดในแรมตรงๆ เป็น NumPy array
-    contents = await file.read()
-    nparr = np.frombuffer(contents, np.uint8)
-    image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-    if image is None:
-        raise HTTPException(status_code=400, detail="ไฟล์รูปภาพไม่ถูกต้อง")
-        
-    # 2. เรียกบริการตรวจจับป้ายสติกเกอร์ QR ในแรม
-    qr_data = detect_qr(image, settings.QR_SIZE_CM)
-    if not qr_data:
-        raise HTTPException(status_code=400, detail="ไม่พบสติกเกอร์ QR Code ในรูปถ่าย")
-        
-    # 3. รันโครงข่ายโมเดลวิเคราะห์พื้นที่แผลขาวดำในแรม
-    model = get_wound_model()
-    wound_data = segment_wound(image, model, settings.DEVICE, settings.THRESHOLD)
-    
-    # 4. บิดแผ่นระนาบภาพถ่ายเท้าลาดเอียงให้เรียบตรง 90 องศาในแรม
-    warped_img, warped_mask, warped_w, warped_h = warp_image_and_mask(
-        image, wound_data["mask"], qr_data["polygon"],
-        settings.QR_SIZE_CM, settings.TARGET_PX_PER_CM, settings.MAX_WARPED_DIM
-    )
-    
-    # 5. คำนวณขนาดพื้นที่ตารางเซนติเมตรจริงแบบ Dynamic (ไม่ Hardcode)
-    pixels_rectified = int(np.sum(warped_mask > 0))
-    qr_side_px = settings.QR_SIZE_CM * settings.TARGET_PX_PER_CM
-    qr_area_real_cm2 = settings.QR_SIZE_CM * settings.QR_SIZE_CM
-    qr_area_rectified_px = qr_side_px * qr_side_px
-    scale_factor = qr_area_real_cm2 / qr_area_rectified_px
-    area_cm2 = pixels_rectified * scale_factor
-    
-    # 6. บันทึกรูปภาพจริงลงดิสก์พร้อมกัน 4 รูป (Naming Convention - เก็บ 4 สไตล์)
-    contours, _ = cv2.findContours(warped_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    warped_img_contour = warped_img.copy()
-    cv2.drawContours(warped_img_contour, contours, -1, (0, 255, 0), 2)
-    
-    unique_filename = f"{wound_id}_{uuid.uuid4().hex}"
-    
-    # กำหนดพาธจัดเก็บสำหรับภาพทั้ง 4 รูปแบบ
-    raw_path = os.path.join(settings.STATIC_DIR, f"{unique_filename}_raw.jpg")
-    rectified_path = os.path.join(settings.STATIC_DIR, f"{unique_filename}_rectified.jpg")
-    mask_path = os.path.join(settings.STATIC_DIR, f"{unique_filename}_mask.png")
-    contour_path = os.path.join(settings.STATIC_DIR, f"{unique_filename}_contour.jpg")
-    
-    # บันทึกรูปภาพทั้งหมดลงในห้อง static/wounds
-    cv2.imwrite(raw_path, image)                   # 1. รูปดิบต้นฉบับก่อนแก้เอียง (Raw Image)
-    cv2.imwrite(rectified_path, warped_img)         # 2. รูปสีหน้าตรงหลังแก้เอียง (Rectified Color)
-    cv2.imwrite(mask_path, warped_mask)             # 3. รูปหน้ากากแผลขาวดำหน้าตรง (Rectified Mask)
-    cv2.imwrite(contour_path, warped_img_contour)   # 4. รูปสีหน้าตรงตีกรอบเส้นเขียว (Rectified Contour)
-    
-    # 7. บันทึกประวัติการวัดลงดีบี PostgreSQL (ตามตาราง WoundRecord ของจริง)
-    record = WoundRecord(
-        wound_id=wound_id,
-        user_id=user_id,
-        image_path=f"/static/wounds/{filename}",  # บันทึกเฉพาะลิงก์ภาพสีหลัก
-        area_pixel=pixels_rectified,
-        area_cm2=area_cm2,
-        note=None
-    )
-    db.add(record)
-    db.commit()
-    db.refresh(record)
-    
-    return {
-        "record_id": record.record_id,
-        "image_path": record.image_path,
-        "area_pixel": record.area_pixel,
-        "area_cm2": record.area_cm2
-    }`,
+    return [{"id": p.body_part_id, "name": p.body_part_name} for p in parts]`,
                 htmlCode: [
-                    `<span class="c-keyword">from</span> fastapi <span class="c-keyword">import</span> FastAPI, Depends, UploadFile, File, Form, HTTPException`,
-                    `<span class="c-keyword">from</span> fastapi.staticfiles <span class="c-keyword">import</span> StaticFiles`,
+                    `<span class="c-keyword">from</span> fastapi <span class="c-keyword">import</span> FastAPI, Depends`,
+                    `<span class="c-keyword">from</span> fastapi.staticfiles <span class="c-keyword">import</span> StaticFiles  <span class="c-comment"># ใช้สำหรับเปิดสิทธิ์เข้าถึง static files เช่น รูปภาพ</span>`,
                     `<span class="c-keyword">from</span> sqlalchemy.orm <span class="c-keyword">import</span> Session`,
                     `<span class="c-keyword">from</span> typing <span class="c-keyword">import</span> List`,
-                    `<span class="c-keyword">import</span> os`,
-                    `<span class="c-keyword">import</span> uuid`,
-                    `<span class="c-keyword">import</span> cv2`,
-                    `<span class="c-keyword">import</span> numpy <span class="c-keyword">as</span> np`,
                     ``,
                     `<span class="c-keyword">from</span> app.core.config <span class="c-keyword">import</span> settings`,
                     `<span class="c-keyword">from</span> app.db.session <span class="c-keyword">import</span> SessionLocal`,
                     `<span class="c-keyword">from</span> app.models <span class="c-keyword">import</span> Role, User, Nurse, Patient, BodyPart, Wound, WoundRecord, Appointment`,
-                    `<span class="c-keyword">from</span> app.services.qr_detector <span class="c-keyword">import</span> detect_qr`,
-                    `<span class="c-keyword">from</span> app.services.wound_segmenter <span class="c-keyword">import</span> load_model, segment_wound`,
-                    `<span class="c-keyword">from</span> app.services.image_rectifier <span class="c-keyword">import</span> warp_image_and_mask`,
-                    ``,
-                    `os.makedirs(settings.STATIC_DIR, exist_ok=<span class="c-keyword">True</span>)`,
                     ``,
                     `app = FastAPI(title=settings.PROJECT_NAME)`,
-                    `app.mount(<span class="c-string">"/static"</span>, StaticFiles(directory=<span class="c-string">"static"</span>), name=<span class="c-string">"static"</span>)`,
                     ``,
-                    `_model = <span class="c-keyword">None</span>`,
-                    `<span class="c-keyword">def</span> <span class="c-func">get_wound_model</span>():`,
-                    `    <span class="c-keyword">global</span> _model`,
-                    `    <span class="c-keyword">if</span> _model <span class="c-keyword">is None</span>:`,
-                    `        _model = load_model(settings.MODEL_PATH, settings.DEVICE)`,
-                    `    <span class="c-keyword">return</span> _model`,
+                    `<span class="c-comment"># --- โค้ดส่วนเปิดแชร์สิทธิ์แสดงภาพถ่ายแผล (เพิ่มเติมจากระบบฐานข้อมูลเดิม) ---</span>`,
+                    `<span class="c-comment"># เปิดบริการแชร์ไดเรกทอรี static เพื่อให้ React ฝั่งหน้าบ้านดึงรูปภาพแผลหน้าตรงไปโชว์ได้</span>`,
+                    `app.mount(<span class="c-string">"/static"</span>, StaticFiles(directory=<span class="c-string">"static"</span>), name=<span class="c-string">"static"</span>)`,
                     ``,
                     `<span class="c-keyword">def</span> <span class="c-func">get_db</span>():`,
                     `    db = SessionLocal()`,
@@ -749,44 +628,7 @@ async def calculate_wound(
                     `@app.get(<span class="c-string">"/test-db-connection"</span>)`,
                     `<span class="c-keyword">def</span> <span class="c-func">test_db_connection</span>(db:Session=Depends(get_db)):`,
                     `    parts = db.query(BodyPart).all()`,
-                    `    <span class="c-keyword">return</span> [{<span class="c-string">"id"</span>: p.body_part_id, <span class="c-string">"name"</span>: p.body_part_name} <span class="c-keyword">for</span> p in parts]`,
-                    ``,
-                    `@app.post(<span class="c-string">"/api/v1/wounds/calculate"</span>)`,
-                    `<span class="c-keyword">async def</span> <span class="c-func">calculate_wound</span>(wound_id: str = Form(...), user_id: str = Form(...), file: UploadFile = File(...), db: Session = Depends(get_db)):`,
-                    `    contents = <span class="c-keyword">await</span> file.read()`,
-                    `    nparr = np.frombuffer(contents, np.uint8)`,
-                    `    image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)`,
-                    `    <span class="c-keyword">if</span> image <span class="c-keyword">is None</span>:`,
-                    `        <span class="c-keyword">raise</span> HTTPException(status_code=<span class="c-number">400</span>, detail=<span class="c-string">"ไฟล์รูปภาพไม่ถูกต้อง"</span>)`,
-                    `    qr_data = detect_qr(image, settings.QR_SIZE_CM)`,
-                    `    <span class="c-keyword">if not</span> qr_data:`,
-                    `        <span class="c-keyword">raise</span> HTTPException(status_code=<span class="c-number">400</span>, detail=<span class="c-string">"ไม่พบสติกเกอร์ QR Code ในรูปถ่าย"</span>)`,
-                    `    model = get_wound_model()`,
-                    `    wound_data = segment_wound(image, model, settings.DEVICE, settings.THRESHOLD)`,
-                    `    warped_img, warped_mask, warped_w, warped_h = warp_image_and_mask(image, wound_data[<span class="c-string">"mask"</span>], qr_data[<span class="c-string">"polygon"</span>], settings.QR_SIZE_CM, settings.TARGET_PX_PER_CM, settings.MAX_WARPED_DIM)`,
-                    `    pixels_rectified = int(np.sum(warped_mask > <span class="c-number">0</span>))`,
-                    `    qr_side_px = settings.QR_SIZE_CM * settings.TARGET_PX_PER_CM`,
-                    `    qr_area_real_cm2 = settings.QR_SIZE_CM * settings.QR_SIZE_CM`,
-                    `    qr_area_rectified_px = qr_side_px * qr_side_px`,
-                    `    scale_factor = qr_area_real_cm2 / qr_area_rectified_px`,
-                    `    area_cm2 = pixels_rectified * scale_factor`,
-                    `    contours, _ = cv2.findContours(warped_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)`,
-                    `    warped_img_contour = warped_img.copy()`,
-                    `    cv2.drawContours(warped_img_contour, contours, -1, (<span class="c-number">0</span>, <span class="c-number">255</span>, <span class="c-number">0</span>), <span class="c-number">2</span>)`,
-                    `    unique_filename = f<span class="c-string">"{wound_id}_{uuid.uuid4().hex}"</span>`,
-                    `    raw_path = os.path.join(settings.STATIC_DIR, f"{unique_filename}_raw.jpg")`,
-                    `    rectified_path = os.path.join(settings.STATIC_DIR, f"{unique_filename}_rectified.jpg")`,
-                    `    mask_path = os.path.join(settings.STATIC_DIR, f"{unique_filename}_mask.png")`,
-                    `    contour_path = os.path.join(settings.STATIC_DIR, f"{unique_filename}_contour.jpg")`,
-                    `    cv2.imwrite(raw_path, image)  <span class="c-comment"># 1. รูปดิบต้นฉบับก่อนแก้เอียง</span>`,
-                    `    cv2.imwrite(rectified_path, warped_img)  <span class="c-comment"># 2. รูปสีหน้าตรงหลังแก้เอียง</span>`,
-                    `    cv2.imwrite(mask_path, warped_mask)  <span class="c-comment"># 3. รูปหน้ากากขาวดำหน้าตรง</span>`,
-                    `    cv2.imwrite(contour_path, warped_img_contour)  <span class="c-comment"># 4. รูปสีหน้าตรงตีกรอบเส้นเขียว</span>`,
-                    `    record = WoundRecord(wound_id=wound_id, user_id=user_id, image_path=f<span class="c-string">"/static/wounds/{filename}"</span>, area_pixel=pixels_rectified, area_cm2=area_cm2, note=<span class="c-keyword">None</span>)`,
-                    `    db.add(record)`,
-                    `    db.commit()`,
-                    `    db.refresh(record)`,
-                    `    <span class="c-keyword">return</span> {<span class="c-string">"record_id"</span>: record.record_id, <span class="c-string">"image_path"</span>: record.image_path, <span class="c-string">"area_pixel"</span>: record.area_pixel, <span class="c-string">"area_cm2"</span>: record.area_cm2}`
+                    `    <span class="c-keyword">return</span> [{<span class="c-string">"id"</span>: p.body_part_id, <span class="c-string">"name"</span>: p.body_part_name} <span class="c-keyword">for</span> p in parts]`
                 ],
                 explanations: [
                     {
@@ -798,17 +640,10 @@ async def calculate_wound(
                     },
                     {
                         title: "🚀 2. การสร้างสายเชื่อม Mount static โฟลเดอร์หลัก",
-                        lines: [16, 17],
-                        what: "สั่งเมานต์ห้องจัดเก็บไฟล์ปลายทาง <code>static</code> บนเซิร์ฟเวอร์ ให้สืบค้นได้จาก URL ภายนอกข่ายที่ขึ้นต้นด้วย <code>/static</code> โดยตรง",
+                        lines: [12, 14],
+                        what: "สั่งเมานต์ห้องจัดเก็บไฟล์ปลายทาง <code>static</code> บนเซิร์ฟเวอร์ ให้สืบค้นได้จาก URL ภายนอกข่ายที่ขึ้นต้นด้วย <code>/static</code> โดยตรง<br><br><strong>🔗 โครงสร้างต่อเนื่อง:</strong> บรรทัดคำสั่ง <code>app.mount</code> นี้เราแทรกเพิ่มใต้การประกาศ <code>app = FastAPI(...)</code> ในไฟล์ <code>server/main.py</code> เดิมของระบบฐานข้อมูล",
                         get: "พาสคีย์การมองเห็นภาพแผลหน้าตรงขอบเขียวทั้งหมดที่บันทึกอยู่ใน <code>static/wounds/...</code>",
-                        why: "เพื่อให้ React หน้ารายงานของพยาบาล สามารถเรียกใส่โค้ดแท็ก <code>&lt;img src='http://localhost:8000/static/wounds/{wound_id}_{uuid}_contour.jpg'&gt;</code> ดึงผลแผลขอบเขียวขึ้นจอได้ทันที"
-                    },
-                    {
-                        title: "🚀 3. ระบบเซฟตี้สร้างห้องเก็บภาพก่อนการเมานต์ไฟล์ (Pre-mount Auto-Init)",
-                        lines: [11, 12],
-                        what: "สั่งรันคำสั่ง <code>os.makedirs(settings.STATIC_DIR, exist_ok=True)</code> ทันทีตั้งแต่ขั้นตอนเริ่มแปลวิเคราะห์ไฟล์ (Module Loading) ก่อนที่จะถึงคิวของโมดูล <code>StaticFiles</code>",
-                        get: "การการันตีโครงสร้างโฟลเดอร์สำหรับแชร์รูปภาพบนเครื่องใหม่แบบอัตโนมัติ โดยตัดทอนโอกาสการเกิดข้อผิดพลาดของไดเรกทอรีว่างเปล่า",
-                        why: "เพราะเงื่อนไขความปลอดภัยของไลบรารี Starlette <code>StaticFiles</code> จะบังคับตรวจจับหาโฟลเดอร์เป้าหมายทันทีตั้งแต่ตอนประกาศเมานต์ หากเราไม่อบรมระบบให้สร้างโฟลเดอร์ดักหน้าก่อน ตัวระบบจะพ่นข้อผิดพลาด <code>RuntimeError</code> และแอปพลิเคชันจะแครชล่มทันทีตั้งแต่บูตรันครับ"
+                        why: "เพื่อให้ React หน้ารายงานของพยาบาล สามารถเรียกใส่โค้ดแท็ก <code>&lt;img src='http://localhost:8000/static/wounds/filename_processed.jpg'&gt;</code> ดึงผลแผลขอบเขียวขึ้นจอได้ทันที"
                     }
                 ]
             },
@@ -820,15 +655,17 @@ async def calculate_wound(
 from pyzbar import pyzbar
 import numpy as np
 
-def detect_qr(image, qr_size_cm=2.0):
+def detect_qr(image_path, qr_size_cm=2.0):
     """
-    ตรวจหาตำแหน่งกล่องสติกเกอร์ QR Code ในรูปแผลเบาหวาน (รับอาเรย์รูปภาพในแรม)
+    ตรวจหาตำแหน่งกล่องสติกเกอร์ QR Code ในรูปแผลเบาหวาน
     เพื่อคำนวณมาตราส่วนพิกเซลต่อเซนติเมตรราบ (px/cm) ปรับแก้ระยะทางกล้อง
     """
-    if image is None: return None
+    # 1. โหลดรูปแผลจากพิกัดไดเรกทอรี
+    img = cv2.imread(image_path)
+    if img is None: return None
     
     # 2. คัดกรองและสแกนค้นหาบาร์โค้ดหรือ QR Code ทั้งหมดในภาพ
-    qr_list = pyzbar.decode(image)
+    qr_list = pyzbar.decode(img)
     # หากตรวจไม่พบ หรือสติกเกอร์ QR โดนนิ้วบังจนตรวจจุดมุมไม่ครบทิศทาง (ต้องมี 4 จุด) ให้ตีกลับเป็น None
     if not qr_list or len(qr_list[0].polygon) != 4:
         return None
@@ -856,15 +693,17 @@ def detect_qr(image, qr_size_cm=2.0):
                     `<span class="c-keyword">from</span> pyzbar <span class="c-keyword">import</span> pyzbar`,
                     `<span class="c-keyword">import</span> numpy <span class="c-keyword">as</span> np`,
                     ``,
-                    `<span class="c-keyword">def</span> <span class="c-func">detect_qr</span>(image, qr_size_cm=<span class="c-number">2.0</span>):`,
+                    `<span class="c-keyword">def</span> <span class="c-func">detect_qr</span>(image_path, qr_size_cm=<span class="c-number">2.0</span>):`,
                     `    <span class="c-comment">"""</span>`,
-                    `    <span class="c-comment">ตรวจหาตำแหน่งกล่องสติกเกอร์ QR Code ในรูปแผลเบาหวาน (รับอาเรย์รูปภาพในแรม)</span>`,
+                    `    <span class="c-comment">ตรวจหาตำแหน่งกล่องสติกเกอร์ QR Code ในรูปแผลเบาหวาน</span>`,
                     `    <span class="c-comment">เพื่อคำนวณมาตราส่วนพิกเซลต่อเซนติเมตรราบ (px/cm) ปรับแก้ระยะทางกล้อง</span>`,
                     `    <span class="c-comment">"""</span>`,
-                    `    <span class="c-keyword">if</span> image <span class="c-keyword">is None</span>: <span class="c-keyword">return None</span>`,
+                    `    <span class="c-comment"># 1. โหลดรูปแผลจากพิกัดไดเรกทอรี</span>`,
+                    `    img = cv2.imread(image_path)`,
+                    `    <span class="c-keyword">if</span> img <span class="c-keyword">is None</span>: <span class="c-keyword">return None</span>`,
                     ``,
                     `    <span class="c-comment"># 2. คัดกรองและสแกนค้นหาบาร์โค้ดหรือ QR Code ทั้งหมดในภาพ</span>`,
-                    `    qr_list = pyzbar.decode(image)`,
+                    `    qr_list = pyzbar.decode(img)`,
                     `    <span class="c-comment"># หากตรวจไม่พบ หรือสติกเกอร์ QR โดนนิ้วบังจนตรวจจุดมุมไม่ครบทิศทาง (ต้องมี 4 จุด) ให้ตีกลับเป็น None</span>`,
                     `    <span class="c-keyword">if not</span> qr_list <span class="c-keyword">or</span> len(qr_list[<span class="c-number">0</span>].polygon) != <span class="c-number">4</span>:`,
                     `        <span class="c-keyword">return None</span>`,
@@ -935,13 +774,14 @@ def load_model(model_path, device):
     model.to(device).eval()  # ตั้งโหมดประเมินความปลอดภัย (Eval Mode)
     return model
 
-def segment_wound(image, model, device, threshold=0.5):
+def segment_wound(image_path, model, device, threshold=0.5):
     """
-    ตรวจและสร้างขอบเขตแผล (Binary Mask) พร้อมคำนวณระดับความเปื่อยอักเสบขอบแผล (Shannon Entropy) (รับอาเรย์รูปภาพในแรม)
+    ตรวจและสร้างขอบเขตแผล (Binary Mask) พร้อมคำนวณระดับความเปื่อยอักเสบขอบแผล (Shannon Entropy)
     """
-    # 1. แปลงรหัสสีของรูปภาพในแรมเป็นมาตรฐาน RGB
-    h, w = image.shape[:2]
-    img_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    # 1. อ่านรูปแผลและแปลงรหัสสีเป็นมาตรฐาน RGB
+    img = cv2.imread(image_path)
+    h, w = img.shape[:2]
+    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img_pil = Image.fromarray(img_rgb)
     
     # 2. ปรับสเกลย่อยภาพถ่ายแผลเป็นสี่เหลี่ยมจัตุรัส 512x512 และล้างเกลี่ยสภาพแสงด้วยสถิติ ImageNet
@@ -978,7 +818,8 @@ def segment_wound(image, model, device, threshold=0.5):
     return {
         "mask": mask,                 # ขอบเขตแผลขาวดำขนาดต้นฉบับ
         "confidence": confidence,     # ค่าเฉลี่ยความชัวร์ของ AI ต่อเนื้อแผล
-        "avg_entropy": avg_entropy    # อัตราความเปื่อยอักเสบแดงรอบแผล
+        "avg_entropy": avg_entropy,   # อัตราความเปื่อยอักเสบแดงรอบแผล
+        "img": img                    # รูปดิบดั้งเดิม
     }`,
                 htmlCode: [
                     `<span class="c-keyword">import</span> torch`,
@@ -989,20 +830,28 @@ def segment_wound(image, model, device, threshold=0.5):
                     `<span class="c-keyword">import</span> segmentation_models_pytorch <span class="c-keyword">as</span> smp`,
                     ``,
                     `<span class="c-keyword">def</span> <span class="c-func">load_model</span>(model_path, device):`,
-                    `    <span class="c-comment"># โหลดตัวโครงข่ายโมเดลวิเคราะห์แผล U-Net เข้าแรมเพื่อจำลอง</span>`,
+                    `    <span class="c-comment">"""</span>`,
+                    `    <span class="c-comment">ฟังก์ชันโหลดตัวโครงข่ายโมเดลวิเคราะห์แผล U-Net เข้าสู่แรมระบบเพื่อเตรียมทำนายผล</span>`,
+                    `    <span class="c-comment">"""</span>`,
+                    `    <span class="c-comment"># ใช้สถาปัตยกรรม U-Net ร่วมกับแกนย่อระดับพิกเซลพรีเมียม EfficientNet-B4</span>`,
                     `    model = smp.Unet(encoder_name=<span class="c-string">"efficientnet-b4"</span>, encoder_weights=<span class="c-keyword">None</span>, in_channels=<span class="c-number">3</span>, classes=<span class="c-number">1</span>)`,
+                    `    <span class="c-comment"># โหลดค่าพารามิเตอร์น้ำหนักที่เทรนเสร็จแล้วเข้าสู่เครื่องตรวจจับ</span>`,
                     `    state_dict = torch.load(model_path, map_location=device)`,
                     `    model.load_state_dict(state_dict, strict=<span class="c-keyword">False</span>)`,
-                    `    model.to(device).eval()`,
+                    `    model.to(device).eval()  <span class="c-comment"># ตั้งโหมดประเมินความปลอดภัย (Eval Mode)</span>`,
                     `    <span class="c-keyword">return</span> model`,
                     ``,
-                    `<span class="c-keyword">def</span> <span class="c-func">segment_wound</span>(image, model, device, threshold=<span class="c-number">0.5</span>):`,
-                    `    <span class="c-comment"># 1. แปลงรหัสสีของรูปภาพในแรมเป็นมาตรฐาน RGB</span>`,
-                    `    h, w = image.shape[:2]`,
-                    `    img_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)`,
+                    `<span class="c-keyword">def</span> <span class="c-func">segment_wound</span>(image_path, model, device, threshold=<span class="c-number">0.5</span>):`,
+                    `    <span class="c-comment">"""</span>`,
+                    `    <span class="c-comment">ตรวจและสร้างขอบเขตแผล (Binary Mask) พร้อมคำนวณระดับความเปื่อยอักเสบขอบแผล (Shannon Entropy)</span>`,
+                    `    <span class="c-comment">"""</span>`,
+                    `    <span class="c-comment"># 1. อ่านรูปแผลและแปลงรหัสสีเป็นมาตรฐาน RGB</span>`,
+                    `    img = cv2.imread(image_path)`,
+                    `    h, w = img.shape[:2]`,
+                    `    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)`,
                     `    img_pil = Image.fromarray(img_rgb)`,
                     ``,
-                    `    <span class="c-comment"># 2. ปรับสเกลย่อยภาพถ่ายแผลเป็นสี่เหลี่ยมจัตุรัส 512x512 และล้างสภาพแสง</span>`,
+                    `    <span class="c-comment"># 2. ปรับสเกลย่อยภาพถ่ายแผลเป็นสี่เหลี่ยมจัตุรัส 512x512 และล้างเกลี่ยสภาพแสงด้วยสถิติ ImageNet</span>`,
                     `    transform = transforms.Compose([`,
                     `        transforms.Resize((<span class="c-number">512</span>, <span class="c-number">512</span>)),`,
                     `        transforms.ToTensor(),`,
@@ -1015,15 +864,18 @@ def segment_wound(image, model, device, threshold=0.5):
                     `        logits = model(img_tensor)`,
                     `        prob = torch.sigmoid(logits).squeeze().cpu().numpy()`,
                     ``,
-                    `    <span class="c-comment"># 4. ขยายพิกัดความละเอียดทำนายสีกลับมาเท่ารูปถ่ายต้นฉบับ</span>`,
+                    `    <span class="c-comment"># 4. ขยายพิกัดความละเอียดทำนายสีกลับมาเท่ารูปถ่ายต้นฉบับ เพื่อไม่ให้ขอบเบลอ</span>`,
                     `    prob_resized = cv2.resize(prob, (w, h), interpolation=cv2.INTER_LINEAR)`,
+                    `    <span class="c-comment"># แยกสีดำ(ไม่ใช่แผล = 0) และขาว(เนื้อแผลจริง = 255) ด้วยเกณฑ์ Threshold</span>`,
                     `    mask = (prob_resized > threshold).astype(np.uint8) * <span class="c-number">255</span>`,
                     ``,
                     `    <span class="c-comment"># 5. [ระบบเตือนอักเสบแดงผิวขอบแผลล่วงหน้า - Shannon Entropy]</span>`,
+                    `    <span class="c-comment"># ตรวจจับหาพิกเซลคาบเกี่ยวแผลรอบนอกที่ AI มีความลังเลสูงเพื่อประเมินความเปื่อยอักเสบ (Erythema)</span>`,
                     `    wound_pixels_prob = prob[prob > threshold]`,
                     `    <span class="c-keyword">if</span> len(wound_pixels_prob) > <span class="c-number">0</span>:`,
-                    `        eps = <span class="c-number">1e-7</span>`,
+                    `        eps = <span class="c-number">1e-7</span>  <span class="c-comment"># ป้องกันข้อผิดพลาดทางคณิตศาสตร์จากค่า Log(0)</span>`,
                     `        p = wound_pixels_prob`,
+                    `        <span class="c-comment"># คำนวณหาค่าความบิดเบี้ยวเอนโทรปีสะสม</span>`,
                     `        entropy = - (p * np.log2(p + eps) + (<span class="c-number">1</span> - p) * np.log2(<span class="c-number">1</span> - p + eps))`,
                     `        avg_entropy = float(np.mean(entropy))`,
                     `        confidence = float(np.mean(wound_pixels_prob))`,
@@ -1031,9 +883,10 @@ def segment_wound(image, model, device, threshold=0.5):
                     `        avg_entropy, confidence = <span class="c-number">0.0</span>, <span class="c-number">0.0</span>`,
                     ``,
                     `    <span class="c-keyword">return</span> {`,
-                    `        <span class="c-string">"mask"</span>: mask,`,
-                    `        <span class="c-string">"confidence"</span>: confidence,`,
-                    `        <span class="c-string">"avg_entropy"</span>: avg_entropy`,
+                    `        <span class="c-string">"mask"</span>: mask,                 <span class="c-comment"># ขอบเขตแผลขาวดำขนาดต้นฉบับ</span>`,
+                    `        <span class="c-string">"confidence"</span>: confidence,     <span class="c-comment"># ค่าเฉลี่ยความชัวร์ของ AI ต่อเนื้อแผล</span>`,
+                    `        <span class="c-string">"avg_entropy"</span>: avg_entropy,   <span class="c-comment"># อัตราความเปื่อยอักเสบแดงรอบแผล</span>`,
+                    `        <span class="c-string">"img"</span>: img                    <span class="c-comment"># รูปดิบดั้งเดิม</span>`,
                     `    }`
                 ],
                 explanations: [
@@ -1046,14 +899,14 @@ def segment_wound(image, model, device, threshold=0.5):
                     },
                     {
                         title: "🔬 2. การเตรียมภาพถ่ายปรับขนาด Normalized โครงข่าย PyTorch",
-                        lines: [23, 29],
+                        lines: [30, 35],
                         what: "แปลงรูปถ่ายแผลสี RGB เป็นคีย์อาร์เรย์ตัวเลขทศนิยม (Tensor) ปรับขนาดเป็นตาราง 512×512 พิกเซล และขัดถูเกลี่ยสีตามสถิติความสว่างและค่าเฉลี่ยแสงสว่างมาตรฐานของ ImageNet",
                         get: "ชุดข้อมูลตัวเลข Tensor ที่มีความสมดุลแสงสว่าง ปราศจากการสะท้อนแสงจ้าสะสมพร้อมส่งป้อนให้ประสาทเทียมประมวลผล",
                         why: "โมเดล AI PyTorch ถูกฝึกหัดมาด้วยภาพแสงสว่างเฉลี่ย ImageNet การไม่จัดแจงเกลี่ย Normalize สภาพแสงในภาพจริงก่อนส่งเข้าประสาท จะส่งผลให้ AI เกิดความเข้าใจผิด พลาดมองไม่เห็นแผลหรือเข้าใจผิดว่าเป็นสีเงาผิวธรรมดา"
                     },
                     {
                         title: "🔬 3. การหาค่าเอนโทรปีเฉลี่ยเตือนผิวหนังอักเสบ (Shannon Entropy)",
-                        lines: [40, 50],
+                        lines: [46, 57],
                         what: "เดินตรวจจิ้มถามพิกเซลคาบเกี่ยวแผลทีละพิกเซลว่ามั่นใจไหม? (หากพิกเซลกลางแผลแดงก่ำ AI ตอบชัวร์ 100% ลังเล = 0, หากเป็นขอบผิวหนังแดงช้ำระเรื่อ AI ลังเล 50/50 ลังเลสูงสุด Entropy = 1.0) แล้วหาค่าเฉลี่ยสะสม",
                         get: "ดัชนีชี้วัดความลังเลอักเสบรอบขอบแผล ส่งประมวลผลออกหน้าเว็บ Dashboard",
                         why: "เป็น <b>'ระบบเตือนอักเสบภัยล่วงหน้า (Early Warning)'</b> เพราะบางทีพยาบาลดูแผลตาเปล่าเห็นขนาดเท่าเดิม แต่ค่าความอักเสบรอบขอบแผลสูงล้ำลุกลาม ผิวหนังเตรียมอักเสบแดงเปื่อยเปื่อย แพทย์จะสลับตัวยาต้านเชื้อได้ทันท่วงที"
@@ -1101,7 +954,7 @@ def warp_image_and_mask(img, mask, qr_polygon, qr_size_cm=2.0, target_px_per_cm=
     min_y, max_y = np.min(y_coords), np.max(y_coords)
     warped_w, warped_h = int(np.ceil(max_x - min_x)), int(np.ceil(max_y - min_y))
     
-    # ตรวจเช็คเกณฑ์ภัยพิบัติหากมือถือลาดเอียงจัดระดับขนานพื้น (ป้องกันแรมระบบล้นจากการสร้างพิกเซลใหญ่)
+    # ตรวจเช็คเกณฑ์ภัยพิบัติหากมือถือลาดเอียงจัดระดับขนานพื้น (ป้องกันหน่วยความจำล้นจากการสร้างพิกเซลใหญ่)
     if warped_w > max_warped_dim or warped_h > max_warped_dim:
         raise ValueError("มุมกล้องถ่ายภาพเอียงลาดชันมากเกินไป กรุณาจัดตั้งกล้องทำมุมตั้งฉากและขนานกับแผลมากขึ้น")
         
@@ -1119,6 +972,9 @@ def warp_image_and_mask(img, mask, qr_polygon, qr_size_cm=2.0, target_px_per_cm=
                     `<span class="c-keyword">import</span> numpy <span class="c-keyword">as</span> np`,
                     ``,
                     `<span class="c-keyword">def</span> <span class="c-func">warp_image_and_mask</span>(img, mask, qr_polygon, qr_size_cm=<span class="c-number">2.0</span>, target_px_per_cm=<span class="c-number">100.0</span>, max_warped_dim=<span class="c-number">5000</span>):`,
+                    `    <span class="c-comment">"""</span>`,
+                    `    <span class="c-comment">ใช้เมตริกซ์ Homography เพื่อดึงระนาบเท้าลาดเอียงให้เรียบหน้าตรงขนานหน้าเลนส์ 90 องศาคงที่</span>`,
+                    `    <span class="c-comment">"""</span>`,
                     `    <span class="c-comment"># 1. เรียงจัดยอดมุมพิกัด QR จากเฉียงซ้ายไปขวา</span>`,
                     `    src_pts = np.array([`,
                     `        [qr_polygon[0][0], qr_polygon[0][1]],  <span class="c-comment"># บน-ซ้าย (Top-Left)</span>`,
@@ -1127,7 +983,7 @@ def warp_image_and_mask(img, mask, qr_polygon, qr_size_cm=2.0, target_px_per_cm=
                     `        [qr_polygon[1][0], qr_polygon[1][1]]   <span class="c-comment"># ล่าง-ซ้าย (Bottom-Left)</span>`,
                     `    ], dtype=<span class="c-string">"float32"</span>)`,
                     ``,
-                    `    <span class="c-comment"># 2. ปักหมุดเป้าหมายหน้าตรงที่ตึงเรียบกว้างยาว 200x200 พิกเซล (2.0 cm * 100 px/cm)</span>`,
+                    `    <span class="c-comment"># 2. ปักหมุดเป้าหมายหน้าตรงที่ตึงเรียบกว้างยาว 200x200 พิกเซล (คำนวณจาก 2.0 cm * 100 px/cm)</span>`,
                     `    qr_side_px = qr_size_cm * target_px_per_cm`,
                     `    dst_pts_ref = np.array([`,
                     `        [<span class="c-number">0.0</span>, <span class="c-number">0.0</span>],`,
@@ -1140,6 +996,7 @@ def warp_image_and_mask(img, mask, qr_polygon, qr_size_cm=2.0, target_px_per_cm=
                     `    H = cv2.getPerspectiveTransform(src_pts, dst_pts_ref)`,
                     `    h, w = img.shape[:2]`,
                     `    <span class="c-comment"># 4. [ขั้นตอนป้องกันแผลโดนเบียดหลุดขอบจอสีดำ (Translation Matrix)]</span>`,
+                    `    <span class="c-comment"># ประเมินหาขนาดกรอบรูปหลังปรับบิดตรงทั้งหมดเพื่อหาพิกัดกว้างยาวใหม่</span>`,
                     `    corners = np.array([[0,0], [w-1,0], [w-1,h-1], [0,h-1]], dtype=np.float32).reshape(-1,1,2)`,
                     `    warped_corners = cv2.perspectiveTransform(corners, H)`,
                     `    x_coords, y_coords = warped_corners[:,0,0], warped_corners[:,0,1]`,
@@ -1147,7 +1004,7 @@ def warp_image_and_mask(img, mask, qr_polygon, qr_size_cm=2.0, target_px_per_cm=
                     `    min_y, max_y = np.min(y_coords), np.max(y_coords)`,
                     `    warped_w, warped_h = int(np.ceil(max_x - min_x)), int(np.ceil(max_y - min_y))`,
                     ``,
-                    `    <span class="c-comment"># ตรวจเช็คเกณฑ์ภัยพิบัติหากมือถือลาดเอียงจัดระดับขนานพื้น</span>`,
+                    `    <span class="c-comment"># ตรวจเช็คเกณฑ์ภัยพิบัติหากมือถือลาดเอียงจัดระดับขนานพื้น (ป้องกันแรมระบบล้น)</span>`,
                     `    <span class="c-keyword">if</span> warped_w > max_warped_dim <span class="c-keyword">or</span> warped_h > max_warped_dim:`,
                     `        <span class="c-keyword">raise</span> ValueError(<span class="c-string">"มุมกล้องถ่ายภาพเอียงลาดชันมากเกินไป กรุณาจัดตั้งกล้องทำมุมตั้งฉากและขนานกับแผลมากขึ้น"</span>)`,
                     ``,
@@ -1164,21 +1021,21 @@ def warp_image_and_mask(img, mask, qr_polygon, qr_size_cm=2.0, target_px_per_cm=
                 explanations: [
                     {
                         title: "📐 1. การดึงมุมแผ่นยางเบี้ยว ๆ ให้ตรงเป๊ะขนานกล้อง (Homography Warp)",
-                        lines: [4, 23],
+                        lines: [5, 26],
                         what: "จินตนาการภาพถ่ายแผลเฉียงๆ ที่พยาบาลถือถ่ายเฉียงจากบนลงล่างเปรียบเหมือน <b>'แผ่นยางสี่เหลี่ยมเบี้ยวๆ'</b> ระบบจะหาจุดพาสิกเกอร์สี่ขอบ มาคำนวณสะพาน Homography ยืดกางดึงสี่มุมให้แบนตึงราบคงที่ขนาด 200x200 พิกเซลพอดีขนานสายตา",
                         get: "เมตริกซ์ Homography H สำหรับใช้ในการแปลงระนาบภาพและหน้ากากทำนายผลทั้งหมด",
                         why: "เมื่อสติกเกอร์ที่ติดอยู่บนผิวเท้าเบี้ยวๆ โดนยืดดึงให้แบนตึงหน้าตรงขนานหน้าเลนส์แล้ว บาดแผลของคนไข้และพิกเซลผิวหนังรอบนอกทั้งหมดจะโดนบิดขยับยืดตึงตรงให้ได้พาสเกลมาตราส่วนตรง 90 องศาโดยอัตโนมัติ"
                     },
                     {
                         title: "↔️ 2. การเลื่อน Translate พิกเซลภาพ ป้องกันแผลหลุดปลิวขอบจอ",
-                        lines: [25, 34],
+                        lines: [28, 35],
                         what: "หาขอบภาพหลังยืดตรงทั้งหมด แล้วขุดตรวจว่ามีพิกเซลจุดใดกระเด็นข้ามไปอยู่ในย่านค่าติดลบของแกนแนวนอนแนวตั้งหรือไม่ ก่อนที่จะประเมินพื้นที่รวมขนาดยกพิกัดกว้างยาวใหม่",
                         get: "พารามิเตอร์ขยับความกว้างของภาพเฉลี่ยชดเชยที่ถูกต้อง และยกเลิกข้อจำกัดกรณีการถ่ายภาพเฉียงเอียงจัด",
                         why: "หากบิด Homography ดิบๆ โดยไม่ขยับจัดแกนภาพ พิกเซลเกือบครึ่งของภาพจะเด้งไปอยู่โซนติดลบ ซึ่งคอมพิวเตอร์จะตัดสีดำปิดทับแผล ส่งผลให้วิเคราะห์พื้นที่จริงตกกรอบเพี้ยนเสียหาย"
                     },
                     {
                         title: "↔️ 3. การประสมเมตริกซ์และบิดจริง (Warp Perspective Execution)",
-                        lines: [36, 42],
+                        lines: [41, 47],
                         what: "นำแผ่นเมทริกซ์การเลื่อน Translation คอนทราสคูณประสมกับ H เดิม แล้วสั่งยืดระนาบจริงผ่านคำสั่ง Open CV พิเศษ <code>cv2.warpPerspective</code> ทั้งตัวภาพแผล RGB และตัวภาพทำนายหน้ากากสีขาว",
                         get: "รูปภาพระนาบตรงขนานกล้อง 90 องศา และหน้ากากแผลหน้าตรงที่ไม่เกิดรอยแรเงาบดบังแผล",
                         why: "เพื่อให้ได้รูปผลลัพธ์สุดท้ายที่มีระดับมาตราส่วนเที่ยงตรงแน่นอนคือ <b>100 พิกเซล = 1 ซม. คงที่เสมอกันทุกๆ มุมมองภาพ</b>"
@@ -1187,7 +1044,7 @@ def warp_image_and_mask(img, mask, qr_polygon, qr_size_cm=2.0, target_px_per_cm=
             },
             test_segmentation_py: {
                 name: "test_segmentation.py",
-                path: "server/sandbox/test_segmentation.py",
+                path: "server/scratch/test_segmentation.py",
                 fileStatus: "🆕 สร้างไฟล์ใหม่ทั้งหมด",
                 rawCode: `import sys
 import os
@@ -1205,56 +1062,30 @@ from app.services.image_rectifier import warp_image_and_mask
 
 def run_sandbox(image_path):
     print("🚀 สตาร์ททดสอบเอนจิน AI & ปรับสเกลภาพแผล...")
-    
-    # โหลดภาพเข้ารูปแบบ numpy array ในแรมก่อน (เพียงครั้งเดียวจากดิสก์)
-    image = cv2.imread(image_path)
-    if image is None:
-        print("❌ ไม่สามารถเปิดไฟล์ภาพทดสอบได้!")
-        return
-        
     # 1. สั่งโหลดโมเดลประสาทเทียมตรวจแผล
     model = load_model(settings.MODEL_PATH, settings.DEVICE)
     
-    # 2. ค้นหาสติกเกอร์ QR และพิกัดยอดมุม (ส่งภาพ numpy array)
-    qr_data = detect_qr(image, settings.QR_SIZE_CM)
+    # 2. ค้นหาสติกเกอร์ QR และพิกัดยอดมุม
+    qr_data = detect_qr(image_path, settings.QR_SIZE_CM)
     if not qr_data:
         print("❌ ไม่พบป้ายอ้างอิง QR Code!")
         return
         
-    # 3. รันคัดกรองพื้นที่แผลสีขาวดำจาก U-Net AI (ส่งภาพ numpy array)
-    wound_data = segment_wound(image, model, settings.DEVICE, settings.THRESHOLD)
+    # 3. รันคัดกรองพื้นที่แผลสีขาวดำจาก U-Net AI
+    wound_data = segment_wound(image_path, model, settings.DEVICE, settings.THRESHOLD)
     
-    # 4. บิดแผ่นระนาบภาพถ่ายเท้าเฉียง ให้เป็นแผลระนาบตรงหน้าตรง (ส่งภาพ numpy array และหน้ากากแผล)
+    # 4. บิดแผ่นระนาบภาพถ่ายเท้าเฉียง ให้เป็นแผลระนาบตรงหน้าตรง
     warped_img, warped_mask, warped_w, warped_h = warp_image_and_mask(
-        image, wound_data["mask"], qr_data["polygon"],
+        wound_data["img"], wound_data["mask"], qr_data["polygon"],
         settings.QR_SIZE_CM, settings.TARGET_PX_PER_CM, settings.MAX_WARPED_DIM
     )
     
-    # 5. [ระบบวิเคราะห์พื้นที่ ซม. จริงคำนวณแบบ Dynamic (ไม่ Hardcode)]
+    # 5. [ระบบสูตรสากลคงที่วิเคราะห์พื้นที่ ซม. จริงคงที่ (Scale Factor = 0.0001)]
     # นับจำนวนพิกเซลแผลสีขาวในภาพแบนราบหน้าตรง
     pixels_rectified = int(np.sum(warped_mask > 0))
-    # หาอัตราส่วนพิกเซลต่อ cm2 อิงตามตัวแปรหลัก
-    qr_side_px = settings.QR_SIZE_CM * settings.TARGET_PX_PER_CM
-    qr_area_real_cm2 = settings.QR_SIZE_CM * settings.QR_SIZE_CM
-    qr_area_rectified_px = qr_side_px * qr_side_px
-    scale_factor = qr_area_real_cm2 / qr_area_rectified_px
+    # หาอัตราส่วนพิกเซลต่อ cm2: ขนาดจริง QR 4 ซม.2 หารด้วยพื้นที่พิกเซลตรงของมัน (200x200 = 40,000 px)
+    scale_factor = 4.0 / (200.0 * 200.0) # 0.0001 cm2/px
     area_cm2 = pixels_rectified * scale_factor
-    
-    # 📌 บันทึกเซฟรูปภาพลงโฟลเดอร์เก็บข้อมูลร่วมของระบบจริง (app/static/wounds) เพื่อให้หน้าบ้านดึงแสดงผลได้
-    contours, _ = cv2.findContours(warped_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    warped_img_contour = warped_img.copy()
-    cv2.drawContours(warped_img_contour, contours, -1, (0, 255, 0), 2)
-    
-    # คำนวณหาที่อยู่สัมบูรณ์ของห้อง static/wounds แบบ Dynamic โดยอิงตำแหน่งจากจุดรันสคริปต์
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # ถอยออกจากห้อง sandbox ไปที่ห้อง server (ซึ่ง static วางขนานอยู่)
-    static_wounds_dir = os.path.join(base_dir, "static", "wounds")
-    os.makedirs(static_wounds_dir, exist_ok=True)
-    
-    # เซฟรูปทดสอบทั้ง 4 สไตล์ลงในห้องจัดเก็บร่วมของระบบ
-    cv2.imwrite(os.path.join(static_wounds_dir, "test_raw.jpg"), image)                  # 1. รูปดิบต้นฉบับก่อนแก้เอียง
-    cv2.imwrite(os.path.join(static_wounds_dir, "test_rectified.jpg"), warped_img)        # 2. รูปสีหน้าตรงหลังแก้เอียง
-    cv2.imwrite(os.path.join(static_wounds_dir, "test_mask.png"), warped_mask)            # 3. รูปหน้ากากขาวดำหน้าตรง
-    cv2.imwrite(os.path.join(static_wounds_dir, "test_contour.jpg"), warped_img_contour)  # 4. รูปสีหน้าตรงตีกรอบเส้นเขียว
     
     print("="*50)
     print(f"📊 ผลคำนวณพื้นที่แผลจริง: {area_cm2:.4f} cm²")
@@ -1263,8 +1094,8 @@ def run_sandbox(image_path):
     print("="*50)
 
 if __name__ == "__main__":
-    # ใส่รูปแผลทดสอบ 'test.jpg' ไว้ใน server/sandbox/inputs/ เพื่อตรวจรัน
-    run_sandbox("sandbox/inputs/test.jpg")`,
+    # ใส่รูปแผลทดสอบ 'test.jpg' ไว้ใน server/scratch/inputs/ เพื่อตรวจรัน
+    run_sandbox("scratch/inputs/test.jpg")`,
                 htmlCode: [
                     `<span class="c-keyword">import</span> sys`,
                     `<span class="c-keyword">import</span> os`,
@@ -1282,52 +1113,28 @@ if __name__ == "__main__":
                     ``,
                     `<span class="c-keyword">def</span> <span class="c-func">run_sandbox</span>(image_path):`,
                     `    print(<span class="c-string">"🚀 สตาร์ททดสอบเอนจิน AI & ปรับสเกลภาพแผล..."</span>)`,
-                    `    <span class="c-comment"># โหลดภาพเข้ารูปแบบ numpy array ในแรมก่อน (เพียงครั้งเดียวจากดิสก์)</span>`,
-                    `    image = cv2.imread(image_path)`,
-                    `    <span class="c-keyword">if</span> image <span class="c-keyword">is None</span>:`,
-                    `        print(<span class="c-string">"❌ ไม่สามารถเปิดไฟล์ภาพทดสอบได้!"</span>)`,
-                    `        <span class="c-keyword">return</span>`,
                     `    <span class="c-comment"># 1. สั่งโหลดโมเดลประสาทเทียมตรวจแผล</span>`,
                     `    model = load_model(settings.MODEL_PATH, settings.DEVICE)`,
                     ``,
-                    `    <span class="c-comment"># 2. ค้นหาสติกเกอร์ QR และพิกัดยอดมุม (ส่งภาพ numpy array)</span>`,
-                    `    qr_data = detect_qr(image, settings.QR_SIZE_CM)`,
+                    `    <span class="c-comment"># 2. ค้นหาสติกเกอร์ QR และพิกัดยอดมุม</span>`,
+                    `    qr_data = detect_qr(image_path, settings.QR_SIZE_CM)`,
                     `    <span class="c-keyword">if not</span> qr_data:`,
                     `        print(<span class="c-string">"❌ ไม่พบป้ายอ้างอิง QR Code!"</span>)`,
                     `        <span class="c-keyword">return</span>`,
-                    `    <span class="c-comment"># 3. รันคัดกรองพื้นที่แผลสีขาวดำจาก U-Net AI (ส่งภาพ numpy array)</span>`,
-                    `    wound_data = segment_wound(image, model, settings.DEVICE, settings.THRESHOLD)`,
+                    `    <span class="c-comment"># 3. รันคัดกรองพื้นที่แผลสีขาวดำจาก U-Net AI</span>`,
+                    `    wound_data = segment_wound(image_path, model, settings.DEVICE, settings.THRESHOLD)`,
                     ``,
-                    `    <span class="c-comment"># 4. บิดแผ่นระนาบภาพถ่ายเท้าเฉียง ให้เป็นแผลระนาบตรงหน้าตรง (ส่งภาพ numpy array และหน้ากากแผล)</span>`,
+                    `    <span class="c-comment"># 4. บิดแผ่นระนาบภาพถ่ายเท้าเฉียง ให้เป็นแผลระนาบตรงหน้าตรง</span>`,
                     `    warped_img, warped_mask, warped_w, warped_h = warp_image_and_mask(`,
-                    `        image, wound_data[<span class="c-string">"mask"</span>], qr_data[<span class="c-string">"polygon"</span>],`,
+                    `        wound_data[<span class="c-string">"img"</span>], wound_data[<span class="c-string">"mask"</span>], qr_data[<span class="c-string">"polygon"</span>],`,
                     `        settings.QR_SIZE_CM, settings.TARGET_PX_PER_CM, settings.MAX_WARPED_DIM`,
                     `    )`,
-                    `    <span class="c-comment"># 5. [ระบบวิเคราะห์พื้นที่ ซม. จริงคำนวณแบบ Dynamic (ไม่ Hardcode)]</span>`,
-                    `    # นับจำนวนพิกเซลแผลสีขาวในภาพแบนราบหน้าตรง`,
+                    `    <span class="c-comment"># 5. [ระบบสูตรสากลคงที่วิเคราะห์พื้นที่ ซม. จริงคงที่ (Scale Factor = 0.0001)]</span>`,
+                    `    <span class="c-comment"># นับจำนวนพิกเซลแผลสีขาวในภาพแบนราบหน้าตรง</span>`,
                     `    pixels_rectified = int(np.sum(warped_mask > <span class="c-number">0</span>))`,
-                    `    # หาอัตราส่วนพิกเซลต่อ cm2 อิงตามตัวแปรหลัก`,
-                    `    qr_side_px = settings.QR_SIZE_CM * settings.TARGET_PX_PER_CM`,
-                    `    qr_area_real_cm2 = settings.QR_SIZE_CM * settings.QR_SIZE_CM`,
-                    `    qr_area_rectified_px = qr_side_px * qr_side_px`,
-                    `    scale_factor = qr_area_real_cm2 / qr_area_rectified_px`,
+                    `    <span class="c-comment"># หาอัตราส่วนพิกเซลต่อ cm2: ขนาดจริง QR 4 ซม.2 หารด้วยพื้นที่พิกเซลตรงของมัน (200x200 = 40,000 px)</span>`,
+                    `    scale_factor = <span class="c-number">4.0</span> / (<span class="c-number">200.0</span> * <span class="c-number">200.0</span>)  <span class="c-comment"># 0.0001 cm2/px</span>`,
                     `    area_cm2 = pixels_rectified * scale_factor`,
-                    ``,
-                    `    <span class="c-comment"># 📌 บันทึกเซฟรูปภาพลงดิสก์จำลองเพื่อตรวจสอบผลลัพธ์ด้วยตาเปล่า (ตามหลักการ Naming Convention)</span>`,
-                    `    <span class="c-comment"># 1. วาดเส้นขอบสีเขียวรอบแผลลงบนภาพสเกลสีหน้าตรง</span>`,
-                    `    contours, _ = cv2.findContours(warped_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)`,
-                    `    warped_img_contour = warped_img.copy()`,
-                    `    cv2.drawContours(warped_img_contour, contours, -1, (<span class="c-number">0</span>, <span class="c-number">255</span>, <span class="c-number">0</span>), <span class="c-number">2</span>)`,
-                    ``,
-                    `    # คำนวณหาที่อยู่สัมบูรณ์ของห้อง static/wounds แบบ Dynamic`,
-                    `    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))`,
-                    `    static_wounds_dir = os.path.join(base_dir, <span class="c-string">"static"</span>, <span class="c-string">"wounds"</span>)`,
-                    `    os.makedirs(static_wounds_dir, exist_ok=<span class="c-keyword">True</span>)`,
-                    `    # เซฟรูปทดสอบทั้ง 4 สไตล์ลงในห้องจัดเก็บร่วมของระบบ`,
-                    `    cv2.imwrite(os.path.join(static_wounds_dir, <span class="c-string">"test_raw.jpg"</span>), image)  <span class="c-comment"># 1. รูปดิบอัปโหลดก่อนแก้เอียง</span>`,
-                    `    cv2.imwrite(os.path.join(static_wounds_dir, <span class="c-string">"test_rectified.jpg"</span>), warped_img)  <span class="c-comment"># 2. รูปสีระนาบตรง</span>`,
-                    `    cv2.imwrite(os.path.join(static_wounds_dir, <span class="c-string">"test_mask.png"</span>), warped_mask)  <span class="c-comment"># 3. รูปหน้ากากขาวดำตรง</span>`,
-                    `    cv2.imwrite(os.path.join(static_wounds_dir, <span class="c-string">"test_contour.jpg"</span>), warped_img_contour)  <span class="c-comment"># 4. รูปสีตีกรอบเขียวแก้เอียงตรง</span>`,
                     ``,
                     `    print(<span class="c-string">"="</span>*<span class="c-number">50</span>)`,
                     `    print(f<span class="c-string">"📊 ผลคำนวณพื้นที่แผลจริง: {area_cm2:.4f} cm²"</span>)`,
@@ -1336,8 +1143,8 @@ if __name__ == "__main__":
                     `    print(<span class="c-string">"="</span>*<span class="c-number">50</span>)`,
                     ``,
                     `<span class="c-keyword">if</span> __name__ == <span class="c-string">"__main__"</span>:`,
-                    `    <span class="c-comment"># ใส่รูปแผลทดสอบ 'test.jpg' ไว้ใน server/sandbox/inputs/ เพื่อตรวจรัน</span>`,
-                    `    run_sandbox(<span class="c-string">"sandbox/inputs/test.jpg"</span>)`
+                    `    <span class="c-comment"># ใส่รูปแผลทดสอบ 'test.jpg' ไว้ใน server/scratch/inputs/ เพื่อตรวจรัน</span>`,
+                    `    run_sandbox(<span class="c-string">"inputs/test.jpg"</span>)`
                 ],
                 explanations: [
                     {
@@ -1345,21 +1152,14 @@ if __name__ == "__main__":
                         lines: [6, 8],
                         what: "เขียนคำสั่งขยับพาธระบบถอยหลังขึ้นไป 1 ลำดับ เพื่อจับโฟลเดอร์รันไทม์หลัก <code>server/</code> ยัดลงในชุดสารบัญการค้นหาของภาษา Python",
                         get: "สิทธิ์การสั่ง Import คลาสต่างๆ ของระบบหลังบ้านข้ามโฟลเดอร์ เช่น เรียกใช้ <code>detect_qr</code> หรือ <code>settings</code> โดยระบบไม่ฟ้องหาคลาสไม่พบ",
-                        why: "เนื่องจากสคริปต์นี้ตั้งรันอยู่ในโฟลเดอร์ <code>sandbox/</code> ซึ่งไม่มีความเกี่ยวข้องกับโฟลเดอร์หลัก หากไม่บังคับชี้พาธย้อนขึ้น ไพธอนจะเปิดค้นหารันคำสั่งบริการ AI ของเราไม่เจออย่างเด็ดขาดครับ"
+                        why: "เนื่องจากสคริปต์นี้ตั้งรันอยู่ในโฟลเดอร์ <code>scratch/</code> ซึ่งไม่มีความเกี่ยวข้องกับโฟลเดอร์หลัก หากไม่บังคับชี้พาธย้อนขึ้น ไพธอนจะเปิดค้นหารันคำสั่งบริการ AI ของเราไม่เจออย่างเด็ดขาดครับ"
                     },
                     {
-                        title: "📊 2. สูตรคำนวณสเกลพื้นที่แปลง ซม. จริงแบบ Dynamic (ไม่ Hardcode)",
-                        lines: [33, 40],
-                        what: "นับจำนวนพิกเซลขาวในแผลหน้าตรงทั้งหมด (Warped Mask) แล้วคูณไขว้สเกลคงที่ ซึ่งสกัดจากการคูณขนาดของด้านสติกเกอร์ในโลกจริง และอัตราความหนาแน่นเป้าหมายคงที่ในระดับคลาส Settings",
+                        title: "📊 2. สูตรทวีคูณแปลงพื้นที่ ซม. จริงคงที่ (Scale Factor 0.0001)",
+                        lines: [33, 38],
+                        what: "นับจำนวนพิกเซลขาวในแผลหน้าตรงทั้งหมด (Warped Mask) แล้วคูณไขว้สเกลคงที่ <b>0.0001 cm²/pixel</b> (ซึ่งได้มาจากการหารพื้นที่จริงของ QR 4 ซม.² ด้วยพื้นที่พิกเซลคงที่ของมันคือ 200x200 = 40,000 พิกเซล)",
                         get: "รายงานผลลัพธ์ขนาดแผลจริงสะสมในโลกทางกายภาพหน่วยตารางเซนติเมตร (cm²)",
-                        why: "ช่วยให้เราได้ขนาดแผลที่เป็นจริง 100% โดยอ้างอิงตามค่าตัวแปรศูนย์กลาง ซึ่งยืดหยุ่นมากเมื่อต้องการขยายสัดส่วนภายหลัง"
-                    },
-                    {
-                        title: "🖼️ 3. การบันทึกรูปภาพแผลทดสอบสะสม 4 รูปแบบ (4-Image Clinical Storage)",
-                        lines: [40, 59],
-                        what: "ดึงพิกัดขอบพิกเซลแผลมาวาดขอบเส้นสีเขียวหนา 2 พิกเซลลงบนภาพตรง จากนั้นบันทึกรูปผลลัพธ์ทั้ง 4 สไตล์ (Raw, Rectified, Mask, Contour) ลงดิสก์จริงร่วมกับห้องเก็บข้อมูลจริง",
-                        get: "ไฟล์ภาพทั้ง 4 สไตล์ที่พิกัด <code>app/static/wounds/</code> ประกอบด้วย test_raw.jpg, test_rectified.jpg, test_mask.png และ test_contour.jpg เพื่อเปรียบเทียบประมวลผลแผลในแต่ละสเตจ",
-                        why: "เพื่อเป็นการวิเคราะห์การจัดเก็บข้อมูลภาพแบบเป็นระเบียบ ทำให้นักพัฒนาสามารถเปิดดูคุณภาพโมเดลได้แบบเป็นสัดส่วน และใช้หน้าต่างถังเก็บภาพขุดทดสอบร่วมกับระบบหลังบ้านได้ทันที"
+                        why: "ช่วยให้เราได้ขนาดแผลที่เป็นจริง 100% โดยไม่ต้องพึ่งระนาบพิกเซลเบี้ยวจากกล้องถ่าย และได้มาตราส่วนเปรียบเทียบที่เที่ยงตรงสม่ำเสมอในทุกสัปดาห์ของการเข้าติดตามผล"
                     }
                 ]
             }

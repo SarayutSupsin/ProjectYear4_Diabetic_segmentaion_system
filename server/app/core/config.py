@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     #DFU Scale Parameters
     QR_SIZE_CM: float = 2.0
     TARGET_PX_PER_CM: float = 100.0 # 1 cm = 100 px
-    MAX_WARPED_DIM: int = 5000
+    MAX_WARPED_DIM: int = 5000 ## Maximum image width limit to prevent system RAM crashes due to homography warping
     THRESHOLD: float = 0.5
 
     @property
@@ -29,5 +29,4 @@ class Settings(BaseSettings):
         extra="ignore"
     )
     
-
 settings = Settings()
