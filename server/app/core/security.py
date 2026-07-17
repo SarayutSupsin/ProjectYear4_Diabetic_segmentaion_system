@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -6,7 +6,7 @@ from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from app.core.config import settings
-from app.db.session import SessionLocal
+from app.db.session import SessionLocal, get_db
 from app.models import User
 
 # Configure password encryption
@@ -24,9 +24,9 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
@@ -42,7 +42,7 @@ def decode_token(token: str) -> dict:
 
 # Retrieve current user information from the JWT token
 def get_current_user(
-    db: Session = Depends(SessionLocal),
+    db: Session = Depends(get_db),
     token: str = Depends(oauth2_scheme)
 ):
     credentials_exception = HTTPException(
@@ -50,17 +50,16 @@ def get_current_user(
         detail="ไม่สามารถยืนยันตัวตนได้",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
     payload = decode_token(token)
     if not payload:
         raise credentials_exception
-    
+
     user_id = payload.get("sub")
     if not user_id:
         raise credentials_exception
-    
+
     user = db.query(User).filter(User.user_id == user_id).first()
     if not user:
         raise credentials_exception
-    
+
     return user

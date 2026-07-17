@@ -11,6 +11,6 @@ class Appointment(Base):
     appointment_date = Column(Date, nullable=False)
     appointment_time = Column(Time, nullable=False)
     note = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
     
     patient = relationship("Patient", back_populates="appointments")
