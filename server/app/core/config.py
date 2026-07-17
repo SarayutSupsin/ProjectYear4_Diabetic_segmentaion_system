@@ -1,16 +1,16 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-import os
+from pathlib import Path
 from typing import List
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Deep Learning-Based System for Segmentation and Monitoring of Diabetic Foot Ulcer"
     API_V1_STR: str = "/api/v1"
     DATABASE_URL: str
-
-
-    BASE_DIR: str = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    MODEL_PATH: str = os.path.join(BASE_DIR, "weights", "unet_efficientnet_b4_dfu.pth")
-    STATIC_DIR: str = os.path.join(BASE_DIR, "static", "wounds")
+    MODEL_PATH: str = str(BASE_DIR / "weights" / "unet_efficientnet_b4_dfu.pth")
+    STATIC_DIR: str = str(BASE_DIR / "static" / "wounds")
     
     #DFU Scale Parameters
     QR_SIZE_CM: float = 2.0
@@ -34,7 +34,7 @@ class Settings(BaseSettings):
 
     #Database models
     model_config = SettingsConfigDict(
-        env_file="../.env",
+        env_file=BASE_DIR / ".env",
         env_file_encoding="utf-8",
         extra="ignore"
     )
