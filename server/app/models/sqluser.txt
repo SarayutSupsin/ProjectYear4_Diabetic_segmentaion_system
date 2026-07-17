@@ -1,0 +1,5 @@
+INSERT INTO users (user_id, username, password, role_id, created_at)
+VALUES
+('U001', 'admin', '123456', 'ADMIN', NOW()),
+('U002', 'nurse01', '123456', 'NURSE', NOW()),
+('U003', 'patient01', '123456', 'PATIENT', NOW());
