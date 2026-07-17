@@ -9,7 +9,7 @@ class Wound(Base):
     HN = Column(String(50), ForeignKey("patients.HN"), nullable=False)
     body_part_id = Column(String(5), ForeignKey("body_parts.body_part_id"), nullable=False)
     side = Column(String(10), nullable=False)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
 
     patient = relationship("Patient", back_populates="wounds")
     body_part = relationship("BodyPart", back_populates="wounds")

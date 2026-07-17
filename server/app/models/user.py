@@ -9,7 +9,7 @@ class User(Base):
     username = Column(String(50), unique=True, nullable=False, index=True)
     password = Column(String(255), nullable=False)
     role_id = Column(String(10), ForeignKey("roles.role_id"), nullable=False)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
 
     role = relationship("Role", back_populates="users")
     nurse_profile = relationship("Nurse", uselist=False, back_populates="user")

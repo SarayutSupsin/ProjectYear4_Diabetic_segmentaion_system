@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import os
+from typing import List
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Deep Learning-Based System for Segmentation and Monitoring of Diabetic Foot Ulcer"
@@ -16,6 +17,15 @@ class Settings(BaseSettings):
     TARGET_PX_PER_CM: float = 100.0 # 1 cm = 100 px
     MAX_WARPED_DIM: int = 5000 ## Maximum image width limit to prevent system RAM crashes due to homography warping
     THRESHOLD: float = 0.5
+
+    # CORS
+    BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:5173", "http://localhost:3000"]
+
+    # JWT Authentication
+    SECRET_KEY: str 
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
     @property
     def DEVICE(self) -> str:

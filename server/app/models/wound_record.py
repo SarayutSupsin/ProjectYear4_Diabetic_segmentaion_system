@@ -11,7 +11,7 @@ class WoundRecord(Base):
     image_path = Column(String(255), nullable=False)
     area_pixel = Column(Integer, nullable=False)
     area_cm2 = Column(Float, nullable=False)
-    record_date = Column(DateTime, default=datetime.datetime.utcnow)
+    record_date = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
     note = Column(Text, nullable=True)
     
     wound = relationship("Wound", back_populates="records")
