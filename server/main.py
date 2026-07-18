@@ -9,7 +9,7 @@ from app.core.config import settings
 from app.db.session import get_db
 from app.models import Role, User, Nurse, Patient, BodyPart, Wound, WoundRecord, Appointment
 
-from app.api.v1.endpoints import auth
+from app.api.v1.endpoints import auth, patientResponse
 
 os.makedirs(settings.STATIC_DIR, exist_ok=True)
 
@@ -26,8 +26,10 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # add Router
-app.include_router(auth.router, prefix="/api/v1/auth")
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
+app.include_router(patientResponse.router, prefix="/api/v1/patients",tags=["patients"])
 
+#test
 @app.get("/")
 def read_root():
     return {"message": "FastAPI And SQLAlchemy Connected!!!"}
