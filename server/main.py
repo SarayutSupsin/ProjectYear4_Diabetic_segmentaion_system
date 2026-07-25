@@ -9,7 +9,7 @@ from app.core.config import settings
 from app.db.session import get_db
 from app.models import Role, User, Nurse, Patient, BodyPart, Wound, WoundRecord, Appointment
 
-from app.api.v1.endpoints import auth, patientResponse
+from app.api.v1.endpoints import auth, patientResponse, wounds, appointment, nurses
 
 os.makedirs(settings.STATIC_DIR, exist_ok=True)
 
@@ -28,7 +28,9 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # add Router
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(patientResponse.router, prefix="/api/v1/patients",tags=["patients"])
-
+app.include_router(wounds.router, prefix="/api/v1/wounds", tags=["wounds"])
+app.include_router(appointment.router, prefix="/api/v1/appointment", tags=["appointment"])
+app.include_router(nurses.router, prefix="/api/v1/nurses", tags=["nurses"])
 #test
 @app.get("/")
 def read_root():

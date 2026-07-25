@@ -21,3 +21,13 @@ class LoginResponse(BaseModel):
     token: Optional[str] = None
     refresh_token: Optional[str] = None
     user: Optional[UserResponse] = None
+
+class CurrentUserProfileResponse(BaseModel):
+    success: bool
+    user_id: str
+    username: str
+    role: str
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    department: Optional[str] = None
+    HN: Optional[str] = None

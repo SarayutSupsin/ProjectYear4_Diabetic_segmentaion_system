@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional
+from datetime import datetime
 
 class BodyPartResponse(BaseModel):
     body_part_id: str
@@ -28,5 +29,17 @@ class WoundResponse(BaseModel):
 
     class Config:
         from_attributes = True
-    
-    
+
+class WoundRecordResponse(BaseModel):
+    record_id: int
+    wound_id: str
+    user_id: str
+    image_path: str
+    area_pixel: int
+    area_cm2: float
+    record_date: datetime
+    note: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
