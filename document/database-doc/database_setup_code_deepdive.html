@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คู่มือประกอบ: เจาะลึกโค้ดระบบฐานข้อมูลและการควบคุมเวอร์ชัน (DFU Project)</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Styling -->
+    <style>
+        :root {
+            --bg-main: #0b0f19;
+            --bg-sidebar: #0f1524;
+            --bg-panel: #141b2d;
+            --bg-code: #070a12;
+            --primary: #3b82f6;
+            --primary-grad: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --accent: #a855f7;
+            --border: #223049;
+            --text-title: #ffffff;
+            --text-body: #94a3b8;
+            --text-muted: #4b5563;
+            --success: #10b981;
+            --radius-lg: 16px;
+            --radius-md: 8px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Sarabun', 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-body);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Sidebar Menu */
+        aside {
+            width: 280px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            flex-shrink: 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            width: 36px;
+            height: 36px;
+            background: var(--primary-grad);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .brand h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            color: var(--text-title);
+        }
+
+        .brand p {
+            font-size: 10px;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .menu-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+        }
+
+        .menu-item button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            padding: 10px 14px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--text-body);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            cursor: pointer;
+            text-align: left;
+            transition: var(--transition);
+        }
+
+        .menu-item button:hover {
+            background-color: rgba(59, 130, 246, 0.04);
+            color: var(--primary);
+        }
+
+        .menu-item.active button {
+            background: var(--primary-grad);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(139, 92, 246, 0.2);
+        }
+
+        /* Workspace split screen */
+        .workspace {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .top-bar {
+            min-height: 70px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 24px;
+            background-color: var(--bg-sidebar);
+            flex-shrink: 0;
+        }
+
+        .top-bar-title-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-bar h3 {
+            font-family: 'Outfit', 'Sarabun', sans-serif;
+            color: var(--text-title);
+            font-size: 16px;
+            line-height: 1.2;
+        }
+
+        .btn-copy {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-body);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: var(--transition);
+        }
+
+        .btn-copy:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .split-container {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden;
+            height: calc(100vh - 70px);
+        }
+
+        /* Sub Navigation for Packages/Folders */
+        .sub-nav {
+            display: flex;
+            gap: 6px;
+            background-color: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border);
+            padding: 10px 24px;
+            overflow-x: auto;
+            flex-shrink: 0;
+        }
+
+        .sub-nav-btn {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-body);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 11.5px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: var(--transition);
+        }
+
+        .sub-nav-btn:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .sub-nav-btn.active {
+            background-color: rgba(59, 130, 246, 0.15);
+            color: var(--primary);
+            border-color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Left Pane: Code View */
+        .pane-code {
+            width: 55%;
+            background-color: var(--bg-code);
+            overflow-y: auto;
+            border-right: 1px solid var(--border);
+            padding: 24px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 12.5px;
+            color: #e2e8f0;
+            position: relative;
+        }
+
+        .code-line {
+            display: flex;
+            padding: 2px 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: var(--transition);
+            border-left: 3px solid transparent;
+        }
+
+        .code-line:hover {
+            background-color: rgba(59, 130, 246, 0.05);
+            border-left-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .code-line.highlighted {
+            background-color: rgba(59, 130, 246, 0.12) !important;
+            border-left-color: var(--primary) !important;
+        }
+
+        .line-num {
+            width: 30px;
+            color: var(--text-muted);
+            text-align: right;
+            margin-right: 16px;
+            user-select: none;
+        }
+
+        .line-content {
+            white-space: pre;
+            flex-grow: 1;
+        }
+
+        /* Right Pane: Explanations */
+        .pane-explanation {
+            width: 45%;
+            background-color: var(--bg-panel);
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .explanation-card {
+            border: 1px solid var(--border);
+            background-color: rgba(255, 255, 255, 0.01);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            transition: var(--transition);
+            opacity: 0.7;
+        }
+
+        .explanation-card.active {
+            opacity: 1;
+            border-color: var(--primary);
+            background-color: rgba(59, 130, 246, 0.03);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.05);
+        }
+
+        .card-header {
+            font-weight: 700;
+            color: var(--text-title);
+            font-size: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-tag {
+            font-size: 11px;
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--primary);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Interactive Tabs inside Card */
+        .tabs-container {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-body);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .tab-btn:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-btn.active {
+            background: var(--primary-grad);
+            color: white;
+            border-color: transparent;
+            font-weight: 600;
+        }
+
+        .tab-content {
+            font-size: 13.5px;
+            color: var(--text-body);
+            min-height: 80px;
+            line-height: 1.6;
+            animation: tabFadeIn 0.3s ease;
+        }
+
+        @keyframes tabFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Comment Token Styling */
+        .c-comment {
+            color: #6a737d;
+            font-style: italic;
+        }
+
+        .c-keyword {
+            color: #f97583;
+            font-weight: bold;
+        }
+
+        .c-string {
+            color: #9ecbff;
+        }
+
+        .c-class {
+            color: #b392f0;
+            font-weight: bold;
+        }
+
+        .c-func {
+            color: #79b8ff;
+        }
+
+        .c-decorator {
+            color: #ffab70;
+        }
+
+        .c-number {
+            color: #ff79c6;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar menu -->
+    <aside>
+        <div class="brand">
+            <div class="logo">DFU</div>
+            <div>
+                <h2>DFU Code Deep-Dive</h2>
+                <p>คู่มือประกอบแบบละเอียด</p>
+            </div>
+        </div>
+        <ul class="menu-list">
+            <li class="menu-item active" data-file="folder_structure"><button>📁 โครงสร้างโฟลเดอร์</button></li>
+            <li class="menu-item" data-file="env"><button>🔑 1. ไฟล์ .env</button></li>
+            <li class="menu-item" data-file="docker_compose"><button>🐙 2. docker-compose.yml</button></li>
+            <li class="menu-item" data-file="alembic_ini"><button>📝 3. alembic.ini</button></li>
+            <li class="menu-item" data-file="requirements"><button>📦 4. requirements.txt</button></li>
+            <li class="menu-item" data-file="dockerfile"><button>🐳 5. Dockerfile</button></li>
+            <li class="menu-item" data-file="config"><button>⚙️ 6. config.py</button></li>
+            <li class="menu-item" data-file="base_class"><button>📐 7. base_class.py</button></li>
+            <li class="menu-item" data-file="session"><button>🔗 8. session.py</button></li>
+            <li class="menu-item" data-file="models"><button>🗄️ 9. models/ (แยก 9 ไฟล์)</button></li>
+            <li class="menu-item" data-file="alembic_env"><button>✈️ 10. alembic/env.py</button></li>
+            <li class="menu-item" data-file="seed"><button>🌱 11. seed.py (ป้อนข้อมูล)</button></li>
+            <li class="menu-item" data-file="main"><button>🧪 12. main.py & Test API</button></li>
+        </ul>
+    </aside>
+
+    <!-- Workspace -->
+    <div class="workspace" id="workspace-root">
+        <div class="top-bar">
+            <div class="top-bar-title-container">
+                <h3 id="current-file-title">โครงสร้างโฟลเดอร์โครงการ</h3>
+            </div>
+            <button class="btn-copy" id="btn-copy-main" onclick="copyEntireActiveFile()">Copy ทั้งไฟล์</button>
+        </div>
+
+        <!-- Sub-nav bar will be dynamically inserted here if needed -->
+
+        <div class="split-container">
+            <!-- Left Pane: Code View -->
+            <div class="pane-code" id="code-pane">
+                <!-- Lines will be dynamically generated by JS -->
+            </div>
+
+            <!-- Right Pane: Explanations -->
+            <div class="pane-explanation" id="explanation-pane">
+                <!-- Explanation Cards will be dynamically generated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Data and Interactive Logic -->
+    <script>
+        const fileDatabase = {
+            folder_structure: {
+                title: "โครงสร้างโฟลเดอร์โครงการ (Backend Directory Layout)",
+                path: "",
+                rawCode: `server/
+├── Dockerfile                  # [5] แบบแปลนสร้าง Linux Backend Container
+├── requirements.txt            # [4] ไฟล์รวม Library Python (FastAPI, Alembic, OpenCV, pyzbar)
+├── alembic.ini                 # [3] ไฟล์คอนฟิกหลักของระบบควบคุมประวัติการสร้างตาราง
+├── alembic/
+│   └── env.py                  # [10] สคริปต์สแกนโมเดลออโต้ ดึงรหัสผ่านจาก .env
+└── app/
+    ├── __init__.py             # [!] ไฟล์ว่างเปล่า เพื่อให้ไพธอนรู้จักโฟลเดอร์แอป
+    ├── main.py                 # [12] จุดเชื่อม API เซิร์ฟเวอร์หลัก
+    ├── models/                 # [9] แพ็กเกจโมเดลแยกไฟล์ตาราง
+    │   ├── __init__.py         # สารบัญรวมนำเข้าตารางเพื่อผูกกับ Base
+    │   ├── role.py             # ตารางบทบาทสิทธิ์ (roles)
+    │   ├── user.py             # ตารางบัญชีผู้ใช้งาน (users)
+    │   ├── nurse.py            # ตารางประวัติพยาบาล (nurse)
+    │   ├── patient.py          # ตารางประวัติคนไข้ (patients)
+    │   ├── body_part.py        # ตารางตำแหน่งอวัยวะแผล (body_parts)
+    │   ├── wound.py            # ตารางจุดเกิดแผลหลัก (wounds)
+    │   ├── wound_record.py     # บันทึกวิเคราะห์แผลรายครั้ง (wound_records)
+    │   └── appointment.py      # ตารางนัดหมายติดตามผล (appointments)
+    ├── core/
+    │   ├── __init__.py         # [!] ไฟล์ว่างเปล่า
+    │   └── config.py           # [6] โหลดการตั้งค่าดึงค่าแปรจากไฟล์ .env
+    └── db/
+        ├── __init__.py         # [!] ไฟล์ว่างเปล่า
+        ├── base_class.py       # [7] คลาสแม่สำหรับออโต้ตาราง SQL
+        ├── session.py          # [8] เอ็นจิ้นสร้างสายและเซสชันคุยดีบี
+        └── seed.py             # [11] สคริปต์ป้อนข้อมูลบทบาท/อวัยวะเริ่มต้น
+docker-compose.yml              # [2] สคริปต์ควบคุมการเปิดตู้จำลองทั้งหมด (DB + API)
+.env                            # [1] ไฟล์เก็บรหัสลับไว้ที่โฟลเดอร์นอกสุด`,
+                htmlCode: [
+                    `<span class="c-class">server/</span>`,
+                    `├── <span class="c-keyword">Dockerfile</span>                  <span class="c-comment"># [5] แบบแปลนสร้าง Linux Backend Container</span>`,
+                    `├── <span class="c-keyword">requirements.txt</span>            <span class="c-comment"># [4] ไฟล์รวม Library Python (FastAPI, Alembic, OpenCV, pyzbar)</span>`,
+                    `├── <span class="c-keyword">alembic.ini</span>                 <span class="c-comment"># [3] ไฟล์คอนฟิกหลักของระบบควบคุมประวัติการสร้างตาราง</span>`,
+                    `├── <span class="c-class">alembic/</span>`,
+                    `│   └── <span class="c-keyword">env.py</span>                  <span class="c-comment"># [10] สคริปต์สแกนโมเดลออโต้ ดึงรหัสผ่านจาก .env</span>`,
+                    `└── <span class="c-class">app/</span>`,
+                    `    ├── <span class="c-keyword">__init__.py</span>             <span class="c-comment"># [!] ไฟล์ว่างเปล่าเพื่อให้รัน Import แบบสากลได้</span>`,
+                    `    ├── <span class="c-keyword">main.py</span>                 <span class="c-comment"># [12] จุดเชื่อม API เซิร์ฟเวอร์หลัก</span>`,
+                    `    ├── <span class="c-class">models/</span>                 <span class="c-comment"># [9] แพ็กเกจโมเดลแยกไฟล์ตาราง (ลดปัญหาบั๊ก Import วน)</span>`,
+                    `    │   ├── <span class="c-keyword">__init__.py</span>         <span class="c-comment"># สารบัญตาราง นำเข้าตารางย่อยทั้งหมดมารวมศูนย์</span>`,
+                    `    │   ├── <span class="c-keyword">role.py</span>             <span class="c-comment"># ตารางบทบาทสิทธิ์ (roles)</span>`,
+                    `    │   ├── <span class="c-keyword">user.py</span>             <span class="c-comment"># ตารางบัญชีผู้ใช้งาน (users)</span>`,
+                    `    │   ├── <span class="c-keyword">nurse.py</span>            <span class="c-comment"># ตารางประวัติพยาบาล (nurse)</span>`,
+                    `    │   ├── <span class="c-keyword">patient.py</span>          <span class="c-comment"># ตารางประวัติคนไข้ (patients)</span>`,
+                    `    │   ├── <span class="c-keyword">body_part.py</span>        <span class="c-comment"># ตารางตำแหน่งอวัยวะแผล (body_parts)</span>`,
+                    `    │   ├── <span class="c-keyword">wound.py</span>            <span class="c-comment"># ตารางจุดเกิดแผลหลัก (wounds)</span>`,
+                    `    │   ├── <span class="c-keyword">wound_record.py</span>     <span class="c-comment"># บันทึกประวัติวิเคราะห์แผลรายครั้ง (wound_records)</span>`,
+                    `    │   └── <span class="c-keyword">appointment.py</span>      <span class="c-comment"># ตารางนัดหมายติดตามผล (appointments)</span>`,
+                    `    ├── <span class="c-class">core/</span>`,
+                    `    │   ├── <span class="c-keyword">__init__.py</span>         <span class="c-comment"># [!] ไฟล์ว่างเปล่า</span>`,
+                    `    │   └── <span class="c-keyword">config.py</span>           <span class="c-comment"># [6] โหลดการตั้งค่าดึงค่าแปรจากไฟล์ .env</span>`,
+                    `    └── <span class="c-class">db/</span>`,
+                    `        ├── <span class="c-keyword">__init__.py</span>         <span class="c-comment"># [!] ไฟล์ว่างเปล่า</span>`,
+                    `        ├── <span class="c-keyword">base_class.py</span>       <span class="c-comment"># [7] คลาสแม่สำหรับออโต้ตาราง SQL</span>`,
+                    `        ├── <span class="c-keyword">session.py</span>          <span class="c-comment"># [8] เอ็นจิ้นสร้างสายและเซสชันคุยดีบี</span>`,
+                    `        └── <span class="c-keyword">seed.py</span>             <span class="c-comment"># [11] สคริปต์ป้อนข้อมูลบทบาท/อวัยวะเริ่มต้น</span>`,
+                    `<span class="c-keyword">docker-compose.yml</span>              <span class="c-comment"># [2] สคริปต์ควบคุมการเปิดตู้จำลองทั้งหมด (DB + API)</span>`,
+                    `<span class="c-keyword">.env</span>                            <span class="c-comment"># [1] ไฟล์เก็บรหัสลับไว้ที่โฟลเดอร์นอกสุดของโปรเจกต์</span>`
+                ],
+                explanations: [
+                    {
+                        lines: [1, 6],
+                        title: "📂 1. ภาพรวมโครงสร้างระดับบนสุด (Root Structure)",
+                        what: "นี่คือการจัดวางผังไฟล์ระดับหัวใจของระบบเซิร์ฟเวอร์หลังบ้าน โดยแบ่งแยกความปลอดภัยและความเป็นสัดส่วนออกจากกันอย่างชัดเจน โดยไฟล์ปรับแต่งตู้และสิทธิ์ล็อกอิน (.env, docker-compose.yml) จะวางอยู่นอกสุดเพื่อความปลอดภัยจากการเข้าถึงโดยไม่ได้รับอนุญาต ในขณะที่ตัวโปรแกรมหลักทั้งหมดจะถูกห่อหุ้มเอาไว้ในห้อง 'server/' เพื่อความง่ายในการก็อปปี้จัดทำแพ็กเกจส่งงาน",
+                        get: "สถาปัตยกรรมระบบที่สะอาดหมดจดตามมาตรฐานสากล รองรับการทำงานในแบบ Containerization มีการแยกโฟลเดอร์แบ่งความรับผิดชอบอย่างชัดเจน เช่น app/ (ตรรกะโปรแกรม), db/ (ฐานข้อมูล) และ alembic/ (ระบบประวัติความเปลี่ยนแปลง)",
+                        why: "หากไม่จัดวางโฟลเดอร์แบบแบ่งสัดส่วนเช่นนี้ เมื่อโปรเจกต์มีขนาดใหญ่ขึ้นหรือมีการต่อยอดเพิ่มฟีเจอร์ด้านปัญญาประดิษฐ์ (Deep Learning) โค้ดจะปะปนกันมั่วซั่วจนสแกนรันดีบักยาก และมีโอกาสเขียนโค้ดชนกันเองในกลุ่มสูงมาก"
+                    },
+                    {
+                        lines: [7, 7],
+                        title: "📂 2. ไฟล์ __init__.py ว่างเปล่าทำหน้าที่อะไร?",
+                        what: "ไฟล์ที่มีชื่อว่า __init__.py ที่ว่างเปล่า (ไม่มีการเขียนโค้ดใด ๆ บรรจุอยู่ข้างใน) บรรจุอยู่ในโฟลเดอร์ app/, core/ และ db/ ทำหน้าที่เปรียบเสมือนป้ายบอกทางระดับระบบปฏิบัติการของคอมพิวเตอร์",
+                        get: "ทำให้ตัวแปรและระบบรันไทม์ของภาษา Python สแกนตรวจสอบแล้วรับรู้ทันทีว่าโฟลเดอร์ย่อยเหล่านั้นเป็น 'Python Package' ซึ่งมีสิทธิ์อนุญาตให้นำเข้ามาใช้งาน (Import) ข้ามไฟล์ได้อย่างเสถียร",
+                        why: "หากลืมสร้างไฟล์ __init__.py ในห้องเหล่านี้ เมื่อเรากดรันเซิร์ฟเวอร์ด้วย Uvicorn ตัวรันไทม์ของไพธอนจะฟ้องข้อผิดพลาด ModuleNotFoundError: No module named 'app.core' และโปรแกรมจะหยุดรันทันที เนื่องจากมันมองห้องเหล่านี้เป็นเพียงโฟลเดอร์ทั่วไปบนดิสก์ ไม่ใช่รหัสแพ็กเกจโปรแกรม"
+                    },
+                    {
+                        lines: [9, 18],
+                        title: "📂 3. แพ็กเกจโมเดลย่อย app/models/ (โครงสร้างมาตรฐานสเกลใหญ่)",
+                        what: "การแตกตารางข้อมูลทั้ง 8 ตารางแยกเขียนออกมาเป็นตารางละ 1 ไฟล์ เช่น role.py, user.py, patient.py... แทนการเขียนสแต็คกองรวมกันยาวเหยียดในไฟล์เดียว และผูกส่งออกข้ามโมดูลด้วยไฟล์สารบัญ __init__.py",
+                        get: "โค้ดระบบที่มีระเบียบวินัย ค้นหาคอลัมน์ของแต่ละตารางได้รวดเร็ว เหมาะสำหรับการแบ่งงานในกลุ่มนักศึกษาพัฒนา เช่น คนนึงดูตารางคนไข้และประวัติแผล อีกคนดูตารางสิทธิ์และการนัดหมาย สามารถแยกไฟล์กันทำงานได้โดยไม่เซฟทับทับกันเอง",
+                        why: "การเขียนรวมในไฟล์เดียวทำให้อนาคตโค้ดยาวเกินไป อ่านและวิเคราะห์ความสัมพันธ์เชื่อมโยงยากมาก การแยกโมเดลจะช่วยคัดกรองแยกฟิลด์และคีย์ของตารางให้ตรงจุดแก้ไขบำรุงรักษาได้แบบระยะยาว"
+                    }
+                ]
+            },
+            env: {
+                title: "ไฟล์: .env (รหัสผ่านและความลับระบบภายนอกโค้ด)",
+                path: ".env",
+                rawCode: `POSTGRES_USER=dfu_admin
+POSTGRES_PASSWORD=dfu_password
+POSTGRES_DB=dfu_database
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
+
+DATABASE_URL=postgresql://dfu_admin:dfu_password@localhost:5430/dfu_database
+DATABASE_URL_DOCKER=postgresql://dfu_admin:dfu_password@db:5432/dfu_database`,
+                htmlCode: [
+                    `<span class="c-comment"># ข้อมูลสิทธิ์ผู้ดูแลฐานข้อมูล PostgreSQL สูงสุด (Superuser)</span>`,
+                    `<span class="c-keyword">POSTGRES_USER</span>=dfu_admin`,
+                    `<span class="c-keyword">POSTGRES_PASSWORD</span>=dfu_password`,
+                    `<span class="c-keyword">POSTGRES_DB</span>=dfu_database`,
+                    `<span class="c-keyword">POSTGRES_HOST</span>=db`,
+                    `<span class="c-keyword">POSTGRES_PORT</span>=5432`,
+                    ``,
+                    `<span class="c-comment"># สายเชื่อมต่อสำหรับรันสคริปต์ในเครื่อง Windows หลัก (ชี้เข้าพอร์ตภายนอก 5430)</span>`,
+                    `<span class="c-keyword">DATABASE_URL</span>=postgresql://dfu_admin:dfu_password@localhost:5430/dfu_database`,
+                    ``,
+                    `<span class="c-comment"># สายเชื่อมต่อสำหรับรันภายในเครือข่ายตู้จำลอง Docker (ชี้เข้าบริการ db พอร์ต 5432)</span>`,
+                    `<span class="c-keyword">DATABASE_URL_DOCKER</span>=postgresql://dfu_admin:dfu_password@db:5432/dfu_database`
+                ],
+                explanations: [
+                    {
+                        lines: [1, 6],
+                        title: "🔑 1. ตัวแปรดีบีหลักของ PostgreSQL (Environment Variables)",
+                        what: "กำหนดชื่อผู้ใช้สิทธิ์สูงสุด (POSTGRES_USER), รหัสผ่านป้องกัน (POSTGRES_PASSWORD) และชื่อฐานข้อมูลระบบสำหรับการคัดกรองรูปแผลเบาหวาน (POSTGRES_DB) รวมถึงระบุ Host ภายในเน็ตเวิร์กจำลองให้ชี้ไปที่ตู้บริการชื่อ db",
+                        get: "ระบบความปลอดภัยภายนอกตู้ โดยตู้ Docker PostgreSQL Alpine จะดึงเอาตัวแปรตั้งต้นเหล่านี้ไปเปิดระบบ สถาปนาสิทธิ์ผู้ใช้งาน และสร้างตารางข้อมูลว่างเปล่าตามชื่อนี้ให้อัตโนมัติในตอนเปิดเครื่องครั้งแรก",
+                        why: "เพื่อหลีกเลี่ยงการนำชื่อและรหัสผ่านดีบีไปเขียนดิบฝังถาวร (Hardcode) ไว้ในซอร์สโค้ดหลักของภาษาไพธอน ซึ่งขัดแย้งกับหลักความปลอดภัยสากลระดับเว็บแอพและระบบจัดการสุขภาพคนไข้"
+                    },
+                    {
+                        lines: [8, 9],
+                        title: "🔑 2. DATABASE_URL สำหรับใช้ในเครื่อง Windows หลัก (Host URL)",
+                        what: "เส้นทางเชื่อมต่อฐานข้อมูล (Database Connection String) สำหรับประมวลผลผ่าน <strong>'ระบบปฏิบัติการวินโดวส์โฮสต์หลัก (Windows Host OS)'</strong> ชี้พิกัดไปที่ localhost และพอร์ตสะพานภายนอกคือ 5430 เพื่อยิงเจาะทะลุเชื่อมเข้าไปหาบริการ PostgreSQL ที่อยู่ภายในตู้จำลอง",
+                        get: "ทำให้เราสามารถสั่งยิงโปรแกรมเพื่อสแกนหรือย้ายตารางข้อมูลผ่านสคริปต์หน้าต่าง Terminal บนวินโดวส์ เช่น <code>alembic upgrade head</code> หรือ <code>python seed.py</code> ได้อย่างเสถียร",
+                        why: "เนื่องจากเมื่อเราสั่งรันตัวอัปเกรดตารางหรือสคริปต์จำลองข้อมูลผ่าน PowerShell ตัวโค้ดไพธอนจะรันอยู่บนวินโดวส์ (ภายนอกตู้ Docker) มันจึงจำเป็นต้องต่อสัญญาณเข้าพอร์ตสะพาน 5430 ที่สะพานแมปไว้เท่านั้น หากไปชี้ 5432 ตรง ๆ จะเชื่อมไม่สำเร็จหรือไปชนกับ PostgreSQL ตัวอื่นบนเครื่องวินโดวส์ของคุณ"
+                    },
+                    {
+                        lines: [11, 12],
+                        title: "🔑 3. DATABASE_URL_DOCKER สำหรับใช้ในระบบปิด Docker (Container URL)",
+                        what: "เส้นทางเชื่อมต่อฐานข้อมูลสำหรับเรียกใช้จาก <strong>'ภายในเครือข่ายจำลองวงในปิดของ Docker (Bridge Network)'</strong> ชี้ชื่อปลายทางตรงไปหาชื่อเครื่องตู้ดีบีฐานข้อมูลคือ <code>db</code> และเชื่อมพอร์ตภายในของ Postgres ตรง ๆ คือ <code>5432</code>",
+                        get: "ช่องทางการสื่อสารส่งข้อมูลภายในระดับความเร็วสูงที่ปิดเป็นส่วนตัวระหว่างตู้เว็บ API (FastAPI) วิ่งตรงไปคุยกับตู้ฐานข้อมูล PostgreSQL สรุปผลได้อย่างลื่นไหลปลอดภัย",
+                        why: "<strong>นี่คือหลักสำคัญเรื่อง Docker Network:</strong> เพราะตู้ API รันจำลองเป็นเสมือนคอมอีกเครื่องหนึ่ง หากเราสั่งชี้ไปหา localhost:5430 ตัวแอปจะเข้าใจว่า Postgres รันอยู่ในตู้ตัวมันเองและจะเด้งเออร์เรอร์การต่อเชื่อมถูกปฏิเสธ (Connection Refused) ทันที ดังนั้นจึงต้องสั่งให้วิ่งข้ามตู้ไปคุยกับตู้ <code>db:5432</code> ตามชื่อ Service ที่ประกาศไว้ใน docker-compose แทนครับ"
+                    }
+                ]
+            },
+            docker_compose: {
+                title: "ไฟล์: docker-compose.yml (สคริปต์รวมคุมตู้ฐานข้อมูลและ API)",
+                path: "docker-compose.yml",
+                rawCode: `version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: dfu-db
+    ports:
+      - "5430:5432"
+    env_file:
+      - .env
+    volumes:
+      - dfu-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \$\${POSTGRES_USER:-postgres} -d \$\${POSTGRES_DB:-dfu_database}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: dfu-api
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    volumes:
+      - ./server:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  dfu-db-data:`,
+                htmlCode: [
+                    `version: <span class="c-string">'3.8'</span>`,
+                    ``,
+                    `services:`,
+                    `  <span class="c-keyword">db:</span>`,
+                    `    image: postgres:16-alpine`,
+                    `    container_name: dfu-db`,
+                    `    ports:`,
+                    `      - <span class="c-string">"5430:5432"</span>`,
+                    `    env_file:`,
+                    `      - .env`,
+                    `    volumes:`,
+                    `      - dfu-db-data:/var/lib/postgresql/data`,
+                    `    healthcheck:`,
+                    `      test: [<span class="c-string">"CMD-SHELL"</span>, <span class="c-string">"pg_isready -U \$\${POSTGRES_USER:-postgres} -d \$\${POSTGRES_DB:-dfu_database}"</span>]`,
+                    `      interval: 5s`,
+                    `      timeout: 5s`,
+                    `      retries: 5`,
+                    ``,
+                    `  <span class="c-keyword">api:</span>`,
+                    `    build:`,
+                    `      context: ./server`,
+                    `      dockerfile: Dockerfile`,
+                    `    container_name: dfu-api`,
+                    `    ports:`,
+                    `      - <span class="c-string">"8000:8000"</span>`,
+                    `    depends_on:`,
+                    `      db:`,
+                    `        condition: service_healthy`,
+                    `    env_file:`,
+                    `      - .env`,
+                    `    volumes:`,
+                    `      - ./server:/app`,
+                    `    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload`,
+                    ``,
+                    `volumes:`,
+                    `  dfu-db-data:`
+                ],
+                explanations: [
+                    {
+                        lines: [4, 17],
+                        title: "🐋 1. การตั้งค่าระบบฐานข้อมูลจำลอง (Service: db)",
+                        what: "สั่งเช่าพื้นที่ดึงอิมเมจระบบดีบี PostgreSQL รุ่น 16 พัฒนาบน Linux Alpine ตัวเบาพิเศษ พร้อมสถาปนาเปิดจับคู่แมปพอร์ตจากในตู้ 5432 ออกไปที่คอมเครื่องหลักทางพอร์ต 5430 และมีตัวเช็คความพร้อมรันงาน (Healthcheck) เป็นตัวตรวจสอบความพร้อมก่อนอนุญาตให้ตู้ตัวอื่นเข้ามาต่อสัญญาณ",
+                        get: "ฐานข้อมูล PostgreSQL ประสิทธิภาพสูงที่ทำงานในระบบแซนด์บ็อกซ์แยกจากวินโดวส์ ปราศจากปัญหาแรมล้นหรือโค้ดดีบีเออร์เรอร์บนวินโดวส์ และข้อมูลทุกชิ้นจะถูกเก็บบันทึกถาวรไว้บนพื้นที่เก็บดิสก์จริงของ Docker Volume เพื่อไม่ให้เกิดสถิติข้อมูลแผลคนไข้สูญหาย",
+                        why: "เพื่อแก้ปัญหาที่พบกันบ่อยมากในคอมพิวเตอร์นักศึกษา ที่มักจะมีการติดตั้ง PostgreSQL ตัวอื่นรันคาอยู่ที่พอร์ตมาตรฐาน 5432 การเบี่ยงสะพานพอร์ตมาที่ 5430 จะทำให้ระบบเปิดใช้ฐานข้อมูลได้ 100% ปราศจากการเจอบั๊ก Port Collision"
+                    },
+                    {
+                        lines: [19, 33],
+                        title: "🐋 2. ตู้ประมวลผลเว็บ API (Service: api)",
+                        what: "สั่งสร้างภาพจำลองเซิร์ฟเวอร์หลังบ้านขึ้นมาโดยสแกนรัน Dockerfile ภายใต้ห้อง server/ และสะพานแมปโฟลเดอร์โค้ดของจริงบนคอมเข้ากับระบบข้างในตู้เพื่อเอื้อผลต่อระบบสะท้อนโค้ดสด (Hot-Reload) ในแบบเรียลไทม์",
+                        get: "ระบบเว็บแอป APIs หลังบ้านที่จะสตาร์ทรันขึ้นมาด้วยเซิร์ฟเวอร์ความเร็วสูง Uvicorn ประจำอยู่ที่พอร์ต 8000 พร้อมทำงานคู่กัน และข้อมูลจะเปลี่ยนตามรหัสโค้ดที่เราพิมพ์ทันทีโดยไม่ต้องเสียเวลาบิวด์ตู้คอนเทนเนอร์ใหม่ทุกครั้ง",
+                        why: "เพื่อตัดปัญหาเรื่องการลงโมดูลไพธอนไม่ครบหรือเออร์เรอร์ด้านซอฟต์แวร์ระหว่างเครื่องวินโดวส์ระบบแกนหลัก การรวมแอปและรันไว้ในตู้ช่วยการันตีความเข้ากันได้ และป้อนค่า depends_on เพื่อไม่ให้ API วิ่งเข้าไปอ่านดีบีก่อนที่ดีบีจะตั้งตัวเสร็จสิ้น"
+                    }
+                ]
+            },
+            alembic_ini: {
+                title: "ไฟล์: server/alembic.ini (ไฟล์คอนฟิกหลักของระบบประวัติ)",
+                path: "server/alembic.ini",
+                rawCode: `[alembic]
+script_location = alembic
+sqlalchemy.url = postgresql://dfu_admin:dfu_password@localhost:5430/dfu_database
+
+[post_write_hooks]
+[loggers]
+keys = root,sqlalchemy,alembic
+[handlers]
+keys = console
+[formatters]
+keys = generic
+
+[logger_root]
+level = WARNING
+handlers = console
+
+[logger_sqlalchemy]
+level = WARNING
+qualname = sqlalchemy.engine
+
+[logger_alembic]
+level = INFO
+qualname = alembic
+
+[handler_console]
+class = StreamHandler
+args = (sys.stdout,)
+level = NOTSET
+formatter = generic
+
+[formatter_generic]
+format = %(levelname)-5.5s [%(name)s] %(message)s
+datefmt = %H:%M:%S`,
+                htmlCode: [
+                    `<span class="c-decorator">[alembic]</span>`,
+                    `<span class="c-keyword">script_location</span> = alembic`,
+                    `<span class="c-keyword">sqlalchemy.url</span> = postgresql://dfu_admin:dfu_password@localhost:5430/dfu_database`,
+                    ``,
+                    `<span class="c-decorator">[loggers]</span>`,
+                    `<span class="c-keyword">keys</span> = root,sqlalchemy,alembic`,
+                    `<span class="c-decorator">[handlers]</span>`,
+                    `<span class="c-keyword">keys</span> = console`,
+                    `<span class="c-decorator">[formatters]</span>`,
+                    `<span class="c-keyword">keys</span> = generic`,
+                    ``,
+                    `<span class="c-decorator">[logger_root]</span>`,
+                    `<span class="c-keyword">level</span> = WARNING`,
+                    `<span class="c-keyword">handlers</span> = console`,
+                    ``,
+                    `<span class="c-decorator">[handler_console]</span>`,
+                    `<span class="c-keyword">class</span> = StreamHandler`,
+                    `<span class="c-keyword">args</span> = (sys.stdout,)`,
+                    `<span class="c-keyword">formatter</span> = generic`
+                ],
+                explanations: [
+                    {
+                        lines: [1, 3],
+                        title: "📝 1. ไฟล์ตั้งค่าการทำงาน Alembic (Alembic Configuration)",
+                        what: "ไฟล์โครงสร้างการตั้งค่ากลางสำหรับเรียกใช้งาน Alembic โดยชี้เป้าหมายไปหาโฟลเดอร์หลักชื่อ alembic และระบุช่องทางการเชื่อมเชื่อมโยง URL ไปยังดีบีเริ่มต้นเพื่อเป็นตัวเปิดหัวธุรกรรมคิวรีหลัก",
+                        get: "ระบบจะสามารถอ่านค่าและรู้เป้าหมายได้ว่า เมื่อพิมพ์รันคำสั่ง Migration หรือสร้างไฟล์ประวัติย้ายโครงสร้างดีบี จะต้องนำพาไฟล์ประวัติย้อนหลังเหล่านั้นไปบันทึกจัดเก็บไว้ที่ตำแหน่งสารบบใดบนคอมพิวเตอร์",
+                        why: "เนื่องจากเครื่องมือ Alembic เป็นตัวประมวลผลภายนอกโค้ดหลัก มันจึงจำเป็นต้องพึ่งพิงไฟล์ ini เพื่อสแกนโครงร่างตั้งค่าความเข้าใจก่อนสตาร์ทรัน โดยเราใส่ URL ชี้เข้าพอร์ต 5430 ของเครื่อง Windows ไว้รองรับเป็นทางเลือกสำรอง"
+                    }
+                ]
+            },
+            requirements: {
+                title: "ไฟล์: server/requirements.txt (ใบสั่งซื้อไลบรารีระบบ)",
+                path: "server/requirements.txt",
+                rawCode: `fastapi==0.111.0
+uvicorn==0.30.1
+sqlalchemy==2.0.31
+psycopg2-binary==2.9.9
+alembic==1.13.1
+pydantic-settings==2.3.3
+opencv-python-headless==4.9.0.80
+pyzbar==0.1.9`,
+                htmlCode: [
+                    `<span class="c-keyword">fastapi</span>==0.111.0`,
+                    `<span class="c-keyword">uvicorn</span>==0.30.1`,
+                    `<span class="c-keyword">sqlalchemy</span>==2.0.31`,
+                    `<span class="c-keyword">psycopg2-binary</span>==2.9.9`,
+                    `<span class="c-keyword">alembic</span>==1.13.1  <span class="c-comment"># [!] สำคัญมาก: ขาดไม่ได้สำหรับการทำตั้งค่าตาราง</span>`,
+                    `<span class="c-keyword">pydantic-settings</span>==2.3.3  <span class="c-comment"># [!] สำคัญมาก: ใช้สำหรับโหลดไฟล์คอนฟิก .env</span>`,
+                    `<span class="c-keyword">opencv-python-headless</span>==4.9.0.80`,
+                    `<span class="c-keyword">pyzbar</span>==0.1.9`
+                ],
+                explanations: [
+                    {
+                        lines: [1, 4],
+                        title: "📦 1. เว็บเซิร์ฟเวอร์หลักและท่อเชื่อมดีบี (APIs Core & Database Driver)",
+                        what: "ประกาศนำเอา FastAPI และ Uvicorn เข้ามาจัดสร้างอินสแตนซ์เว็บบริการ APIs หลังบ้าน ส่วน SQLAlchemy ทำหน้าที่รับบทแปลงโค้ดไพธอนเป็นคำสั่ง SQL คิวรี และ psycopg2-binary ทำหน้าที่เปรียบเสมือนไดรเวอร์คุยภาษาสตรีมข้อมูลกับระบบ PostgreSQL",
+                        get: "ระบบหลังบ้านความเร็วสูงเกรดอุตสาหกรรม มีฟังก์ชันตรวจสอบชนิดข้อมูลขาเข้าขาออกอย่างแม่นยำ และต่อสายท่อธุรกรรมตรงไปยังตู้ Postgres โดยไม่ต้องพิมพ์ SQL ดิบด้วยมือ",
+                        why: "หากไม่ติดตั้ง Psycopg2 ตัวระบบ SQLAlchemy จะเป็นเหมือนท่อที่ปราศจากสายยางเชื่อมหาดีบีจริง ส่งผลให้เกิดเออร์เรอร์ 'NoSuchModuleError: Dialect postgresql not loaded' ทันทีตอนแอปเชื่อมฐานข้อมูล"
+                    },
+                    {
+                        lines: [5, 6],
+                        title: "⚠️ 2. Alembic & Pydantic-Settings (ตัวประคองระบบปิดและคุมตาราง)",
+                        what: "ระบุสั่งการติดตั้ง Alembic รุ่น 1.13.1 เพื่อเป็นหัวลากคุมตาราง และ Pydantic-Settings รุ่น 2.3.3 เพื่อสร้างคลาส Settings โหลดตัวแปรลับข้ามระบบจาก `.env` นอกโฟลเดอร์เซิร์ฟเวอร์เข้ามาในแอป",
+                        get: "ทำให้เราสามารถยิงพิมพ์คำสั่ง 'alembic upgrade' ในคอนโซล Terminal ได้สำเร็จ และช่วยให้ไพธอนรันโมดูล core/config.py ได้ปลอดภัยโดยไม่แสดงอาการ ModulesNotFoundError",
+                        why: "<strong>เป็นจุดสำคัญมากที่ห้ามมองข้าม</strong> เพราะ Pydantic Settings ถูกแยกส่วนออกจาก Pydantic หลักในเวอร์ชันใหม่ หากขาดไปโปรแกรมจะเปิดไม่ขึ้น และหากขาด Alembic ในระบบ ก็จะไม่สามารถสั่งสร้างตารางจริงลงตู้ดีบีได้เลย"
+                    },
+                    {
+                        lines: [7, 8],
+                        title: "📦 3. OpenCV & pyzbar (แกนหลักปัญญาประดิษฐ์วิเคราะห์ขนาดแผล)",
+                        what: "กำหนดเวอร์ชันของ OpenCV-python-headless ซึ่งเป็นเวอร์ชันประหยัดเนื้อที่ ปราศจากโมดูล UI ฝั่งวินโดวส์หนักเครื่อง และ Pyzbar รุ่น 0.1.9 เพื่อให้ใช้ดึงพจนานุกรมตรวจจับคิวอาร์บาร์โค้ดสเกลความกว้างแผล",
+                        get: "ระบบ API ประมวลผลรูปแผลสามารถรับรูปภาพคนไข้จากหน้าบ้าน ตรวจหาตำแหน่งมุมของ QR Code ขนาด 2 ซม. สแกนประวัติแปลงพิกเซลแผลเป็นตารางเซนติเมตรจริงทางหลังบ้านได้อย่างรวดเร็ว",
+                        why: "ต้องเลือกใช้เวอร์ชัน headless ในตู้ Docker เพราะในตู้ปิด Linux Docker จะไม่มีระบบเปิดหน้าต่างวินโดวส์ (X11) หากใช้ OpenCV ตัวปกติ ตู้จะพังทันทีเวลารันคำสั่งประมวลผลภาพเนื่องจากหาจอภาพภายนอกไม่เจอ"
+                    }
+                ]
+            },
+            dockerfile: {
+                title: "ไฟล์: server/Dockerfile (แบบพิมพ์เขียวประกอบตู้ Linux Backend)",
+                path: "server/Dockerfile",
+                rawCode: `FROM python:3.10-slim
+WORKDIR /app
+RUN apt-get update && apt-get install -y libzbar0 libgl1-mesa-glx libglib2.0-0 && rm -rf /var/lib/apt/lists/*
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 8000`,
+                htmlCode: [
+                    `<span class="c-keyword">FROM</span> python:3.10-slim`,
+                    `<span class="c-keyword">WORKDIR</span> /app`,
+                    `<span class="c-keyword">RUN</span> apt-get update && apt-get install -y \\`,
+                    `    libzbar0 \\`,
+                    `    libgl1-mesa-glx \\`,
+                    `    libglib2.0-0 \\`,
+                    `    && rm -rf /var/lib/apt/lists/*`,
+                    ``,
+                    `<span class="c-keyword">COPY</span> requirements.txt .`,
+                    `<span class="c-keyword">RUN</span> pip install --no-cache-dir -r requirements.txt`,
+                    `<span class="c-keyword">COPY</span> . .`,
+                    `<span class="c-keyword">EXPOSE</span> 8000`
+                ],
+                explanations: [
+                    {
+                        lines: [1, 2],
+                        title: "🐳 1. ดึงภาพฐานลินุกซ์จำลองและสร้างโฟลเดอร์ทำงาน",
+                        what: "FROM ชี้ดาวน์โหลดระบบปฏิบัติการ Debian รุ่นย่อย slim ที่ติดตั้ง Python 3.10 มาแล้วจากคลังส่วนกลาง และจัดแจงสร้างโฟลเดอร์กลางชื่อ /app เพื่อเป็นที่เก็บรหัสซอร์สโค้ดและรัน APIs",
+                        get: "ได้คอมพิวเตอร์เสมือนระบบปิดขนาดเล็กจิ๋ว ประหยัดเนื้อที่ มีพื้นที่สเปคปิดเป็นส่วนตัวในการบูตรันเว็บหลังบ้าน",
+                        why: "เลือกรุ่น slim เพราะมีความสมดุลสูง มีเครื่องมือพื้นฐานครบ ไม่กินแรมหนักเครื่องเหมือนรุ่นเต็ม และไม่บั๊กไลบรารีเวลาเชื่อม OpenCV เหมือน Alpine"
+                    },
+                    {
+                        lines: [3, 7],
+                        title: "⚠️ 2. ติดตั้งระบบกราฟิกของลินุกซ์ส่วนล่าง (OS Libraries - ขาดไม่ได้เด็ดขาด!)",
+                        what: "สั่งคอมจำลองลินุกซ์ตัวล่าง รันการติดตั้งโปรแกรม libzbar0 (ถอดบาร์โค้ด QR), libgl1-mesa-glx และ libglib2.0-0 (ไลบรารีกราฟิกเบื้องหลังสำหรับรัน OpenCV) และลบขยะติดตั้งทิ้งเพื่อประหยัดดิสก์",
+                        get: "ระบบปฏิบัติการจำลองในตู้จะมีความสามารถครบถ้วนในการเขียนอ่านข้อมูลกราฟิกรูปภาพแผลเบาหวาน และวิเคราะห์ตำแหน่ง QR Code สเกลแผลได้สำเร็จเหมือนลงโปรแกรมในวินโดวส์ตัวเต็ม",
+                        why: "<strong>นี่คือคีย์สำคัญมากที่โปรแกรมเมอร์มักหลงลืม</strong> ตัว pyzbar และ OpenCV ในไพธอนเป็นเพียงแค่รหัสหน้ากาก (Wrappers) ซึ่งการประมวลผลจริงหลังบ้านต้องการไลบรารีภาษา C ของระบบปฏิบัติการจำลองลินุกซ์ด้วย หากไม่ระบุส่วนนี้ ตอนเรียกใช้ฟังก์ชันสแกนแผล ดีบักเกอร์จะระเบิดเออร์เรอร์ 'ImportError: libGL.so.1: cannot open shared object file' ตู้ดับทันที"
+                    },
+                    {
+                        lines: [9, 10],
+                        title: "🐳 3. การก๊อบปี้และติดตั้ง Dependencies ไร้ขยะ",
+                        what: "คัดลอกเฉพาะไฟล์ใบนำส่ง requirements.txt เข้าตู้ปิดก่อนเป็นอันดับแรก จากนั้นยิงคำสั่งติดตั้ง Pip Install โดยปิดการสะสมหน่วยความจำแคชชั่วคราว (--no-cache-dir)",
+                        get: "ตู้ระบบติดตั้งไลบรารีไพธอนสำเร็จโดยที่ไม่มีไฟล์ขยะตกค้างหลงเหลือหลังลงเสร็จ ช่วยย่นขนาดไฟล์อิมเมจสุดท้ายให้บางและรวดเร็ว",
+                        why: "การก็อปปี้และติดตั้ง requirements แยกกันก่อนการก็อปปี้โค้ดทั้งหมด (COPY . .) จะช่วยดึงฟีเจอร์ Docker Layer Caching มาใช้ ทำให้เมื่อมีการแก้ไขโค้ดแอปครั้งต่อไป Docker จะไม่เหวี่ยงตัวดาวน์โหลดไลบรารีใหม่ตั้งแต่ศูนย์ ช่วยประหยัดเวลาอย่างมหาศาล"
+                    }
+                ]
+            },
+            config: {
+                title: "ไฟล์: server/app/core/config.py (ตัวโหลดคอนฟิกระดับแอป)",
+                path: "server/app/core/config.py",
+                rawCode: `from pydantic_settings import BaseSettings, SettingsConfigDict
+
+class Settings(BaseSettings):
+    PROJECT_NAME: str = "Deep Learning-Based System for Segmentation and Monitoring of Diabetic Foot Ulcer"
+    API_V1_STR: str = "/api/v1"
+    DATABASE_URL: str
+    model_config = SettingsConfigDict(env_file="../.env", env_file_encoding="utf-8", extra="ignore")
+
+settings = Settings()`,
+                htmlCode: [
+                    `<span class="c-keyword">from</span> pydantic_settings <span class="c-keyword">import</span> BaseSettings, SettingsConfigDict`,
+                    ``,
+                    `<span class="c-keyword">class</span> <span class="c-class">Settings</span>(BaseSettings):`,
+                    `    PROJECT_NAME: <span class="c-class">str</span> = <span class="c-string">"Deep Learning-Based System for Segmentation and Monitoring of Diabetic Foot Ulcer"</span>`,
+                    `    API_V1_STR: <span class="c-class">str</span> = <span class="c-string">"/api/v1"</span>`,
+                    `    DATABASE_URL: <span class="c-class">str</span>`,
+                    `    `,
+                    `    model_config = SettingsConfigDict(env_file=<span class="c-string">"../.env"</span>, env_file_encoding=<span class="c-string">"utf-8"</span>, extra=<span class="c-string">"ignore"</span>)`,
+                    ``,
+                    `settings = Settings()`
+                ],
+                explanations: [
+                    {
+                        lines: [3, 6],
+                        title: "⚙️ 1. คลาสควบคุมตัวแปรแอปพลิเคชัน (Settings Class)",
+                        what: "สร้างคลาสสำหรับโหลดการตั้งค่าระบบ โดยสืบทอดมาจาก BaseSettings ของ Pydantic กำหนดประเภทข้อมูลสำหรับตัวเชื่อมฐานข้อมูลคือ <code>DATABASE_URL: str</code> เพื่อให้ Pydantic ทำการเปิดอ่านและแมปค่าจากไฟล์ <code>.env</code> ภายนอกเข้าสู่ระบบโดยอัตโนมัติโดยตรง",
+                        get: "ออบเจกต์เชื่อมโยงข้อมูลแบบ OOP ชื่อ settings ซึ่งเก็บคุณสมบัติทุกอย่างพร้อมเรียกใช้งานด่วนทั่วโปรเจกต์ เช่น เขียน settings.PROJECT_NAME ได้ใน main.py ทันที",
+                        why: "การประกาศประเภทตัวแปรไว้เฉย ๆ โดยไม่ใช้ <code>os.getenv</code> จะช่วยป้องกันข้อผิดพลาดประเภท ValidationError บนคอมเครื่อง Windows หลัก (เพราะ Windows ไม่ได้เปิดอ่านไฟล์ .env เข้าสู่ระบบปฏิบัติการอัตโนมัติเหมือนในตู้ Docker) และเปิดโอกาสให้ Pydantic Settings จัดการโหลดค่าความลับข้ามแพลตฟอร์มอย่างเสถียร"
+                    },
+                    {
+                        lines: [8, 8],
+                        title: "⚙️ 2. การระบุเป้าหมายไฟล์ความลับ (SettingsConfigDict)",
+                        what: "กำหนดทิศทางการค้นหาไฟล์ความลับย้อนกลับขึ้นไปหนึ่งระดับนอกห้องแอปผ่านพาธ '../.env' ใช้ฟอร์แมตฟอนต์สากล utf-8 และข้ามคีย์ตัวแปรแปลกอื่น ๆ ด้วยค่า extra='ignore'",
+                        get: "กลไกประมวลผลอัตโนมัติของ Pydantic Settings ที่จะวิ่งไปเจาะดูดตัวแปรจากไฟล์ .env นอกสุดเข้ามาสถิตในคลาสให้ทันทีตอนเปิดแอปโดยปราศจากการเขียนคำสั่งคัดกรองแบบแมนนวล",
+                        why: "เพราะไฟล์ .env ตั้งอยู่ภายนอกโฟลเดอร์ระบบเซิร์ฟเวอร์หลัก (เพื่อความปลอดภัยจากการแนบเข้า Git) การระบุพาธย้อนขึ้นแบบไดนามิกจึงเป็นวิธียืนยันตัวตนที่เสถียรที่สุด"
+                    }
+                ]
+            },
+            base_class: {
+                title: "ไฟล์: server/app/db/base_class.py (คลาสแม่กำหนดชื่อตาราง)",
+                path: "server/app/db/base_class.py",
+                rawCode: `from typing import Any
+from sqlalchemy.orm import DeclarativeBase, declared_attr
+
+class Base(DeclarativeBase):
+    id: Any
+    __name__: str
+
+    @declared_attr
+    def __tablename__(cls) -> str:
+        return cls.__name__.lower()`,
+                htmlCode: [
+                    `<span class="c-keyword">from</span> typing <span class="c-keyword">import</span> Any`,
+                    `<span class="c-keyword">from</span> sqlalchemy.orm <span class="c-keyword">import</span> DeclarativeBase, declared_attr`,
+                    ``,
+                    `<span class="c-keyword">class</span> <span class="c-class">Base</span>(DeclarativeBase):`,
+                    `    id: Any`,
+                    `    __name__: <span class="c-class">str</span>`,
+                    `    `,
+                    `    <span class="c-decorator">@declared_attr</span>`,
+                    `    <span class="c-keyword">def</span> <span class="c-func">__tablename__</span>(cls) -> <span class="c-class">str</span>:`,
+                    `        <span class="c-keyword">return</span> cls.__name__.lower()`
+                ],
+                explanations: [
+                    {
+                        lines: [4, 6],
+                        title: "📐 1. คลาสตั้งต้น ORM ตัวแม่ (DeclarativeBase)",
+                        what: "สร้างคลาสสารบัญชื่อ Base สืบทอดมาจาก DeclarativeBase ของระบบ SQLAlchemy 2.0 ทำหน้าที่เปรียบเสมือนศูนย์กลางการผูกโยงข้อมูลตารางทั้งหมดในโปรเจกต์เข้าด้วยกัน",
+                        get: "คลาสแม่แบบมาตรฐานสะสมข้อมูลเชิงสัมพันธ์ (Metadata) ที่ตารางข้อมูลรายไฟล์โมเดล (role.py, user.py, patient.py...) ทุกตัวจะดึงไปใช้งานสืบทอดครอบคลุมเพื่อสร้างตารางลงฐานข้อมูลจริง",
+                        why: "นี่คือดีไซน์แพทเทิร์นแบบ OOP เพื่ออำนวยความสะดวกในการจัดหมวดหมู่ข้อมูล ทำให้ SQLAlchemy และ Alembic สแกน Metadata รวมของตารางทั้งหมดได้ผ่าน Base.metadata จุดเดียว"
+                    },
+                    {
+                        lines: [8, 10],
+                        title: "📐 2. ตัวแปลแปลงชื่อคลาสเป็นชื่อตาราง SQL อัตโนมัติ (__tablename__)",
+                        what: "ใช้ตกแต่งมาร์กอัปโค้ดด้วย @declared_attr เพื่อคำนวณชื่อตารางจริงใน SQL อ้างอิงจากชื่อคลาสไพธอน แปลงอักษรเป็นภาษาอังกฤษพิมพ์เล็ก เช่น คลาส User จะแปลงชื่อตารางเป็น 'users' อัตโนมัติในฐานข้อมูล",
+                        get: "ลดการเขียนโค้ดที่ฟุ่มเฟือย ซ้ำซาก โปรแกรมเมอร์ไม่ต้องเสียเวลามาพิมพ์ระบุ __tablename__ = '...' ทุกครั้งที่เขียนคลาสใหม่ขึ้นมาใช้งาน",
+                        why: "เพื่อป้องกันปัญหาเรื่องความผิดพลาดทางการสะกดคำ (Typo) และกำหนดระเบียบตารางให้ออกมาเป็นแบบภาษาอังกฤษพิมพ์เล็กเสมอเพื่อความเป็นระเบียบบนโปรโตคอลระบบดีบี"
+                    }
+                ]
+            },
+            session: {
+                title: "ไฟล์: server/app/db/session.py (โรงงานเปิดสายเชื่อมดีบี)",
+                path: "server/app/db/session.py",
+                rawCode: `from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from app.core.config import settings
+
+engine = create_engine(settings.DATABASE_URL, pool_pre_ping=True)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)`,
+                htmlCode: [
+                    `<span class="c-keyword">from</span> sqlalchemy <span class="c-keyword">import</span> create_engine`,
+                    `<span class="c-keyword">from</span> sqlalchemy.orm <span class="c-keyword">import</span> sessionmaker`,
+                    `<span class="c-keyword">from</span> app.core.config <span class="c-keyword">import</span> settings`,
+                    ``,
+                    `engine = create_engine(settings.DATABASE_URL, pool_pre_ping=<span class="c-keyword">True</span>)`,
+                    `SessionLocal = sessionmaker(autocommit=<span class="c-keyword">False</span>, autoflush=<span class="c-keyword">False</span>, bind=engine)`
+                ],
+                explanations: [
+                    {
+                        lines: [5, 5],
+                        title: "🔗 1. เอ็นจิ้นสะพานท่อส่งข้อมูลหลัก (Database Engine)",
+                        what: "สร้างเอ็นจิ้นกลางชื่อ engine ผ่านฟังก์ชัน create_engine เชื่อมโยงเข้าหาพารามิเตอร์ DATABASE_URL ที่โหลดคอนฟิกมาจาก `.env` และกำหนดคำสั่ง pool_pre_ping=True เป็นระบบตรวจสอบความปลอดภัยของสายเชื่อมโยงก่อนคิวรีจริง",
+                        get: "ท่อเชื่อมสัญญาณส่งข้อมูลหลัก (Database Connection Pool) คอยทำหน้าที่เปิดและหมุนเวียนจัดสรรสายเชื่อมอัตโนมัติ ป้องกันไม่ให้แอปสะดุดขาดตอนเวลามีผู้ใช้กดสแกนรูปแผลพร้อมกันหลายคน",
+                        why: "คำสั่ง pool_pre_ping=True มีความสำคัญมากในงานตู้จำลอง เนื่องจากหากไม่ได้ยิงสัญญาณ Ping ตรวจสอบสุขภาพสายก่อนเริ่มทำคิวรี หากสายฐานข้อมูล PostgreSQL ค้างหรือหลุดระหว่างใช้งาน ตัวแอป FastAPI จะพังดับทันที (Internal Server Error) การเปิดฟังก์ชันนี้จะช่วยออโต้รีเซ็ตท่อสัญญาณใหม่ให้ทันควัน"
+                    },
+                    {
+                        lines: [6, 6],
+                        title: "🔗 2. คลาสคุมหน้าต่างธุรกรรมดีบี (SessionLocal Factory)",
+                        what: "สถาปนาคลาส SessionLocal ด้วยข้อตกลงปิดคำสั่งเขียนบันทึกข้อมูลอัตโนมัติ (autocommit=False) และสั่งห้ามส่งถ่ายข้อมูลคิวรีชั่วคราวก่อนกดยืนยัน (autoflush=False) ผูกมัดกับเอ็นจิ้นหลัก",
+                        get: "โรงงานสำหรับพิมพ์คลาส SessionLocal เพื่อนำไปสร้างธุรกรรมคุยกับฐานข้อมูล (เช่น ใน API ดึงรูปแผล หรือสคริปต์กรอกข้อมูล) มั่นใจได้ว่าข้อมูลปลอดภัย",
+                        why: "การตั้งค่า autocommit=False บังคับหลักการรักษาความมั่นคงทางข้อมูล (Unit of Work) โปรแกรมเมอร์ต้องระบุdb.commit() เองทางโค้ดเท่านั้นข้อมูลถึงจะบันทึกถาวรลงดิสก์ หากโค้ดทำงานพังกลางคัน (เช่น วิเคราะห์ภาพแผลไม่ผ่าน) เราสั่ง db.rollback() ถอยข้อมูลกลับได้ทันที ป้องกันข้อมูลดิบเสียหายปะปนค้างดีบี"
+                    }
+                ]
+            },
+            models: {
+                title: "แพ็กเกจ: server/app/models/ (โครงสร้างแยกไฟล์ตาราง)",
+                path: "",
+                isFolder: true,
+                defaultSubFile: "init",
+                subFiles: {
+                    init: {
+                        name: "__init__.py",
+                        path: "server/app/models/__init__.py",
+                        rawCode: `from app.db.base_class import Base
+from app.models.role import Role
+from app.models.user import User
+from app.models.nurse import Nurse
+from app.models.patient import Patient
+from app.models.body_part import BodyPart
+from app.models.wound import Wound
+from app.models.wound_record import WoundRecord
+from app.models.appointment import Appointment`,
+                        htmlCode: [
+                            `<span class="c-keyword">from</span> app.db.base_class <span class="c-keyword">import</span> Base`,
+                            `<span class="c-keyword">from</span> app.models.role <span class="c-keyword">import</span> Role`,
+                            `<span class="c-keyword">from</span> app.models.user <span class="c-keyword">import</span> User`,
+                            `<span class="c-keyword">from</span> app.models.nurse <span class="c-keyword">import</span> Nurse`,
+                            `<span class="c-keyword">from</span> app.models.patient <span class="c-keyword">import</span> Patient`,
+                            `<span class="c-keyword">from</span> app.models.body_part <span class="c-keyword">import</span> BodyPart`,
+                            `<span class="c-keyword">from</span> app.models.wound <span class="c-keyword">import</span> Wound`,
+                            `<span class="c-keyword">from</span> app.models.wound_record <span class="c-keyword">import</span> WoundRecord`,
+                            `<span class="c-keyword">from</span> app.models.appointment <span class="c-keyword">import</span> Appointment`
+                        ],
+                        explanations: [
+                            {
+                                lines: [1, 9],
+                                title: "⚠️ 1. ไฟล์สารบัญนำเข้า (ไม่ใช่ตัวเขียนคอลัมน์ดีบี)",
+                                what: "<strong>[ข้อควรระวัง]</strong> ไฟล์นี้ทำหน้าที่เป็นเพียงสารบัญ (Index) นำเข้าโมเดลย่อยมารวมกัน <u>ไม่ใช่ที่สำหรับประกาศฟิลด์หรือคอลัมน์</u> ของตารางครับ! <strong>หากต้องการดูชนิดข้อมูลและคอลัมน์ของจริง ให้กดแท็บปุ่มด้านบนแยกตามตาราง เช่น role.py, user.py, patient.py...</strong>",
+                                get: "ทำให้โค้ดภายนอกเรียกใช้งานผ่าน app.models ได้สั้น ๆ สะอาดตา และช่วยให้ตัว Alembic Migration สแกนค้นหาตารางทั้งหมดพบลื่นไหล",
+                                why: "หากเราไม่สร้างไฟล์สารบัญนี้ หรือเรานำรหัสคอลัมน์ไปเขียนในนี้ทั้งหมด จะเกิดปัญหา Circular Import โครงร่างโค้ดพังได้ง่ายในอนาคต"
+                            }
+                        ]
+                    },
+                    role: {
+                        name: "role.py",
+                        path: "server/app/models/role.py",
+                        rawCode: `from sqlalchemy import Column, String
+from sqlalchemy.orm import relationship
+from app.db.base_class import Base
+
+class Role(Base):
+    __tablename__ = "roles"
+    role_id = Column(String(5), primary_key=True)
+    role_name = Column(String(20), nullable=False)
+    users = relationship("User", back_populates="role")`,
+                        htmlCode: [
+                            `<span class="c-keyword">from</span> sqlalchemy <span class="c-keyword">import</span> Column, String`,
+                            `<span class="c-keyword">from</span> sqlalchemy.orm <span class="c-keyword">import</span> relationship`,
+                            `<span class="c-keyword">from</span> app.db.base_class <span class="c-keyword">import</span> Base`,
+                            ``,
+                            `<span class="c-keyword">class</span> <span class="c-class">Role</span>(Base):`,
+                            `    __tablename__ = <span class="c-string">"roles"</span>`,
+                            `    role_id = Column(String(<span class="c-number">5</span>), primary_key=<span class="c-keyword">True</span>)`,
+                            `    role_name = Column(String(<span class="c-number">20</span>), nullable=<span class="c-keyword">False</span>)`,
+                            `    users = relationship(<span class="c-string">"User"</span>, back_populates=<span class="c-string">"role"</span>)`
+                        ],
+                        explanations: [
+                            {
+                                lines: [5, 9],
+                                title: "🗄️ 1. ตารางสิทธิ์และสิทธิ์เข้าใช้งานหลัก (roles table)",
+                                what: "ประกาศตารางเก็บข้อมูลประเภทสิทธิ์เข้าใช้งานหลักในโปรเจกต์ โดยมีคีย์หลักคือ `role_id` ชนิดตัวอักษร 5 อักขระเพื่อใช้เป็นคีย์ระดับสากล เช่น ADMIN (ผู้ดูแล), NURSE (พยาบาล) และ PATI (คนไข้) โยงความสัมพันธ์แบบ One-to-Many ไปตารางผู้ใช้งาน",
+                                get: "โครงสร้างความปลอดภัยในการแยกแยะพฤติกรรมผู้เข้าใช้ระบบเว็บและแอปพลิเคชันหลังบ้าน ป้องกันพยาบาลสลับไอดีมาแก้ไขประวัติของคนไข้ หรือผู้ป่วยเข้ามาสแกนดูตารางข้อมูลของพยาบาลท่านอื่น",
+                                why: "เพื่อให้เป็นไปตามกฎความปลอดภัยสากลด้านสารสนเทศสุขภาพ การจัดสิทธิ์ผู้ใช้ (Role-Based Access Control) ตั้งแต่ระดับโมเดลฐานข้อมูล จะช่วยให้พัฒนาการเขียน APIs หลังบ้านคัดแยกความปลอดภัยได้แน่นหนา"
+                            }
+                        ]
+                    },
+                    user: {
+                        name: "user.py",
+                        path: "server/app/models/user.py",
+                        rawCode: `import datetime
+from sqlalchemy import Column, String, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
+from app.db.base_class import Base
+
+class User(Base):
+    __tablename__ = "users"
+    user_id = Column(String(10), primary_key=True)
+    username = Column(String(50), unique=True, nullable=False, index=True)
+    password = Column(String(255), nullable=False)
+    role_id = Column(String(5), ForeignKey("roles.role_id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    role = relationship("Role", back_populates="users")
+    nurse_profile = relationship("Nurse", uselist=False, back_populates="user")
+    patient_profile = relationship("Patient", uselist=False, back_populates="user")
+    records_added = relationship("WoundRecord", back_populates="nurse")`,
+                        htmlCode: [
+                            `<span class="c-keyword">import</span> datetime`,
+                            `<span class="c-keyword">from</span> sqlalchemy <span class="c-keyword">import</span> Column, String, DateTime, ForeignKey`,
+                            `<span class="c-keyword">from</span> sqlalchemy.orm <span class="c-keyword">import</span> relationship`,
+                            `<span class="c-keyword">from</span> app.db.base_class <span class="c-keyword">import</span> Base`,
+                            ``,
+                            `<span class="c-keyword">class</span> <span class="c-class">User</span>(Base):`,
+                            `    __tablename__ = <span class="c-string">"users"</span>`,
+                            `    user_id = Column(String(<span class="c-number">10</span>), primary_key=<span class="c-keyword">True</span>)`,
+                            `    username = Column(String(<span class="c-number">50</span>), unique=<span class="c-keyword">True</span>, nullable=<span class="c-keyword">False</span>, index=<span class="c-keyword">True</span>)`,
+                            `    password = Column(String(<span class="c-number">255</span>), nullable=<span class="c-keyword">False</span>)`,
+                            `    role_id = Column(String(<span class="c-number">5</span>), ForeignKey(<span class="c-string">"roles.role_id"</span>), nullable=<span class="c-keyword">False</span>)`,
+                            `    created_at = Column(DateTime, default=datetime.datetime.utcnow)`,
+                            `    role = relationship(<span class="c-string">"Role"</span>, back_populates=<span class="c-string">"users"</span>)`,
+                            `    nurse_profile = relationship(<span class="c-string">"Nurse"</span>, uselist=<span class="c-keyword">False</span>, back_populates=<span class="c-string">"user"</span>)`,
+                            `    patient_profile = relationship(<span class="c-string">"Patient"</span>, uselist=<span class="c-keyword">False</span>, back_populates=<span class="c-string">"user"</span>)`,
+                            `    records_added = relationship(<span class="c-string">"WoundRecord"</span>, back_populates=<span class="c-string">"nurse"</span>)`
+                        ],
+                        explanations: [
+                            {
+                                lines: [6, 16],
+                                title: "🗄️ 1. ตารางเก็บข้อมูลรหัสล็อกอินหลัก (users table)",
+                                what: "กำหนดโครงสร้างบัญชีผู้ใช้งาน โดยมีฟิลด์เก็บชื่อผู้ใช้ล็อกอิน (username) บังคับสเปค unique=True ห้ามมีรหัสซ้ำ และทำดัชนีพิเศษ (index=True) เพื่อเพิ่มความเร็วในการกรอกตรวจชื่อล็อกอิน เก็บความสัมพันธ์โยงหาตาราง Nurse และ Patient ในแบบตัวต่อตัว (1-to-1)",
+                                get: "ระบบรักษาความปลอดภัยด่านหน้าตอนล็อกอินเข้าใช้งานของระบบติดตามแผลเบาหวาน โดยใช้ประโยชน์จาก uselist=False เพื่อเชื่อมโยงกุญแจความสัมพันธ์ 1 บัญชีผู้ใช้ต่อข้อมูลประวัติส่วนบุคคลเพียงแค่ 1 ข้อมูลเท่านั้น",
+                                why: "การทำความสัมพันธ์แบบ uselist=False (1-to-1) สำคัญมากในการพัฒนาแอปพลิเคชันเวชระเบียน เพราะป้องกันไม่ให้บัญชีผู้ล็อกอิน 1 คน แอบไปมีโปรไฟล์พยาบาล 2 แผนก หรือมีประวัติ HN ของผู้ป่วยหลายคนซ้ำซ้อนในระบบ"
+                            }
+                        ]
+                    },
+                    nurse: {
+                        name: "nurse.py",
+                        path: "server/app/models/nurse.py",
+                        rawCode: `from sqlalchemy import Column, String, ForeignKey
+from sqlalchemy.orm import relationship
+from app.db.base_class import Base
+
+class Nurse(Base):
+    __tablename__ = "nurse"
+    user_id = Column(String(10), ForeignKey("users.user_id"), primary_key=True)
+    first_name = Column(String(50), nullable=False)
+    last_name = Column(String(50), nullable=False)
+    department = Column(String(100), nullable=True)
+    user = relationship("User", back_populates="nurse_profile")`,
+                        htmlCode: [
+                            `<span class="c-keyword">from</span> sqlalchemy <span class="c-keyword">import</span> Column, String, ForeignKey`,
+                            `<span class="c-keyword">from</span> sqlalchemy.orm <span class="c-keyword">import</span> relationship`,
+                            `<span class="c-keyword">from</span> app.db.base_class <span class="c-keyword">import</span> Base`,
+                            ``,
+                            `<span class="c-keyword">class</span> <span class="c-class">Nurse</span>(Base):`,
+                            `    __tablename__ = <span class="c-string">"nurse"</span>`,
+                            `    user_id = Column(String(<span class="c-number">10</span>), ForeignKey(<span class="c-string">"users.user_id"</span>), primary_key=<span class="c-keyword">True</span>)`,
+                            `    first_name = Column(String(<span class="c-number">50</span>), nullable=<span class="c-keyword">False</span>)`,
+                            `    last_name = Column(String(<span class="c-number">50</span>), nullable=<span class="c-keyword">False</span>)`,
+                            `    department = Column(String(<span class="c-number">100</span>), nullable=<span class="c-keyword">True</span>)`,
+                            `    user = relationship(<span class="c-string">"User"</span>, back_populates=<span class="c-string">"nurse_profile"</span>)`
+                        ],
+                        explanations: [
+                            {
+                                lines: [5, 11],
+                                title: "🗄️ 1. ตารางข้อมูลประวัติพยาบาลผู้รับผิดชอบหลัก (nurse table)",
+                                what: "สร้างตารางเพื่อจัดเก็บโปรไฟล์พยาบาล โดยกำหนดคีย์ user_id ให้พ่วงรับสองหน้าที่ เป็นทั้ง Primary Key ประจำตาราง และเป็น ForeignKey โยงชี้กลับไปตาราง users เพื่อทำการลุกขึ้นจับคู่ความสัมพันธ์แบบ 1-to-1",
+                                get: "ข้อมูลการแสดงตัวของพยาบาลผู้รับสแกนแผลในหน้าจอติดตามประวัติ ป้องกันรายชื่อพยาบาลปะปนกับประวัติของผู้ป่วยเบาหวาน",
+                                why: "การนำ user_id มาทำเป็นทั้ง PK และ FK เพื่อความรัดกุมในการคัดกรองข้อมูล เพราะพยาบาล 1 ท่าน จะต้องมีประวัติในระบบเพียงชุดเดียว และไม่มีความจำเป็นต้องแยกคีย์ ID อื่นให้อ่านตรวจสอบสับสนอีกทอด"
+                            }
+                        ]
+                    },
+                    patient: {
+                        name: "patient.py",
+                        path: "server/app/models/patient.py",
+                        rawCode: `import datetime
+from sqlalchemy import Column, String, Date, ForeignKey
+from sqlalchemy.orm import relationship
+from app.db.base_class import Base
+
+class Patient(Base):
+    __tablename__ = "patients"
+    HN = Column(String(50), primary_key=True, index=True)
+    user_id = Column(String(10), ForeignKey("users.user_id"), nullable=True)
+    first_name = Column(String(50), nullable=False)
+    last_name = Column(String(50), nullable=False)
+    birth_date = Column(Date, nullable=True)
+    gender = Column(String(10), nullable=True)
+    phone = Column(String(20), nullable=True)
+    admit_date = Column(Date, default=datetime.date.today)
+    user = relationship("User", back_populates="patient_profile")
+    wounds = relationship("Wound", back_populates="patient")
+    appointments = relationship("Appointment", back_populates="patient")`,
+                        htmlCode: [
+                            `<span class="c-keyword">import</span> datetime`,
+                            `<span class="c-keyword">from</span> sqlalchemy <span class="c-keyword">import</span> Column, String, Date, ForeignKey`,
+                            `<span class="c-keyword">from</span> sqlalchemy.orm <span class="c-keyword">import</span> relationship`,
+                            `<span class="c-keyword">from</span> app.db.base_class <span class="c-keyword">import</span> Base`,
+                            ``,
+                            `<span class="c-keyword">class</span> <span class="c-class">Patient</span>(Base):`,
+                            `    __tablename__ = <span class="c-string">"patients"</span>`,
+                            `    HN = Column(String(<span class="c-number">50</span>), primary_key=<span class="c-keyword">True</span>, index=<span class="c-keyword">True</span>)`,
+                            `    user_id = Column(String(<span class="c-number">10</span>), ForeignKey(<span class="c-string">"users.user_id"</span>), nullable=<span class="c-keyword">True</span>)`,
+                            `    first_name = Column(String(<span class="c-number">50</span>), nullable=<span class="c-keyword">False</span>)`,
+                            `    last_name = Column(String(<span class="c-number">50</span>), nullable=<span class="c-keyword">False</span>)`,
+                            `    birth_date = Column(Date, nullable=<span class="c-keyword">True</span>)`,
+                            `    gender = Column(String(<span class="c-number">10</span>), nullable=<span class="c-keyword">True</span>)`,
+                            `    phone = Column(String(<span class="c-number">20</span>), nullable=<span class="c-keyword">True</span>)`,
+                            `    admit_date = Column(Date, default=datetime.date.today)`,
+                            `    user = relationship(<span class="c-string">"User"</span>, back_populates=<span class="c-string">"patient_profile"</span>)`,
+                            `    wounds = relationship(<span class="c-string">"Wound"</span>, back_populates=<span class="c-string">"patient"</span>)`,
+                            `    appointments = relationship(<span class="c-string">"Appointment"</span>, back_populates=<span class="c-string">"patient"</span>)`
+                        ],
+                        explanations: [
+                            {
+                                lines: [6, 18],
+                                title: "🗄️ 1. ตารางเวชระเบียนประวัติผู้ป่วยเบาหวานหลัก (patients table)",
+                                what: "กำหนดคลาสเก็บข้อมูลประวัติผู้ป่วยเบาหวาน โดยใช้ HN (Hospital Number) เป็นคีย์หลัก (Primary Key) และดัก index ค้นหาเร็ว กำหนดเชื่อมโยงกุญแจไปหา User ล็อกอินแบบ uselist=False โยงหา Wound แบบ One-to-Many",
+                                get: "ศูนย์กลางสารบัญเก็บตัวตนประวัติคนไข้โรคเบาหวานทั้งหมดของทางคลินิก รองรับสายเชื่อมความสัมพันธ์ที่สามารถสืบดึงรูปถ่ายแผลทั้งหมดของคนไข้รายนี้ขึ้นมารันพล็อตกราฟเส้นติดตามได้สะดวก",
+                                why: "ที่กำหนดให้ user_id ของตารางคนไข้เป็นค่าว่างได้ (nullable=True) เนื่องจากในบริบทจริงของโรงพยาบาล คนไข้โรคแผลเบาหวานบางท่านเป็นผู้สูงอายุที่เดินทางมาตรวจและทำแผลหน้าร้านอย่างเดียวโดยไม่ได้มีการสมัครรหัสบัญชีล็อกอินทางหน้าจอ การอนุญาตให้เป็น NULL จึงจำเป็นมากเพื่อให้ระบบเวชระเบียนเดินหน้าบันทึกแผลได้ราบรื่น"
+                            }
+                        ]
+                    },
+                    body_part: {
+                        name: "body_part.py",
+                        path: "server/app/models/body_part.py",
+                        rawCode: `from sqlalchemy import Column, String
+from sqlalchemy.orm import relationship
+from app.db.base_class import Base
+
+class BodyPart(Base):
+    __tablename__ = "body_parts"
+    body_part_id = Column(String(5), primary_key=True)
+    body_part_name = Column(String(50), nullable=False)
+    wounds = relationship("Wound", back_populates="body_part")`,
+                        htmlCode: [
+                            `<span class="c-keyword">from</span> sqlalchemy <span class="c-keyword">import</span> Column, String`,
+                            `<span class="c-keyword">from</span> sqlalchemy.orm <span class="c-keyword">import</span> relationship`,
+                            `<span class="c-keyword">from</span> app.db.base_class <span class="c-keyword">import</span> Base`,
+                            ``,
+                            `<span class="c-keyword">class</span> <span class="c-class">BodyPart</span>(Base):`,
+                            `    __tablename__ = <span class="c-string">"body_parts"</span>`,
+                            `    body_part_id = Column(String(<span class="c-number">5</span>), primary_key=<span class="c-keyword">True</span>)`,
+                            `    body_part_name = Column(String(<span class="c-number">50</span>), nullable=<span class="c-keyword">False</span>)`,
+                            `    wounds = relationship(<span class="c-string">"Wound"</span>, back_populates=<span class="c-string">"body_part"</span>)`
+                        ],
+                        explanations: [
+                            {
+                                lines: [5, 9],
+                                title: "🗄️ 1. สารบัญจำแนกตำแหน่งส่วนอวัยวะแผลเบาหวาน (body_parts table)",
+                                what: "สร้างตารางมาสเตอร์เก็บตำแหน่งของอวัยวะเท้า เช่น รหัส FF ชี้หน้าเท้า (Forefoot), HEEL ชี้ส้นเท้า (Heel), DORS ชี้หลังเท้า (Dorsum) เพื่อเป็นตัวป้อนทางลัดในการผูก ForeignKey ในตารางแผลคนไข้",
+                                get: "ชุดตัวเลือกสากลมาตรฐานทางแพทย์สำหรับการเลือกจัดกลุ่มรูปถ่ายแผล เพื่อส่งสถิติไปวาดแดชบอร์ดสรุปสถิติรวมของโรงพยาบาลได้ว่า คนไข้เบาหวานมักเกิดแผลหลักที่บริเวณจุดใดมากที่สุด",
+                                why: "การคุมตำแหน่งกายวิภาคด้วยตารางแยกเดี่ยว จะช่วยควบคุมมาตรฐานข้อมูล พยาบาลทุกคนในระบบจะสามารถสกรีนระบุตำแหน่งโดยดึงตัวแปรชี้อ้างอิงตรงกันหมด ป้องกันปัญหาการสะกดคำตำแหน่งเท้าไม่เหมือนกัน"
+                            }
+                        ]
+                    },
+                    wound: {
+                        name: "wound.py",
+                        path: "server/app/models/wound.py",
+                        rawCode: `import datetime
+from sqlalchemy import Column, String, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
+from app.db.base_class import Base
+
+class Wound(Base):
+    __tablename__ = "wounds"
+    wound_id = Column(String(10), primary_key=True)
+    HN = Column(String(50), ForeignKey("patients.HN"), nullable=False)
+    body_part_id = Column(String(5), ForeignKey("body_parts.body_part_id"), nullable=False)
+    side = Column(String(10), nullable=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    patient = relationship("Patient", back_populates="wounds")
+    body_part = relationship("BodyPart", back_populates="wounds")
+    records = relationship("WoundRecord", back_populates="wound")`,
+                        htmlCode: [
+                            `<span class="c-keyword">import</span> datetime`,
+                            `<span class="c-keyword">from</span> sqlalchemy <span class="c-keyword">import</span> Column, String, DateTime, ForeignKey`,
+                            `<span class="c-keyword">from</span> sqlalchemy.orm <span class="c-keyword">import</span> relationship`,
+                            `<span class="c-keyword">from</span> app.db.base_class <span class="c-keyword">import</span> Base`,
+                            ``,
+                            `<span class="c-keyword">class</span> <span class="c-class">Wound</span>(Base):`,
+                            `    __tablename__ = <span class="c-string">"wounds"</span>`,
+                            `    wound_id = Column(String(<span class="c-number">10</span>), primary_key=<span class="c-keyword">True</span>)`,
+                            `    HN = Column(String(<span class="c-number">50</span>), ForeignKey(<span class="c-string">"patients.HN"</span>), nullable=<span class="c-keyword">False</span>)`,
+                            `    body_part_id = Column(String(<span class="c-number">5</span>), ForeignKey(<span class="c-string">"body_parts.body_part_id"</span>), nullable=<span class="c-keyword">False</span>)`,
+                            `    side = Column(String(<span class="c-number">10</span>), nullable=<span class="c-keyword">False</span>)`,
+                            `    created_at = Column(DateTime, default=datetime.datetime.utcnow)`,
+                            `    patient = relationship(<span class="c-string">"Patient"</span>, back_populates=<span class="c-string">"wounds"</span>)`,
+                            `    body_part = relationship(<span class="c-string">"BodyPart"</span>, back_populates=<span class="c-string">"wounds"</span>)`,
+                            `    records = relationship(<span class="c-string">"WoundRecord"</span>, back_populates=<span class="c-string">"wound"</span>)`
+                        ],
+                        explanations: [
+                            {
+                                lines: [6, 15],
+                                title: "🗄️ 1. ตารางจัดกลุ่มจุดพิกัดเกิดแผลหลัก (wounds table)",
+                                what: "กำหนดคลาสคุมตัวแผลหลัก มีคีย์หลัก `wound_id` (เช่น W0001) โยง FK หาคนไข้ผ่าน HN ดึง FK หาอวัยวะผ่าน body_part_id และมีฟิลด์เก็บข้างเท้า (side) ได้แก่ ซ้าย หรือ ขวา เพื่อเป็นแกนกลางรับประวัติย่อย",
+                                get: "ชุดจัดกลุ่มแผลหลักแบบระบุพิกัด ที่ใช้ในการดึงเอาข้อมูลรูปแผลและขนาดพื้นที่รายครั้ง (WoundRecord) มาร้อยเรียงวิเคราะห์ความก้าวหน้า ป้องกันสถิติแผลปะปนกับจุดเกิดแผลอื่น",
+                                why: "นี่คือคีย์ดีไซน์สำคัญทางการแพทย์! เพราะผู้ป่วยเบาหวาน 1 คน ในช่วงเวลารักษาเดียวกัน สามารถมีแผลเกิดขึ้นได้มากกว่า 1 จุด (เช่น มีแผลที่ส้นเท้าขวา และแผลที่หน้าเท้าซ้าย) หากเราไม่สร้างตาราง wounds เป็นตัวจัดกลุ่มแผล ประวัติรูปถ่ายแผลทั้งหมดจะปนกันมั่วซั่วจนสแกนวิเคราะห์ทิศทางการสมานแผลของแต่ละจุดไม่ได้เลย"
+                            }
+                        ]
+                    },
+                    wound_record: {
+                        name: "wound_record.py",
+                        path: "server/app/models/wound_record.py",
+                        rawCode: `import datetime
+from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, Text
+from sqlalchemy.orm import relationship
+from app.db.base_class import Base
+
+class WoundRecord(Base):
+    __tablename__ = "wound_records"
+    record_id = Column(Integer, primary_key=True, autoincrement=True)
+    wound_id = Column(String(10), ForeignKey("wounds.wound_id"), nullable=False)
+    user_id = Column(String(10), ForeignKey("users.user_id"), nullable=False)
+    image_path = Column(String(255), nullable=False)
+    area_pixel = Column(Integer, nullable=False)
+    area_cm2 = Column(Float, nullable=False)
+    record_date = Column(DateTime, default=datetime.datetime.utcnow)
+    note = Column(Text, nullable=True)
+    wound = relationship("Wound", back_populates="records")
+    nurse = relationship("User", back_populates="records_added")`,
+                        htmlCode: [
+                            `<span class="c-keyword">import</span> datetime`,
+                            `<span class="c-keyword">from</span> sqlalchemy <span class="c-keyword">import</span> Column, Integer, String, DateTime, Float, ForeignKey, Text`,
+                            `<span class="c-keyword">from</span> sqlalchemy.orm <span class="c-keyword">import</span> relationship`,
+                            `<span class="c-keyword">from</span> app.db.base_class <span class="c-keyword">import</span> Base`,
+                            ``,
+                            `<span class="c-keyword">class</span> <span class="c-class">WoundRecord</span>(Base):`,
+                            `    __tablename__ = <span class="c-string">"wound_records"</span>`,
+                            `    record_id = Column(Integer, primary_key=<span class="c-keyword">True</span>, autoincrement=<span class="c-keyword">True</span>)`,
+                            `    wound_id = Column(String(<span class="c-number">10</span>), ForeignKey(<span class="c-string">"wounds.wound_id"</span>), nullable=<span class="c-keyword">False</span>)`,
+                            `    user_id = Column(String(<span class="c-number">10</span>), ForeignKey(<span class="c-string">"users.user_id"</span>), nullable=<span class="c-keyword">False</span>)`,
+                            `    image_path = Column(String(<span class="c-number">255</span>), nullable=<span class="c-keyword">False</span>)`,
+                            `    area_pixel = Column(Integer, nullable=<span class="c-keyword">False</span>)`,
+                            `    area_cm2 = Column(Float, nullable=<span class="c-keyword">False</span>)`,
+                            `    record_date = Column(DateTime, default=datetime.datetime.utcnow)`,
+                            `    note = Column(Text, nullable=<span class="c-keyword">True</span>)`,
+                            `    wound = relationship(<span class="c-string">"Wound"</span>, back_populates=<span class="c-string">"records"</span>)`,
+                            `    nurse = relationship("User", back_populates="records_added")`
+                        ],
+                        explanations: [
+                            {
+                                lines: [6, 17],
+                                title: "🗄️ 1. ผลลัพธ์จากการคำนวณ Deep Learning (wound_records table)",
+                                what: "กำหนดฟิลด์สำหรับเก็บบันทึกประวัติวิเคราะห์แผลรายครั้ง ประกอบด้วยคีย์หลักรันเลขลำดับอัตโนมัติ (record_id), คีย์เชื่อมหากลุ่มแผลหลัก (wound_id), ที่อยู่จัดจัดเก็บไฟล์ภาพ (image_path) และฟิลด์รับค่าประมวลผลขนาดแผล pixel และเซนติเมตรจริง",
+                                get: "ตารางเก็บผลงานระดับมาสเตอร์พีซที่จะรับเอาค่าพยากรณ์ขอบเขตแผลเบาหวาน (Predicted Mask Pixels) จากโมเดล Deep Learning และรับขนาดแปลงกายภาพตารางเซนติเมตร ($cm^2$) จาก OpenCV มารับบันทึกเซฟลงตู้ดีบีจำลองอย่างเป็นขั้นเป็นตอนพร้อมเก็บวันที่ประเมินแผล",
+                                why: "เพื่อให้เก็บบันทึกประวัติและรูปภาพขอบแผลเบาหวานแบบไทม์ไลน์ (Time-series) เอาไว้คำนวณทิศทางการยุบหรือขยายตัวของแผลเบาหวานย้อนหลังได้ เพื่อให้โปรแกรมเบื้องหลังไม่ต้องเสียพลังงานการ์ดจอแฝงคำนวณโมเดล Deep Learning ภาพเดิมซ้ำซ้อนย้อนไปมา"
+                            }
+                        ]
+                    },
+                    appointment: {
+                        name: "appointment.py",
+                        path: "server/app/models/appointment.py",
+                        rawCode: `import datetime
+from sqlalchemy import Column, Integer, String, Date, Time, DateTime, ForeignKey, Text
+from sqlalchemy.orm import relationship
+from app.db.base_class import Base
+
+class Appointment(Base):
+    __tablename__ = "appointments"
+    appointment_id = Column(Integer, primary_key=True, autoincrement=True)
+    HN = Column(String(50), ForeignKey("patients.HN"), nullable=False)
+    nurse_user_id = Column(String(10), ForeignKey("users.user_id"), nullable=False)
+    appointment_date = Column(Date, nullable=False)
+    appointment_time = Column(Time, nullable=False)
+    note = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    patient = relationship("Patient", back_populates="appointments")`,
+                        htmlCode: [
+                            `<span class="c-keyword">import</span> datetime`,
+                            `<span class="c-keyword">from</span> sqlalchemy <span class="c-keyword">import</span> Column, Integer, String, Date, Time, DateTime, ForeignKey, Text`,
+                            `<span class="c-keyword">from</span> sqlalchemy.orm <span class="c-keyword">import</span> relationship`,
+                            `<span class="c-keyword">from</span> app.db.base_class <span class="c-keyword">import</span> Base`,
+                            ``,
+                            `<span class="c-keyword">class</span> <span class="c-class">Appointment</span>(Base):`,
+                            `    __tablename__ = <span class="c-string">"appointments"</span>`,
+                            `    appointment_id = Column(Integer, primary_key=<span class="c-keyword">True</span>, autoincrement=<span class="c-keyword">True</span>)`,
+                            `    HN = Column(String(<span class="c-number">50</span>), ForeignKey(<span class="c-string">"patients.HN"</span>), nullable=<span class="c-keyword">False</span>)`,
+                            `    nurse_user_id = Column(String(<span class="c-number">10</span>), ForeignKey(<span class="c-string">"users.user_id"</span>), nullable=<span class="c-keyword">False</span>)`,
+                            `    appointment_date = Column(Date, nullable=<span class="c-keyword">False</span>)`,
+                            `    appointment_time = Column(Time, nullable=<span class="c-keyword">False</span>)`,
+                            `    note = Column(Text, nullable=<span class="c-keyword">True</span>)`,
+                            `    created_at = Column(DateTime, default=datetime.datetime.utcnow)`,
+                            `    patient = relationship(<span class="c-string">"Patient"</span>, back_populates=<span class="c-string">"appointments"</span>)`
+                        ],
+                        explanations: [
+                            {
+                                lines: [6, 15],
+                                title: "🗄️ 1. ตารางปฏิทินนัดหมายการรักษาติดตามแผล (appointments table)",
+                                what: "กำหนดคลาสสำหรับการจัดทำนัดหมาย โดยเชื่อม HN สิทธิ์คนไข้ เชื่อมต่อคีย์พยาบาลผู้นัดหมาย มีฟิลด์กำหนดวันที่นัด (Date) และเวลานัดสแกนรอบถัดไป (Time)",
+                                get: "ข้อมูลการจองตารางนัดหมายทำแผลสแกนและประเมินรอบถัดไปของผู้ป่วยโรคเบาหวานแต่ละคนกับพยาบาลผู้รับผิดชอบงาน",
+                                why: "เนื่องจากการประเมินแผลเบาหวานที่ดีต้องตรวจวัดอย่างมีระยะเวลาชัดเจน (เช่น ทุก ๆ 1 สัปดาห์) การบันทึกนัดหมายในตารางจะทำให้ระบบสามารถแจ้งเตือนหรือดึงตารางสรุปปฏิทินงานขึ้นมาแสดงผลให้ทั้งคนไข้และทีมแพทย์ทราบได้ล่วงหน้าโดยระบบไม่ข้ามรอบการตรวจ"
+                            }
+                        ]
+                    }
+                }
+            },
+            alembic_env: {
+                title: "ไฟล์: server/alembic/env.py (สคริปต์ควบคุมประวัติฐานข้อมูล)",
+                path: "server/alembic/env.py",
+                rawCode: `import os
+import sys
+from logging.config import fileConfig
+from sqlalchemy import engine_from_config, pool
+from alembic import context
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from app.core.config import settings
+from app.db.base_class import Base
+from app.models import Role, User, Nurse, Patient, BodyPart, Wound, WoundRecord, Appointment
+
+config = context.config
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+
+if config.config_file_name is not None:
+    fileConfig(config.config_file_name)
+
+target_metadata = Base.metadata
+
+def run_migrations_offline() -> None:
+    url = config.get_main_option("sqlalchemy.url")
+    context.configure(url=url, target_metadata=target_metadata, literal_binds=True, dialect_opts={"paramstyle": "named"})
+    with context.begin_transaction():
+        context.run_migrations()
+
+def run_migrations_online() -> None:
+    connectable = engine_from_config(config.get_section(config.config_ini_section, {}), prefix="sqlalchemy.", poolclass=pool.NullPool)
+    with connectable.connect() as connection:
+        context.configure(connection=connection, target_metadata=target_metadata)
+        with context.begin_transaction():
+            context.run_migrations()
+
+if context.is_offline_mode():
+    run_migrations_offline()
+else:
+    run_migrations_online()`,
+                htmlCode: [
+                    `<span class="c-keyword">import</span> os, sys`,
+                    `<span class="c-keyword">from</span> logging.config <span class="c-keyword">import</span> fileConfig`,
+                    `<span class="c-keyword">from</span> sqlalchemy <span class="c-keyword">import</span> engine_from_config, pool`,
+                    `<span class="c-keyword">from</span> alembic <span class="c-keyword">import</span> context`,
+                    ``,
+                    `sys.path.insert(<span class="c-number">0</span>, os.path.abspath(os.path.join(os.path.dirname(__file__), <span class="c-string">'..'</span>)))`,
+                    ``,
+                    `<span class="c-keyword">from</span> app.core.config <span class="c-keyword">import</span> settings`,
+                    `<span class="c-keyword">from</span> app.db.base_class <span class="c-keyword">import</span> Base`,
+                    `<span class="c-keyword">from</span> app.models <span class="c-keyword">import</span> Role, User, Nurse, Patient, BodyPart, Wound, WoundRecord, Appointment`,
+                    ``,
+                    `config = context.config`,
+                    `config.set_main_option(<span class="c-string">"sqlalchemy.url"</span>, settings.DATABASE_URL)`,
+                    ``,
+                    `<span class="c-keyword">if</span> config.config_file_name <span class="c-keyword">is not</span> <span class="c-keyword">None</span>:`,
+                    `    fileConfig(config.config_file_name)`,
+                    ``,
+                    `target_metadata = Base.metadata`,
+                    ``,
+                    `<span class="c-keyword">def</span> <span class="c-func">run_migrations_offline</span>() -> <span class="c-keyword">None</span>:`,
+                    `    url = config.get_main_option(<span class="c-string">"sqlalchemy.url"</span>)`,
+                    `    context.configure(url=url, target_metadata=target_metadata, literal_binds=<span class="c-keyword">True</span>)`,
+                    `    <span class="c-keyword">with</span> context.begin_transaction():`,
+                    `        context.run_migrations()`,
+                    ``,
+                    `<span class="c-keyword">def</span> <span class="c-func">run_migrations_online</span>() -> <span class="c-keyword">None</span>:`,
+                    `    connectable = engine_from_config(config.get_section(config.config_ini_section, {}), prefix=<span class="c-string">"sqlalchemy."</span>, poolclass=pool.NullPool)`,
+                    `    <span class="c-keyword">with</span> connectable.connect() <span class="c-keyword">as</span> connection:`,
+                    `        context.configure(connection=connection, target_metadata=target_metadata)`,
+                    `        <span class="c-keyword">with</span> context.begin_transaction():`,
+                    `            context.run_migrations()`,
+                    ``,
+                    `<span class="c-keyword">if</span> context.is_offline_mode():`,
+                    `    run_migrations_offline()`,
+                    `<span class="c-keyword">else</span>:`,
+                    `    run_migrations_online()`
+                ],
+                explanations: [
+                    {
+                        lines: [5, 6],
+                        title: "✈️ 1. การแทรกพอยน์เตอร์ระบบปฏิบัติการ (sys.path.insert)",
+                        what: "เขียนคำสั่งฉีดพาธระบบปฏิบัติการย้อนกลับขึ้นไปหนึ่งห้อง เพื่อให้ตัวประมวลผลไพธอนรับรู้โฟลเดอร์หลักของโปรเจกต์",
+                        get: "ตัวช่วยรันประมวลผลที่ทำให้ Alembic สามารถสั่ง import รหัสตารางต่าง ๆ จากโฟลเดอร์แอปย่อยของจริงมาใช้งานในโฟลเดอร์ alembic/ ได้สำเร็จโดยปราศจากบั๊กคลาสหลุดหาย",
+                        why: "เนื่องจากเบื้องหลัง สคริปต์ env.py ทำงานอยู่ในโฟลเดอร์ alembic/ ทำให้มันมีขอบเขตมองไม่เห็นห้อง app/ ที่อยู่ข้างนอก การขยายทัศนวิสัยด้วย sys.path จึงจำเป็นอย่างยิ่ง"
+                    },
+                    {
+                        lines: [8, 12],
+                        title: "✈️ 2. สารบัญเปรียบเทียบและการดึงตารางมาแอดตรวจสอบ (target_metadata)",
+                        what: "นำเอา Base class และตารางโมเดลย่อยทั้ง 8 ไฟล์เข้ามาผูกกับสารบัญหลัก Base.metadata ซึ่งทำหน้าที่รายงานความสมบูรณ์ของโครงสร้างดีบี",
+                        get: "ระบบเปรียบเทียบข้อมูลที่คอยเปรียบเทียบความแตกต่างระหว่างโมเดลคลาสที่เราเขียนขึ้นใหม่ กับฐานข้อมูลจริงในวินาทีนั้น เพื่อทำรายการประวัติตารางอัตโนมัติ (Autogenerate Migration)",
+                        why: "<strong>ข้อระวังอย่างสูงสุด</strong> หากไม่ได้นำเข้าตารางในหน้านี้ ตัวเช็คของ Alembic จะเข้าใจว่าคุณลบตารางทั้งหมดในโปรเจกต์ทิ้งแล้ว และมันจะเขียนคำสั่งลบโครงสร้างตารางข้อมูลใน Postgres ทิ้งเกลี้ยง"
+                    },
+                    {
+                        lines: [14, 16],
+                        title: "✈️ 3. การเชื่อมตัวแปรความลับข้ามระบบ (set_main_option)",
+                        what: "สั่งลบตัวแปรการเชื่อมต่อฐานข้อมูลของเดิมใน alembic.ini และเขียนทับตัวแปรโดยผูกตรงกับ settings.DATABASE_URL ของแอปหลังบ้าน",
+                        get: "การการันตีการคุยดีบีของ Alembic โดยดึงสิทธิ์รหัสผ่านและพอร์ตมาจากไฟล์ .env นอกคอมพิวเตอร์อย่างปลอดภัยและทรงพลังสูงสุด",
+                        why: "เพื่อหลีกเลี่ยงภัยรั่วไหลของข้อมูล เนื่องจากหากเราฝังรหัสล็อกอินฐานข้อมูลไว้ใน alembic.ini เปล่า ๆ สิทธิ์รหัสผ่านดีบีจะโดนเผยแพร่ออกไปเมื่อมีการส่งงานในกลุ่มทันที"
+                    }
+                ]
+            },
+            seed: {
+                title: "ไฟล์: server/app/db/seed.py (สคริปต์สุ่มป้อนบทบาทและอวัยวะ)",
+                path: "server/app/db/seed.py",
+                rawCode: `import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
+from app.db.session import SessionLocal
+from app.models import Role, BodyPart
+
+def seed_initial_data():
+    db = SessionLocal()
+    try:
+        roles_data = [
+            Role(role_id="ADMIN", role_name="ผู้ดูแลระบบ"),
+            Role(role_id="NURSE", role_name="พยาบาล"),
+            Role(role_id="PATI", role_name="ผู้ป่วย")
+        ]
+        
+        parts_data = [
+            BodyPart(body_part_id="FF", body_part_name="Forefoot (หน้าเท้า)"),
+            BodyPart(body_part_id="MF", body_part_name="Midfoot (กลางฝ่าเท้า)"),
+            BodyPart(body_part_id="HEEL", body_part_name="Heel (ส้นเท้า)"),
+            BodyPart(body_part_id="ANKL", body_part_name="Ankle (ข้อเท้า)"),
+            BodyPart(body_part_id="DORS", body_part_name="Dorsum (หลังเท้า)"),
+            BodyPart(body_part_id="PLAN", body_part_name="Plantar (ฝ่าเท้า)")
+        ]
+        
+        for role in roles_data:
+            if not db.query(Role).filter_by(role_id=role.role_id).first():
+                db.add(role)
+                
+        for part in parts_data:
+            if not db.query(BodyPart).filter_by(body_part_id=part.body_part_id).first():
+                db.add(part)
+                
+        db.commit()
+        print("✅ ป้อนข้อมูล Roles และ Body Parts เริ่มต้นลงฐานข้อมูลสำเร็จ!")
+    except Exception as e:
+        print(f"❌ เกิดข้อผิดพลาดในการใส่ข้อมูลตั้งต้น: {e}")
+        db.rollback()
+    finally:
+        db.close()
+
+if __name__ == "__main__":
+    seed_initial_data()`,
+                htmlCode: [
+                    `<span class="c-keyword">import</span> sys, os`,
+                    `sys.path.insert(<span class="c-number">0</span>, os.path.abspath(os.path.join(os.path.dirname(__file__), <span class="c-string">'../..'</span>)))`,
+                    ``,
+                    `<span class="c-keyword">from</span> app.db.session <span class="c-keyword">import</span> SessionLocal`,
+                    `<span class="c-keyword">from</span> app.models <span class="c-keyword">import</span> Role, BodyPart`,
+                    ``,
+                    `<span class="c-keyword">def</span> <span class="c-func">seed_initial_data</span>():`,
+                    `    db = SessionLocal()`,
+                    `    <span class="c-keyword">try</span>:`,
+                    `        roles_data = [`,
+                    `            Role(role_id=<span class="c-string">"ADMIN"</span>, role_name=<span class="c-string">"ผู้ดูแลระบบ"</span>),`,
+                    `            Role(role_id=<span class="c-string">"NURSE"</span>, role_name=<span class="c-string">"พยาบาล"</span>),`,
+                    `            Role(role_id=<span class="c-string">"PATI"</span>, role_name=<span class="c-string">"ผู้ป่วย"</span>)`,
+                    `        ]`,
+                    `        parts_data = [`,
+                    `            BodyPart(body_part_id=<span class="c-string">"FF"</span>, body_part_name=<span class="c-string">"Forefoot (หน้าเท้า)"</span>),`,
+                    `            BodyPart(body_part_id=<span class="c-string">"MF"</span>, body_part_name=<span class="c-string">"Midfoot (กลางฝ่าเท้า)"</span>),`,
+                    `            BodyPart(body_part_id=<span class="c-string">"HEEL"</span>, body_part_name=<span class="c-string">"Heel (ส้นเท้า)"</span>),`,
+                    `            BodyPart(body_part_id=<span class="c-string">"ANKL"</span>, body_part_name=<span class="c-string">"Ankle (ข้อเท้า)"</span>),`,
+                    `            BodyPart(body_part_id=<span class="c-string">"DORS"</span>, body_part_name=<span class="c-string">"Dorsum (หลังเท้า)"</span>),`,
+                    `            BodyPart(body_part_id=<span class="c-string">"PLAN"</span>, body_part_name=<span class="c-string">"Plantar (ฝ่าเท้า)"</span>)`,
+                    `        ]`,
+                    `        <span class="c-keyword">for</span> role <span class="c-keyword">in</span> roles_data:`,
+                    `            <span class="c-keyword">if</span> <span class="c-keyword">not</span> db.query(Role).filter_by(role_id=role.role_id).first():`,
+                    `                db.add(role)`,
+                    `        <span class="c-keyword">for</span> part <span class="c-keyword">in</span> parts_data:`,
+                    `            <span class="c-keyword">if</span> <span class="c-keyword">not</span> db.query(BodyPart).filter_by(body_part_id=part.body_part_id).first():`,
+                    `                db.add(part)`,
+                    `        db.commit()`,
+                    `        print(<span class="c-string">"✅ ป้อนข้อมูล Roles และ Body Parts สำเร็จ!"</span>)`,
+                    `    <span class="c-keyword">except</span> Exception <span class="c-keyword">as</span> e:`,
+                    `        db.rollback()`,
+                    `    <span class="c-keyword">finally</span>:`,
+                    `        db.close()`,
+                    ``,
+                    `<span class="c-keyword">if</span> __name__ == <span class="c-string">"__main__"</span>:`,
+                    `    seed_initial_data()`
+                ],
+                explanations: [
+                    {
+                        lines: [1, 2],
+                        title: "🌱 1. การจัดตั้งพาธความจำระบบ (sys.path.insert)",
+                        what: "เขียนรหัสควบคุมระบบเพื่อดึงให้ไพธอนรู้พิกัดโฟลเดอร์หลักของโปรแกรม เพื่ออำนวยการ import โมดูลข้ามตำแหน่งไฟล์ย่อย",
+                        get: "ช่วยให้สคริปต์ seed.py นี้ สามารถดึงและเปิดสายดีบีจาก db.session และเรียกใช้ตาราง Role จาก models/ มาคิวรีได้อย่างราบรื่น",
+                        why: "ป้องกันบั๊ก ModuleNotFoundError เพราะตามปกติ สคริปต์ที่รันอยู่ในห้องย่อยลึก 2 ชั้น จะมองไม่เห็นชื่อห้องหลัก การตั้งค่านี้ช่วยสถาปนาตัวชี้ระบบให้ปลอดภัยสูงสุด"
+                    },
+                    {
+                        lines: [10, 22],
+                        title: "🌱 2. ชุดตัวแปรข้อมูลเริ่มต้นสำหรับโปรเจกต์ (Static Master Data)",
+                        what: "สถาปนารายการอาเรย์ของบทบาทสิทธิ์ (ADMIN, NURSE, PATI) และพิกัดตำแหน่งเกิดแผลของเท้า 6 พิกัดสำคัญทางการแพทย์ (Forefoot, Midfoot, Heel, Ankle, Dorsum, Plantar)",
+                        get: "ชุดข้อมูลดิบที่มีมาตรฐานสากลพร้อมสำหรับการเขียนบรรจุลงในตาราง SQL เพื่อเตรียมให้บริการดึงข้อมูลไปแสดงตัวเลือกปุ่มทางหน้าบ้าน",
+                        why: "เพื่อแก้ปัญหาฐานข้อมูลว่างเปล่า (Empty DB) ซึ่งหากคนกดสตรีมแอปครั้งแรกแล้วระบบไม่มีตำแหน่งเท้าให้เลือก หรือสิทธิ์ผู้ใช้ไม่ได้รับการระบุ จะทำตัว APIs ทั้งหมดพังและใช้งานจริงไม่ได้"
+                    },
+                    {
+                        lines: [23, 28],
+                        title: "🌱 3. การเช็คซ้ำและแอดข้อมูล (Safety Insert Query)",
+                        what: "วนลูปประมวลเช็คในตาราง Postgres ด้วยคำสั่ง db.query().filter_by().first() ก่อนสั่งแอดตัวใหม่ เพื่อยืนยันว่าไม่มีข้อมูลกีย์นี้ถูกป้อนไว้ก่อนแล้ว",
+                        get: "สคริปต์จะไม่รันแอดข้อมูลทับตัวเดิมหากเคยรัน seed.py ไปแล้วรอบนึง ช่วยลดแรงสะกดคำของเซิร์ฟเวอร์",
+                        why: "ตาราง Role และ BodyPart คุมสิทธิ์ด้วยระดับ Primary Key หากเขียนสั่ง add ดิบซ้ำตัวเดิมโดยไม่มีการดักเช็คก่อน ตัว PostgreSQL จะดีดความเออร์เรอร์ข้อจำกัดคีย์ซ้ำ (IntegrityError) กลับมาทำให้ระบบการรันล้มเหลวทันที"
+                    }
+                ]
+            },
+            main: {
+                title: "ไฟล์: server/app/main.py (โค้ดรันระบบหลักของเซิร์ฟเวอร์หลังบ้าน)",
+                path: "server/app/main.py",
+                rawCode: `from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
+from typing import List
+
+from app.core.config import settings
+from app.db.session import SessionLocal
+from app.models import Role, BodyPart
+
+app = FastAPI(title=settings.PROJECT_NAME)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+@app.get("/")
+def read_root():
+    return {"message": "FastAPI และระบบฐานข้อมูลพร้อมใช้งานแล้ว!"}
+
+@app.get("/test-db-connection", response_model=List[dict])
+def test_db_connection(db: Session = Depends(get_db)):
+    parts = db.query(BodyPart).all()
+    return [{"id": p.body_part_id, "name": p.body_part_name} for p in parts]`,
+                htmlCode: [
+                    `<span class="c-keyword">from</span> fastapi <span class="c-keyword">import</span> FastAPI, Depends`,
+                    `<span class="c-keyword">from</span> sqlalchemy.orm <span class="c-keyword">import</span> Session`,
+                    `<span class="c-keyword">from</span> typing <span class="c-keyword">import</span> List`,
+                    ``,
+                    `<span class="c-keyword">from</span> app.core.config <span class="c-keyword">import</span> settings`,
+                    `<span class="c-keyword">from</span> app.db.session <span class="c-keyword">import</span> SessionLocal`,
+                    `<span class="c-keyword">from</span> app.models <span class="c-keyword">import</span> Role, BodyPart`,
+                    ``,
+                    `app = FastAPI(title=settings.PROJECT_NAME)`,
+                    ``,
+                    `<span class="c-keyword">def</span> <span class="c-func">get_db</span>():`,
+                    `    db = SessionLocal()`,
+                    `    <span class="c-keyword">try</span>:`,
+                    `        <span class="c-keyword">yield</span> db`,
+                    `    <span class="c-keyword">finally</span>:`,
+                    `        db.close()`,
+                    ``,
+                    `<span class="c-decorator">@app.get</span>(<span class="c-string">"/"</span>)`,
+                    `<span class="c-keyword">def</span> <span class="c-func">read_root</span>():`,
+                    `    <span class="c-keyword">return</span> {<span class="c-string">"message"</span>: <span class="c-string">"FastAPI และระบบฐานข้อมูลพร้อมใช้งานแล้ว!"</span>}`,
+                    ``,
+                    `<span class="c-decorator">@app.get</span>(<span class="c-string">"/test-db-connection"</span>)`,
+                    `<span class="c-keyword">def</span> <span class="c-func">test_db_connection</span>(db: Session = Depends(get_db)):`,
+                    `    parts = db.query(BodyPart).all()`,
+                    `    <span class="c-keyword">return</span> [{<span class="c-string">"id"</span>: p.body_part_id, "name": p.body_part_name} <span class="c-keyword">for</span> p <span class="c-keyword">in</span> parts]`
+                ],
+                explanations: [
+                    {
+                        lines: [9, 9],
+                        title: "🧪 1. จุดศูนย์กลาง API เซิร์ฟเวอร์ (FastAPI app)",
+                        what: "สร้างออบเจกต์ระบบแอปพลิเคชัน FastAPI กำหนดดึงหัวเรื่องชื่อของแอปพลิเคชันมาจากคลาสตั้งค่า settings",
+                        get: "ระบบหลังบ้านความเร็วสูงที่คอยดักรับสตรีมข้อมูลภาพถ่ายแผล และสร้างเว็บหน้าทดสอบ API Docs (Swagger UI) ให้เรากดยิงทดลองเขียนแผลแบบอัตโนมัติสำเร็จรูป",
+                        why: "เพื่อทำหน้าที่เป็นผู้ประสานงานหลัก (Coordinator) ในการเปิดเส้นทางเว็บคิวรีข้ามโปรโตคอลให้แอปมือถือหรือเว็บหลังบ้านสามารถส่งรูปแผลมาคำนวณสเกลได้"
+                    },
+                    {
+                        lines: [11, 16],
+                        title: "🧪 2. ตัวแจกจ่ายสิทธิ์สายคุยฐานข้อมูล (get_db Connection Lifecycle)",
+                        what: "สร้างฟังก์ชันแจกจ่ายเซสชันดีบีเกรดพิเศษโดยประยุกต์ใช้คำสั่ง yield ในแบบ Dependency Injection และสั่ง db.close() ครอบไว้ในบล็อกความปลอดภัยสุดท้าย",
+                        get: "ระบบคุมสายต่อดีบีแบบไร้กังวล โดยตัว API จะยืมเปิดสายต่อเมื่อมีคนกดส่งข้อมูลแผลเข้ามาประมวลผล และเมื่อคำนวณส่งสารกลับไปหาหน้าบ้านเสร็จสิ้น ท่อธุรกรรมนี้จะถูกดึงปิดดักล้างแรมออโต้ทันที",
+                        why: "เพื่อแก้ปัญหารูรั่วไหลของหน่วยความจำเซิร์ฟเวอร์ (Database Connection Leaks) หากไม่ตั้งแบบใช้ yield บังคับปิดสาย เมื่อมีคนทักใช้งานบ่อย ๆ สายต่อ PostgreSQL จะทะลุขีดจำกัดจนฐานข้อมูลดีดปฏิเสธล็อกอินเข้าใช้งานและทำระบบเว็บล่มแบบถาวร"
+                    },
+                    {
+                        lines: [22, 25],
+                        title: "🧪 3. APIs ยิงสแกนทดสอบระบบจริง (/test-db-connection)",
+                        what: "สร้างเราท์เตอร์ GET เข้าหาพิกัด /test-db-connection เรียกใช้งาน Dependency get_db เพื่อกู้ยืมสายดีบี สแกนอ่านคลาส BodyPart ส่งออกในแบบ JSON",
+                        get: "ระบบ Sanity Check ที่จะคอยการันตีบอกโปรแกรมเมอร์อย่างมั่นใจว่า ตัว API และระบบ Postgres จำลองในตู้ Docker คุยกันอย่างปกติสมบูรณ์",
+                        why: "เพื่อทำตัวเช็คสภาพการคุยกันของระบบหลังบ้านและคลาสตาราง (Sanity Check) ก่อนที่เราจะเริ่มนำเอาโมเดลปัญญาประดิษฐ์และคิวรีที่ซับซ้อนกว่านี้เข้ามาเขียนเชื่อมโยงแอป"
+                    }
+                ]
+            }
+        };
+
+        let activeFile = "folder_structure";
+        let activeLineIndex = null;
+
+        const codePane = document.getElementById("code-pane");
+        const explanationPane = document.getElementById("explanation-pane");
+        const fileTitle = document.getElementById("current-file-title");
+        const workspaceRoot = document.getElementById("workspace-root");
+
+        function loadFile(fileKey, subFileKey = null) {
+            activeFile = fileKey;
+
+            // Clear sub-nav if it exists
+            const existingSubNav = document.getElementById("sub-nav-container");
+            if (existingSubNav) {
+                existingSubNav.remove();
+            }
+
+            const fileData = fileDatabase[fileKey];
+            let codeData = fileData;
+            let displayPath = fileData.path;
+
+            if (fileData.isFolder) {
+                if (!subFileKey) {
+                    subFileKey = fileData.defaultSubFile;
+                }
+                codeData = fileData.subFiles[subFileKey];
+                displayPath = codeData.path;
+
+                fileTitle.innerHTML = `${fileData.title} &gt; ${codeData.name}<br><span style="font-size: 13.5px; color: var(--primary); font-weight: 500; display: block; margin-top: 4px;">📍 สร้างไฟล์ที่พาธ: <code>${displayPath}</code></span>`;
+
+                // Create sub-nav buttons
+                const subNavDiv = document.createElement("div");
+                subNavDiv.id = "sub-nav-container";
+                subNavDiv.className = "sub-nav";
+
+                Object.keys(fileData.subFiles).forEach(key => {
+                    const btn = document.createElement("button");
+                    btn.className = "sub-nav-btn" + (key === subFileKey ? " active" : "");
+                    btn.innerText = fileData.subFiles[key].name;
+                    btn.addEventListener("click", () => {
+                        loadFile(fileKey, key);
+                    });
+                    subNavDiv.appendChild(btn);
+                });
+
+                // Insert sub-nav immediately below the top bar
+                const topBar = document.querySelector(".top-bar");
+                topBar.insertAdjacentElement('afterend', subNavDiv);
+            } else {
+                if (displayPath) {
+                    fileTitle.innerHTML = `${fileData.title}<br><span style="font-size: 13.5px; color: var(--primary); font-weight: 500; display: block; margin-top: 4px;">📍 สร้างไฟล์ที่พาธ: <code>${displayPath}</code></span>`;
+                } else {
+                    fileTitle.innerText = fileData.title;
+                }
+            }
+
+            activeLineIndex = null;
+
+            codePane.innerHTML = "";
+            codeData.htmlCode.forEach((lineText, idx) => {
+                const lineNum = idx + 1;
+                const lineDiv = document.createElement("div");
+                lineDiv.className = "code-line";
+                lineDiv.id = `code-line-${lineNum}`;
+                lineDiv.innerHTML = `<span class="line-num">${lineNum}</span><span class="line-content">${lineText || ' '}</span>`;
+                lineDiv.addEventListener("click", () => highlightLine(lineNum, codeData));
+                codePane.appendChild(lineDiv);
+            });
+
+            explanationPane.innerHTML = "";
+            codeData.explanations.forEach((exp, idx) => {
+                const card = document.createElement("div");
+                card.className = "explanation-card";
+                card.id = `exp-card-${idx}`;
+                card.innerHTML = `
+                    <div class="card-header">
+                        <span>${exp.title}</span>
+                        <span class="card-tag">บรรทัดที่ ${exp.lines[0]} - ${exp.lines[1]}</span>
+                    </div>
+                    <div class="tabs-container">
+                        <button class="tab-btn active" onclick="switchCardTab(this, ${idx}, 'what', '${subFileKey}')">🔎 คืออะไร</button>
+                        <button class="tab-btn" onclick="switchCardTab(this, ${idx}, 'get', '${subFileKey}')">🎁 ได้อะไร</button>
+                        <button class="tab-btn" onclick="switchCardTab(this, ${idx}, 'why', '${subFileKey}')">💡 ทำไมต้องทำ</button>
+                    </div>
+                    <div class="tab-content" id="card-content-${idx}">
+                        ${exp.what}
+                    </div>
+                `;
+
+                card.addEventListener("click", () => {
+                    highlightLinesRange(exp.lines[0], exp.lines[1]);
+                    document.querySelectorAll('.explanation-card').forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                });
+
+                explanationPane.appendChild(card);
+            });
+        }
+
+        function highlightLine(lineNum, codeData) {
+            document.querySelectorAll(".code-line").forEach(l => l.classList.remove("highlighted"));
+            const targetLine = document.getElementById(`code-line-${lineNum}`);
+            if (targetLine) targetLine.classList.add("highlighted");
+
+            const explanations = codeData.explanations;
+            const expIdx = explanations.findIndex(exp => lineNum >= exp.lines[0] && lineNum <= exp.lines[1]);
+
+            if (expIdx !== -1) {
+                document.querySelectorAll('.explanation-card').forEach(c => c.classList.remove('active'));
+                const card = document.getElementById(`exp-card-${expIdx}`);
+                if (card) {
+                    card.classList.add('active');
+                    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+        }
+
+        function highlightLinesRange(start, end) {
+            document.querySelectorAll(".code-line").forEach(l => l.classList.remove("highlighted"));
+            for (let i = start; i <= end; i++) {
+                const line = document.getElementById(`code-line-${i}`);
+                if (line) line.classList.add("highlighted");
+            }
+            const firstLine = document.getElementById(`code-line-${start}`);
+            if (firstLine) {
+                firstLine.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        function switchCardTab(button, cardIdx, type, subFileKey) {
+            event.stopPropagation();
+            const card = button.closest('.explanation-card');
+            card.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            const contentDiv = document.getElementById(`card-content-${cardIdx}`);
+            let expData;
+
+            const fileData = fileDatabase[activeFile];
+            if (fileData.isFolder) {
+                expData = fileData.subFiles[subFileKey].explanations[cardIdx];
+            } else {
+                expData = fileData.explanations[cardIdx];
+            }
+
+            if (type === 'what') {
+                contentDiv.innerHTML = expData.what;
+            } else if (type === 'get') {
+                contentDiv.innerHTML = expData.get;
+            } else if (type === 'why') {
+                contentDiv.innerHTML = expData.why;
+            }
+        }
+
+        function copyEntireActiveFile() {
+            const fileData = fileDatabase[activeFile];
+            let raw = fileData.rawCode;
+
+            if (fileData.isFolder) {
+                const activeBtn = document.querySelector(".sub-nav-btn.active");
+                if (activeBtn) {
+                    const subFileName = activeBtn.innerText;
+                    const subFileKey = Object.keys(fileData.subFiles).find(key => fileData.subFiles[key].name === subFileName);
+                    raw = fileData.subFiles[subFileKey].rawCode;
+                }
+            }
+
+            navigator.clipboard.writeText(raw).then(() => {
+                const copyBtn = document.getElementById("btn-copy-main");
+                const originalText = copyBtn.innerText;
+                copyBtn.innerText = "Copied File!";
+                copyBtn.style.color = "var(--success)";
+                copyBtn.style.borderColor = "var(--success)";
+                setTimeout(() => {
+                    copyBtn.innerText = originalText;
+                    copyBtn.style.color = "var(--text-body)";
+                    copyBtn.style.borderColor = "var(--border)";
+                }, 2000);
+            });
+        }
+
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function () {
+                document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+                this.classList.add('active');
+                const fileKey = this.getAttribute('data-file');
+                loadFile(fileKey);
+            });
+        });
+
+        window.addEventListener("DOMContentLoaded", () => {
+            loadFile("folder_structure");
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คู่มือการติดตั้งระบบฐานข้อมูลและ Migration (DFU Project)</title>
+    <meta name="description" content="คู่มือสอนการขึ้นโครงสร้างฐานข้อมูล PostgreSQL, SQLAlchemy ORM และ Alembic Migration สำหรับระบบวิเคราะห์แผลเบาหวานที่เท้า">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS Design System -->
+    <style>
+        :root {
+            --bg-main: #0b0f19;
+            --bg-card: #151c2c;
+            --bg-sidebar: #101625;
+            --bg-code: #090d16;
+            --primary: #3b82f6;
+            --primary-grad: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --accent: #a855f7;
+            --text-title: #ffffff;
+            --text-body: #94a3b8;
+            --text-muted: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --border: #223049;
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Sarabun', 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-body);
+            line-height: 1.6;
+            overflow-x: hidden;
+            display: flex;
+        }
+
+        /* Sidebar Navigation */
+        aside {
+            width: 320px;
+            height: 100vh;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .brand-logo {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-grad);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 20px;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+        }
+
+        .brand-text h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            color: var(--text-title);
+            font-weight: 700;
+        }
+
+        .brand-text p {
+            font-size: 11px;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+            flex-grow: 1;
+            padding-right: 4px;
+        }
+
+        .nav-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .nav-list::-webkit-scrollbar-thumb {
+            background-color: var(--border);
+            border-radius: 4px;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            color: var(--text-body);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: var(--transition);
+            border: 1px solid transparent;
+        }
+
+        .nav-item a:hover {
+            background-color: rgba(59, 130, 246, 0.05);
+            color: var(--primary);
+            border-color: rgba(59, 130, 246, 0.1);
+        }
+
+        .nav-item.active a {
+            background: var(--primary-grad);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+        }
+
+        /* Main Content */
+        main {
+            margin-left: 320px;
+            flex-grow: 1;
+            padding: 48px 64px;
+            min-height: 100vh;
+            max-width: 1200px;
+        }
+
+        header {
+            margin-bottom: 48px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 6px 12px;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary);
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        h2 {
+            font-family: 'Outfit', 'Sarabun', sans-serif;
+            color: var(--text-title);
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--text-body);
+        }
+
+        /* Content Sections */
+        .section-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .section-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        }
+
+        .card h3 {
+            font-family: 'Outfit', 'Sarabun', sans-serif;
+            color: var(--text-title);
+            font-size: 20px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-number {
+            width: 28px;
+            height: 28px;
+            background: var(--primary-grad);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: var(--text-body);
+        }
+
+        ul, ol {
+            margin-left: 24px;
+            margin-bottom: 16px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* Code Blocks */
+        .code-container {
+            position: relative;
+            background-color: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            background-color: rgba(255,255,255,0.02);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .file-path {
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .btn-copy {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-body);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-copy:hover {
+            background: rgba(255,255,255,0.05);
+            color: white;
+        }
+
+        pre {
+            padding: 20px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 13.5px;
+            color: #e2e8f0;
+        }
+
+        /* Deep-Dive (คำอธิบายโค้ด) */
+        .deep-dive {
+            background: rgba(59, 130, 246, 0.03);
+            border-left: 4px solid var(--primary);
+            padding: 20px 24px;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            margin-top: 24px;
+        }
+
+        .deep-dive-title {
+            font-weight: 700;
+            color: var(--text-title);
+            margin-bottom: 10px;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .deep-dive-list {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .deep-dive-list li {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: var(--text-body);
+        }
+
+        .deep-dive-list li::before {
+            content: "🔍";
+            position: absolute;
+            left: 0;
+            top: 2px;
+            font-size: 11px;
+        }
+
+        .deep-dive-list strong {
+            color: var(--text-title);
+            font-family: 'Inter', 'Sarabun', sans-serif;
+        }
+
+        /* Flow Diagrams (Mermaid-like mockup) */
+        .diagram-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255,255,255,0.01);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        .diagram-step {
+            width: 100%;
+            max-width: 500px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            text-align: center;
+            margin-bottom: 16px;
+            position: relative;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .diagram-step:not(:last-child)::after {
+            content: "↓";
+            position: absolute;
+            bottom: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .diagram-step:last-child {
+            margin-bottom: 0;
+        }
+
+        .diagram-step-title {
+            font-weight: 700;
+            color: var(--text-title);
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .diagram-step-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Alerts */
+        .alert {
+            display: flex;
+            gap: 16px;
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+
+        .alert-info {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            color: var(--text-body);
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            color: var(--text-body);
+        }
+
+        .alert-icon {
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 64px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 992px) {
+            body {
+                flex-direction: column;
+            }
+            aside {
+                width: 100%;
+                height: auto;
+                position: static;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+            main {
+                margin-left: 0;
+                padding: 32px 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside>
+        <div class="brand">
+            <div class="brand-logo">DFU</div>
+            <div class="brand-text">
+                <h1>DFU Backend</h1>
+                <p>คู่มือหลัก (Main)</p>
+            </div>
+        </div>
+        <ul class="nav-list">
+            <li class="nav-item active" data-target="overview"><a href="#overview">📖 1. ภาพรวมระบบ</a></li>
+            <li class="nav-item" data-target="step1"><a href="#step1">🛠️ 2. ไฟล์โครงข่ายภายนอก</a></li>
+            <li class="nav-item" data-target="step2"><a href="#step2">🔑 3. ระบบเชื่อมต่อ DB</a></li>
+            <li class="nav-item" data-target="step3"><a href="#step3">🗄️ 4. ตาราง SQLAlchemy</a></li>
+            <li class="nav-item" data-target="step4"><a href="#step4">✈️ 5. ติดตั้ง Alembic</a></li>
+            <li class="nav-item" data-target="step5"><a href="#step5">📥 6. ข้อมูล Seed & Test</a></li>
+            <li class="nav-item" data-target="runtest"><a href="#runtest">🚀 7. วิธีทดสอบรันจริง</a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main>
+        
+        <!-- SECTION: OVERVIEW -->
+        <section id="overview" class="section-content active">
+            <header>
+                <div class="tag">Overview & Architecture</div>
+                <h2>คู่มือหลัก: ภาพรวมขั้นตอนการเตรียมฐานข้อมูล</h2>
+                <p class="subtitle">คู่มือรวบรวมแผนการรันระบบและโรดแมปขั้นตอนการตั้งค่าโปรเจกต์ DFU</p>
+            </header>
+
+            <div class="card">
+                <h3><div class="card-number">A</div>โครงสร้างสะพานเชื่อมโยงข้อมูล (Flow Diagram)</h3>
+                <p>นี่คือขั้นตอนเวลาที่ระบบ Backend ทำงานร่วมกัน ตั้งแต่เริ่มประกอบคอมจำลอง Docker ไปจนถึง APIs สื่อสารจริง:</p>
+                
+                <div class="diagram-container">
+                    <div class="diagram-step">
+                        <div class="diagram-step-title">1. Docker Compose (ศูนย์บัญชาการ)</div>
+                        <div class="diagram-step-desc">อ่านไฟล์ docker-compose.yml เพื่อเตรียมเปิดตู้ db (Postgres) และสร้างตู้ api (FastAPI)</div>
+                    </div>
+                    <div class="diagram-step">
+                        <div class="diagram-step-title">2. Dockerfile & Requirements.txt (สร้างสิ่งแวดล้อม)</div>
+                        <div class="diagram-step-desc">ลินุกซ์จำลองรันคำสั่ง pip install ติดตั้ง SQLAlchemy, OpenCV, และ pyzbar ไว้อย่างมิดชิดภายในตู้</div>
+                    </div>
+                    <div class="diagram-step">
+                        <div class="diagram-step-title">3. SQLAlchemy Engine & Session (สายจ่ายพลังงาน)</div>
+                        <div class="diagram-step-desc">เปิดสายคุยระหว่าง FastAPI และ PostgreSQL ผ่านพอร์ตจำลอง โดยมีการเช็คสายหลุดอัตโนมัติ</div>
+                    </div>
+                    <div class="diagram-step">
+                        <div class="diagram-step-title">4. Alembic Migration (ผู้คุมเวอร์ชัน)</div>
+                        <div class="diagram-step-desc">สแกนโครงร่างโมเดลคลาสใน models.py เพื่อนำไปแปลงเขียนตารางจริงลงดีบีโดยไม่ทำให้ข้อมูลเก่าสูญหาย</div>
+                    </div>
+                    <div class="diagram-step">
+                        <div class="diagram-step-title">5. APIs & Dependency Injection (ด่านตรวจพร้อมยืม)</div>
+                        <div class="diagram-step-desc">ผู้ใช้ร้องขอมา -> get_db ยืม Session ให้ API คิวรี -> เมื่อส่งคำตอบกลับเสร็จ ปิด Session อัตโนมัติ</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-number">B</div>สถาปัตยกรรมจัดกลุ่มโมดูลแบบแยกย่อย (Modular Directory Layout)</h3>
+                <p>เพื่อรองรับโครงการขนาดปานกลาง-ใหญ่ และป้องกันปัญหา Import วนลูป (Circular Import) เราจัดสัดส่วนดังนี้:</p>
+                <ul>
+                    <li><strong>`app/models.py`</strong>: รวมคลาสโครงร่างตาราง ORM ทั้งหมดไว้ที่นี่ เพื่อเขียนความสัมพันธ์ `relationship` เชื่อมหากันได้อย่างอิสระ</li>
+                    <li><strong>`app/modules/`</strong>: แยกกลุ่มโฟลเดอร์สำหรับเก็บฟังก์ชันประมวลผล (def) และตัวรับ APIs เช่น แยกงานคนไข้ที่ `patients/` และงานตัดขอบคำนวณแผลที่ `wounds/`</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SECTION: STEP 1 -->
+        <section id="step1" class="section-content">
+            <header>
+                <div class="tag">Step 1</div>
+                <h2>การตั้งค่าไฟล์โครงข่ายภายนอก (Docker & Env)</h2>
+                <p class="subtitle">การเตรียมฐานรันระบบจำลองเพื่อให้ทุกคนในทีมรันโค้ดได้ผลลัพธ์ตรงกัน</p>
+            </header>
+
+            <div class="alert alert-info">
+                <div class="alert-icon">💡</div>
+                <div>
+                    <strong>ทำไมเครื่องคุณถึงไม่ต้องการลงไลบรารี?</strong> เพราะในขั้นตอนนี้เราจะบรรจุความต้องการทั้งหมดไปติดตั้งอยู่ในตู้ Docker ทั้งสิ้น ระบบหลัก Windows ของคุณจะไม่มีขยะติดตั้งเพิ่มขึ้นเลย
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-number">1</div>ปรับแต่งไฟล์ `.env`</h3>
+                <p>สร้างไว้ที่โฟลเดอร์นอกสุดของโปรเจกต์ เพื่อเป็นที่รวมคีย์ลับรหัสผ่านของระบบ:</p>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="file-path">.env</span>
+                        <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code>POSTGRES_USER=dfu_admin
+POSTGRES_PASSWORD=dfu_password
+POSTGRES_DB=dfu_database
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
+
+DATABASE_URL=postgresql://dfu_admin:dfu_password@localhost:5430/dfu_database
+DATABASE_URL_DOCKER=postgresql://dfu_admin:dfu_password@db:5432/dfu_database</code></pre>
+                </div>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border); font-size: 13px;">
+                    <strong style="color: var(--primary); display: block; margin-bottom: 8px;">💡 ทำไมต้องแยก DATABASE_URL และ DATABASE_URL_DOCKER? (ต่างกันอย่างไร)</strong>
+                    <p style="margin-bottom: 8px; line-height: 1.6;">เนื่องจากโปรเจกต์ของเราจะรันอยู่บน <strong>"สองระบบเครือข่าย (Network Namespace) ที่แยกออกจากกัน"</strong> ดังนี้ครับ:</p>
+                    <ul style="margin-left: 20px; line-height: 1.6; display: flex; flex-direction: column; gap: 8px; color: var(--text-body);">
+                        <li><strong>DATABASE_URL (โลกภายนอกตู้ - รันตรงบน Windows):</strong> ใช้เมื่อเราพิมพ์สั่งคำสั่งตรงบน PowerShell/CMD ใน Windows เช่น สั่งอัปเดตตารางฐานข้อมูล (<code>alembic upgrade head</code>) หรือสคริปต์ป้อนข้อมูลตัวตนคนไข้ (<code>python seed.py</code>) ตัวระบบ Windows จะเข้าถึง Postgres ผ่านพอร์ตสะพานภายนอกคือ <code>localhost:5430</code></li>
+                        <li><strong>DATABASE_URL_DOCKER (โลกภายในตู้ปิด - รันจำลองบน Docker):</strong> ใช้เมื่อตัวแอป FastAPI (หลังบ้าน) ถูกสั่งให้บูตตัวเองรันอยู่อยู่ในตู้ปิดจำลอง โดยตู้แอปจะวิ่งไปต่อเชื่อมกับตู้ฐานข้อมูลผ่านสายแลนจำลองภายใน Docker (Bridge Network) โดยวิ่งเข้าหาชื่อเครื่องบริการฐานข้อมูลตรง ๆ คือ <code>db</code> และคุยผ่านพอร์ตรุ่นดั้งเดิมคือ <code>5432</code> (ไม่ชี้ไป localhost:5430 เพราะภายในตู้ API คำว่า localhost จะหมายถึงตัวแอปเอง และทำให้ต่อดีบีล้มเหลว)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-number">2</div>สร้างสเปคไลบรารีหลังบ้าน `requirements.txt`</h3>
+                <p>สร้างไฟล์นี้ไว้ในโฟลเดอร์ `server/requirements.txt` เพื่อติดตั้งโมดูลที่จำเป็นทั้งหมด:</p>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="file-path">server/requirements.txt</span>
+                        <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code>fastapi==0.111.0
+uvicorn==0.30.1
+sqlalchemy==2.0.31
+psycopg2-binary==2.9.9
+alembic==1.13.1
+pydantic-settings==2.3.3
+opencv-python-headless==4.9.0.80
+pyzbar==0.1.9</code></pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-number">3</div>สร้างแบบแปลนสร้างคอมพิวเตอร์จำลอง `Dockerfile`</h3>
+                <p>เขียนสคริปต์นี้ไว้ที่ไฟล์ `server/Dockerfile`:</p>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="file-path">server/Dockerfile</span>
+                        <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code>FROM python:3.10-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    libzbar0 \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE 8000</code></pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-number">4</div>สร้างไฟล์ควบคุมการเปิดตู้จำลอง `docker-compose.yml`</h3>
+                <p>เขียนสคริปต์นี้ไว้ที่ไฟล์ `docker-compose.yml` ที่โฟลเดอร์หลักนอกสุดของโครงการ:</p>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="file-path">docker-compose.yml</span>
+                        <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code>version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: dfu-db
+    ports:
+      - "5430:5432"
+    env_file:
+      - .env
+    volumes:
+      - dfu-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d $${POSTGRES_DB:-dfu_database}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: dfu-api
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://dfu_admin:dfu_password@db:5432/dfu_database
+    volumes:
+      - ./server:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  dfu-db-data:</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: STEP 2 -->
+        <section id="step2" class="section-content">
+            <header>
+                <div class="tag">Step 2</div>
+                <h2>ระบบเชื่อมโยงและเปิดสัญญาณฐานข้อมูล (Session)</h2>
+                <p class="subtitle">การจัดทำสายแจกจ่ายสัญญาณ (Connection Pool) ให้กับ API หลังบ้านของระบบ</p>
+            </header>
+
+            <div class="card">
+                <h3><div class="card-number">1</div>ไฟล์โหลดคอนฟิก `config.py`</h3>
+                <p>สร้างไฟล์นี้เพื่อให้ Pydantic ดึงตัวแปรจากไฟล์ `.env` ภายนอกมาใช้งานในระบบโดยอัตโนมัติ:</p>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="file-path">server/app/core/config.py</span>
+                        <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code>from pydantic_settings import BaseSettings, SettingsConfigDict
+
+class Settings(BaseSettings):
+    PROJECT_NAME: str = "Deep Learning-Based System for Segmentation and Monitoring of Diabetic Foot Ulcer"
+    API_V1_STR: str = "/api/v1"
+    DATABASE_URL: str
+
+    model_config = SettingsConfigDict(
+        env_file="../.env", 
+        env_file_encoding="utf-8", 
+        extra="ignore"
+    )
+
+settings = Settings()</code></pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-number">2</div>สร้างคลาสแม่สำหรับตารางฐานข้อมูล `base_class.py`</h3>
+                <p>สร้างสคริปต์นี้เพื่อตั้งระบบแปลงคลาส ORM เป็นตารางอัตโนมัติ:</p>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="file-path">server/app/db/base_class.py</span>
+                        <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code>from typing import Any
+from sqlalchemy.orm import DeclarativeBase, declared_attr
+
+class Base(DeclarativeBase):
+    id: Any
+    __name__: str
+
+    @declared_attr
+    def __tablename__(cls) -> str:
+        return cls.__name__.lower()</code></pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-number">3</div>สร้างสายสัญญาณและแจกจ่าย `session.py`</h3>
+                <p>ควบคุมการต่อสายสัญญาณเข้าสู่ตู้ดีบีจำลอง:</p>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="file-path">server/app/db/session.py</span>
+                        <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code>from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from app.core.config import settings
+
+engine = create_engine(settings.DATABASE_URL, pool_pre_ping=True)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: STEP 3 -->
+        <section id="step3" class="section-content">
+            <header>
+                <div class="tag">Step 3</div>
+                <h2>โมเดลโครงร่างฐานข้อมูล (SQLAlchemy Models)</h2>
+                <p class="subtitle">การนิยามคลาสภาษา Python ทั้ง 7 ตารางหลักเพื่อป้อนลงฐานข้อมูล</p>
+            </header>
+
+            <div class="card">
+                <h3><div class="card-number">1</div>ไฟล์สารบัญนำเข้าตารางรวม `app/models/__init__.py`</h3>
+                <p>สร้างโฟลเดอร์ชื่อ <code>server/app/models/</code> และเขียนสคริปต์สารบัญเพื่อรวบรวมไฟล์ตารางย่อย <strong>(คำเตือน: ไฟล์นี้ไม่ใช่ไฟล์สำหรับเขียนคอลัมน์ตาราง โค้ดชนิดข้อมูลและตัวแปรตารางจริง ๆ จะถูกอธิบายแยกย่อยไว้ในการ์ดข้อถัด ๆ ไปด้านล่าง เช่น role.py, user.py, patient.py...)</strong>:</p>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="file-path">server/app/models/__init__.py</span>
+                        <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code>from app.db.base_class import Base
+from app.models.role import Role
+from app.models.user import User
+from app.models.nurse import Nurse
+from app.models.patient import Patient
+from app.models.body_part import BodyPart
+from app.models.wound import Wound
+from app.models.wound_record import WoundRecord
+from app.models.appointment import Appointment</code></pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-number">2</div>โมเดลบทบาทสิทธิ์ `app/models/role.py`</h3>
+                <p>เขียนสคริปต์นี้ไว้ที่ <code>server/app/models/role.py</code>:</p>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="file-path">server/app/models/role.py</span>
+                        <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code>from sqlalchemy import Column, String
+from sqlalchemy.orm import relationship
+from app.db.base_class import Base
+
+class Role(Base):
+    __tablename__ = "roles"
+    role_id = Column(String(5), primary_key=True)
+    role_name = Column(String(20), nullable=False)
+    users = relationship("User", back_populates="role")</code></pre>
+                </div>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border); font-size: 13px;">
+                    <strong style="color: var(--primary); display: block; margin-bottom: 8px;">💡 คำอธิบายโครงสร้างตาราง roles:</strong>
+                    <ul style="margin-left: 20px; line-height: 1.6;">
+                        <li><strong>role_id (String 5 ตัว):</strong> รหัสสิทธิ์สั้น ๆ เช่น <code>ADMIN</code>, <code>NURSE</code>, <code>PATI</code> เป็น Primary Key</li>
+                        <li><strong>role_name (String 20 ตัว):</strong> ชื่อภาษาไทยเพื่อใช้แสดงผลบน UI เช่น 'ผู้ดูแลระบบ', 'พยาบาล', 'ผู้ป่วย'</li>
+                        <li><strong>users:</strong> ผูกความสัมพันธ์ One-to-Many ไปยังตาราง User (1 บทบาทมีผู้ใช้สังกัดได้หลายคน)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-number">3</div>โมเดลบัญชีสมาชิกหลัก `app/models/user.py`</h3>
+                <p>เขียนสคริปต์นี้ไว้ที่ <code>server/app/models/user.py</code>:</p>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="file-path">server/app/models/user.py</span>
+                        <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code>import datetime
+from sqlalchemy import Column, String, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
+from app.db.base_class import Base
+
+class User(Base):
+    __tablename__ = "users"
+    user_id = Column(String(10), primary_key=True)
+    username = Column(String(50), unique=True, nullable=False, index=True)
+    password = Column(String(255), nullable=False)
+    role_id = Column(String(5), ForeignKey("roles.role_id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    role = relationship("Role", back_populates="users")
+    nurse_profile = relationship("Nurse", uselist=False, back_populates="user")
+    patient_profile = relationship("Patient", uselist=False, back_populates="user")
+    records_added = relationship("WoundRecord", back_populates="nurse")</code></pre>
+                </div>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border); font-size: 13px;">
+                    <strong style="color: var(--primary); display: block; margin-bottom: 8px;">💡 คำอธิบายโครงสร้างตาราง users (ระบบล็อกอินหลัก):</strong>
+                    <ul style="margin-left: 20px; line-height: 1.6;">
+                        <li><strong>user_id (String 10 ตัว):</strong> รหัสผู้ใช้งานที่ไม่ซ้ำกัน ทำหน้าที่เป็น Primary Key</li>
+                        <li><strong>username (String 50 ตัว):</strong> บัญชีล็อกอินหลัก ตั้งค่าแบบ <code>unique=True</code> ห้ามมีคนลงซ้ำ และใส่ <code>index=True</code> เพื่อให้สืบค้นตรวจชื่อได้ไวตอนล็อกอิน</li>
+                        <li><strong>password (String 255 ตัว):</strong> บรรจุรหัสผ่านที่แฮชเรียบร้อยแล้ว เพื่อความปลอดภัยทางข้อมูล</li>
+                        <li><strong>role_id (String 5 ตัว):</strong> คีย์นอก (ForeignKey) อ้างอิงสิทธิ์การเข้าถึงจากตาราง roles</li>
+                        <li><strong>nurse_profile / patient_profile (1-to-1 Relationship):</strong> การผูกโยงไปยังข้อมูลส่วนตัวพยาบาลหรือคนไข้ โดยใช้คำสั่ง <code>uselist=False</code> เพื่อจำกัดว่า 1 บัญชีผู้ล็อกอินจะสามารถผูกโยงข้อมูลตัวตนได้เพียง 1 ข้อมูลเท่านั้น</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-number">4</div>โมเดลประวัติพยาบาล `app/models/nurse.py`</h3>
+                <p>เขียนสคริปต์นี้ไว้ที่ <code>server/app/models/nurse.py</code>:</p>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="file-path">server/app/models/nurse.py</span>
+                        <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code>from sqlalchemy import Column, String, ForeignKey
+from sqlalchemy.orm import relationship
+from app.db.base_class import Base
+
+class Nurse(Base):
+    __tablename__ = "nurse"
+    user_id = Column(String(10), ForeignKey("users.user_id"), primary_key=True)
+    first_name = Column(String(50), nullable=False)
+    last_name = Column(String(50), nullable=False)
+    department = Column(String(100), nullable=True)
+    user = relationship("User", back_populates="nurse_profile")</code></pre>
+                </div>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border); font-size: 13px;">
+                    <strong style="color: var(--primary); display: block; margin-bottom: 8px;">💡 คำอธิบายโครงสร้างตาราง nurse:</strong>
+                    <ul style="margin-left: 20px; line-height: 1.6;">
+                        <li><strong>user_id (String 10 ตัว):</strong> เป็นทั้ง ForeignKey ชี้หาตาราง users และทำหน้าที่เป็น Primary Key ของตารางตัวเองไปพร้อมกัน เพื่อจำกัดสิทธิ์ความสัมพันธ์แบบ 1-to-1</li>
+                        <li><strong>first_name / last_name (String 50 ตัว):</strong> ชื่อจริงและนามสกุลจริงของพยาบาลผู้ตรวจแผล</li>
+                        <li><strong>department (String 100 ตัว):</strong> แผนกสังกัด เช่น แผนกผู้ป่วยนอก (OPD) หรือ คลินิกเบาหวาน</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-number">5</div>โมเดลประวัติคนไข้เบาหวาน `app/models/patient.py`</h3>
+                <p>เขียนสคริปต์นี้ไว้ที่ <code>server/app/models/patient.py</code>:</p>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="file-path">server/app/models/patient.py</span>
+                        <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code>import datetime
+from sqlalchemy import Column, String, Date, ForeignKey
+from sqlalchemy.orm import relationship
+from app.db.base_class import Base
+
+class Patient(Base):
+    __tablename__ = "patients"
+    HN = Column(String(50), primary_key=True, index=True)
+    user_id = Column(String(10), ForeignKey("users.user_id"), nullable=True)
+    first_name = Column(String(50), nullable=False)
+    last_name = Column(String(50), nullable=False)
+    birth_date = Column(Date, nullable=True)
+    gender = Column(String(10), nullable=True)
+    phone = Column(String(20), nullable=True)
+    admit_date = Column(Date, default=datetime.date.today)
+    user = relationship("User", back_populates="patient_profile")
+    wounds = relationship("Wound", back_populates="patient")
+    appointments = relationship("Appointment", back_populates="patient")</code></pre>
+                </div>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border); font-size: 13px;">
+                    <strong style="color: var(--primary); display: block; margin-bottom: 8px;">💡 คำอธิบายโครงสร้างตาราง patients:</strong>
+                    <ul style="margin-left: 20px; line-height: 1.6;">
+                        <li><strong>HN (Hospital Number - String 50 ตัว):</strong> หมายเลขประจำตัวผู้ป่วยเวชระเบียนโรงพยาบาล เป็น Primary Key หลักใช้คุมภาพรวม</li>
+                        <li><strong>user_id:</strong> ไอดีเชื่อมตารางผู้ใช้ (ล็อกอิน) อนุญาตให้เป็น <code>nullable=True</code> ได้ ในกรณีที่คนไข้บางท่านยังไม่มีบัญชีสิทธิล็อกอิน (ใช้แค่ HN ในการตรวจแผลหน้าโรงพยาบาลอย่างเดียว)</li>
+                        <li><strong>admit_date (Date):</strong> วันเริ่มเข้ารับการรักษารอบติดตามผลแผลเบาหวาน</li>
+                        <li><strong>wounds:</strong> ผูกความสัมพันธ์ One-to-Many ไปยังตารางแผลทั้งหมดที่เกิดกับคนไข้ท่านนี้ (คนไข้ 1 คน สามารถเกิดแผลหลายจุดแยกจากกันได้)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-number">6</div>โมเดลตำแหน่งร่างกายที่แผลเกิด `app/models/body_part.py`</h3>
+                <p>เขียนสคริปต์นี้ไว้ที่ <code>server/app/models/body_part.py</code>:</p>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="file-path">server/app/models/body_part.py</span>
+                        <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code>from sqlalchemy import Column, String
+from sqlalchemy.orm import relationship
+from app.db.base_class import Base
+
+class BodyPart(Base):
+    __tablename__ = "body_parts"
+    body_part_id = Column(String(5), primary_key=True)
+    body_part_name = Column(String(50), nullable=False)
+    wounds = relationship("Wound", back_populates="body_part")</code></pre>
+                </div>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border); font-size: 13px;">
+                    <strong style="color: var(--primary); display: block; margin-bottom: 8px;">💡 คำอธิบายโครงสร้างตาราง body_parts:</strong>
+                    <ul style="margin-left: 20px; line-height: 1.6;">
+                        <li><strong>body_part_id (String 5 ตัว):</strong> รหัสตำแหน่งทางกายวิภาคสั้น เช่น <code>FF</code> (หน้าเท้า), <code>HEEL</code> (ส้นเท้า), <code>PLAN</code> (ฝ่าเท้า) เป็น Primary Key</li>
+                        <li><strong>body_part_name (String 50 ตัว):</strong> ชื่อตำแหน่งภาษาไทยแสดงผลบนกราฟฟิก</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-number">7</div>โมเดลจุดเกิดแผลหลักคนไข้ `app/models/wound.py`</h3>
+                <p>เขียนสคริปต์นี้ไว้ที่ <code>server/app/models/wound.py</code>:</p>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="file-path">server/app/models/wound.py</span>
+                        <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code>import datetime
+from sqlalchemy import Column, String, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
+from app.db.base_class import Base
+
+class Wound(Base):
+    __tablename__ = "wounds"
+    wound_id = Column(String(10), primary_key=True)
+    HN = Column(String(50), ForeignKey("patients.HN"), nullable=False)
+    body_part_id = Column(String(5), ForeignKey("body_parts.body_part_id"), nullable=False)
+    side = Column(String(10), nullable=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    patient = relationship("Patient", back_populates="wounds")
+    body_part = relationship("BodyPart", back_populates="wounds")
+    records = relationship("WoundRecord", back_populates="wound")</code></pre>
+                </div>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border); font-size: 13px;">
+                    <strong style="color: var(--primary); display: block; margin-bottom: 8px;">💡 คำอธิบายโครงสร้างตาราง wounds (ตัวจัดกลุ่มแผลหลัก):</strong>
+                    <ul style="margin-left: 20px; line-height: 1.6;">
+                        <li><strong>wound_id (String 10 ตัว):</strong> รหัสกลุ่มแผลหลัก เช่น <code>W0001</code>, <code>W0002</code></li>
+                        <li><strong>HN (ForeignKey):</strong> ผูกกับเจ้าของแผลเพื่อสืบสาวว่าแผลเป็นของคนไข้คนไหน</li>
+                        <li><strong>body_part_id (ForeignKey):</strong> ตำแหน่งกายวิภาคอ้างอิงจากตาราง body_parts</li>
+                        <li><strong>side (String 10 ตัว):</strong> บันทึกข้างของเท้าที่เกิดแผล เช่น <code>ซ้าย</code> หรือ <code>ขวา</code></li>
+                        <li><strong>records (Relationship):</strong> ผูกกับประวัติภาพถ่ายประเมินรายวัน (WoundRecord) แบบ One-to-Many ทำให้สามารถคำนวณอัตราความเร็วการเติบโตหรือลดขนาดของแผลตำแหน่งนี้ได้อย่างแม่นยำ</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-number">8</div>โมเดลผลบันทึกประเมินแผลรายครั้ง `app/models/wound_record.py`</h3>
+                <p>เขียนสคริปต์นี้ไว้ที่ <code>server/app/models/wound_record.py</code>:</p>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="file-path">server/app/models/wound_record.py</span>
+                        <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code>import datetime
+from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, Text
+from sqlalchemy.orm import relationship
+from app.db.base_class import Base
+
+class WoundRecord(Base):
+    __tablename__ = "wound_records"
+    record_id = Column(Integer, primary_key=True, autoincrement=True)
+    wound_id = Column(String(10), ForeignKey("wounds.wound_id"), nullable=False)
+    user_id = Column(String(10), ForeignKey("users.user_id"), nullable=False)
+    image_path = Column(String(255), nullable=False)
+    area_pixel = Column(Integer, nullable=False)
+    area_cm2 = Column(Float, nullable=False)
+    record_date = Column(DateTime, default=datetime.datetime.utcnow)
+    note = Column(Text, nullable=True)
+    wound = relationship("Wound", back_populates="records")
+    nurse = relationship("User", back_populates="records_added")</code></pre>
+                </div>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border); font-size: 13px;">
+                    <strong style="color: var(--primary); display: block; margin-bottom: 8px;">💡 คำอธิบายตาราง wound_records (หัวใจหลักของผลงาน Deep Learning):</strong>
+                    <ul style="margin-left: 20px; line-height: 1.6;">
+                        <li><strong>record_id (Integer, Primary Key):</strong> คีย์ออโต้รันเลข 1, 2, 3, 4 เพื่อจัดเรียงประวัติตามเวลา</li>
+                        <li><strong>wound_id (ForeignKey):</strong> ลิงก์ย้อนไปยังแผลแกนหลัก (ตาราง wounds) เพื่อระบุว่ารูปภาพนี้เป็นการสแกนของแผลในกลุ่มใด</li>
+                        <li><strong>user_id (ForeignKey):</strong> รหัสบัญชีพยาบาลผู้กดสั่งถ่ายรูปวิเคราะห์แผล</li>
+                        <li><strong>image_path (String 255 ตัว):</strong> ที่เก็บไฟล์รูปภาพต้นฉบับและผลลัพธ์การคาดการณ์ (Mask) บนฮาร์ดดิสก์</li>
+                        <li><strong>area_pixel (Integer):</strong> ขนาดพื้นที่ความกว้างของแผลในรูป นับตามจำนวนพิกเซล (ได้จากการสแกนขอบเขตแผลด้วยโมเดล Deep Learning)</li>
+                        <li><strong>area_cm2 (Float):</strong> ขนาดพื้นที่จริงที่แปลเป็นหน่วย <strong>ตารางเซนติเมตร ($cm^2$)</strong> โดยอัลกอริทึม OpenCV คำนวณเทียบพิกเซลขนาด 2x2 ซม. ของ QR Code ในรูปภาพ</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-number">9</div>โมเดลตารางนัดติดตามผลแผล `app/models/appointment.py`</h3>
+                <p>เขียนสคริปต์นี้ไว้ที่ <code>server/app/models/appointment.py</code>:</p>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="file-path">server/app/models/appointment.py</span>
+                        <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code>import datetime
+from sqlalchemy import Column, Integer, String, Date, Time, DateTime, ForeignKey, Text
+from sqlalchemy.orm import relationship
+from app.db.base_class import Base
+
+class Appointment(Base):
+    __tablename__ = "appointments"
+    appointment_id = Column(Integer, primary_key=True, autoincrement=True)
+    HN = Column(String(50), ForeignKey("patients.HN"), nullable=False)
+    nurse_user_id = Column(String(10), ForeignKey("users.user_id"), nullable=False)
+    appointment_date = Column(Date, nullable=False)
+    appointment_time = Column(Time, nullable=False)
+    note = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    patient = relationship("Patient", back_populates="appointments")</code></pre>
+                </div>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border); font-size: 13px;">
+                    <strong style="color: var(--primary); display: block; margin-bottom: 8px;">💡 คำอธิบายโครงสร้างตาราง appointments (การจองนัดหมาย):</strong>
+                    <ul style="margin-left: 20px; line-height: 1.6;">
+                        <li><strong>appointment_id (Integer, Primary Key):</strong> คีย์รันตัวเลขอัตโนมัติคุมการนัดหมาย</li>
+                        <li><strong>HN (ForeignKey):</strong> เชื่อมประวัติการจองวันนัดเข้ากับ HN คนไข้</li>
+                        <li><strong>nurse_user_id (ForeignKey):</strong> รหัสบัญชีพยาบาลผู้จองและทำนัดหมาย</li>
+                        <li><strong>appointment_date / appointment_time:</strong> วันและเวลาของรอบการสแกนแผลถัดไป</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: STEP 4 -->
+        <section id="step4" class="section-content">
+            <header>
+                <div class="tag">Step 4</div>
+                <h2>การตั้งระบบประวัติฐานข้อมูล (Alembic Migration)</h2>
+                <p class="subtitle">การควบคุมเวอร์ชันตารางเพื่อให้สามารถแก้ไขโครงสร้างเพิ่มคอลัมน์ได้ตลอดเวลาโดยข้อมูลเดิมไม่หาย</p>
+            </header>
+
+            <div class="card">
+                <h3><div class="card-number">1</div>ติดตั้งและเริ่มต้นใช้งาน</h3>
+                <p>เปิด Terminal ที่โฟลเดอร์ `server/` แล้วพิมพ์คำสั่งเริ่มต้นสร้างระบบควบคุมประวัติ:</p>
+                <div class="code-container">
+                    <pre><code>alembic init alembic</code></pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-number">2</div>แก้ไขไฟล์สแกนตารางออโต้ `alembic/env.py`</h3>
+                <p>แก้ไขโค้ดเพิ่มระบบอ่านค่า .env ในตัวคุม Alembic:</p>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="file-path">server/alembic/env.py</span>
+                        <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code>import sys
+import os
+from logging.config import fileConfig
+from sqlalchemy import engine_from_config
+from sqlalchemy import pool
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from app.db.base_class import Base
+from app.models import Role, User, Nurse, Patient, BodyPart, Wound, WoundRecord, Appointment
+
+target_metadata = Base.metadata
+
+from app.core.config import settings
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: STEP 5 -->
+        <section id="step5" class="section-content">
+            <header>
+                <div class="tag">Step 5</div>
+                <h2>สคริปต์ป้อนข้อมูลตัวอย่างและการรันสแกนแผล (Seeding)</h2>
+                <p class="subtitle">การป้อนสิทธิ์การเข้าถึง (Roles) และตำแหน่งร่างกาย (BodyParts) ก่อนเริ่มทดลองงานจริง</p>
+            </header>
+
+            <div class="card">
+                <h3><div class="card-number">1</div>สร้างไฟล์สคริปต์สุ่มป้อนข้อมูลเริ่มต้น `seed.py`</h3>
+                <p>สร้างไฟล์นี้ไว้ใน `server/app/db/seed.py` เพื่อจัดแจงป้อนข้อมูลเริ่มต้น:</p>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="file-path">server/app/db/seed.py</span>
+                        <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code>import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
+from app.db.session import SessionLocal
+from app.models import Role, BodyPart
+
+def seed_initial_data():
+    db = SessionLocal()
+    try:
+        roles_data = [
+            Role(role_id="ADMIN", role_name="ผู้ดูแลระบบ"),
+            Role(role_id="NURSE", role_name="พยาบาล"),
+            Role(role_id="PATI", role_name="ผู้ป่วย")
+        ]
+        
+        parts_data = [
+            BodyPart(body_part_id="FF", body_part_name="Forefoot (หน้าเท้า)"),
+            BodyPart(body_part_id="MF", body_part_name="Midfoot (กลางฝ่าเท้า)"),
+            BodyPart(body_part_id="HEEL", body_part_name="Heel (ส้นเท้า)"),
+            BodyPart(body_part_id="ANKL", body_part_name="Ankle (ข้อเท้า)"),
+            BodyPart(body_part_id="DORS", body_part_name="Dorsum (หลังเท้า)"),
+            BodyPart(body_part_id="PLAN", body_part_name="Plantar (ฝ่าเท้า)")
+        ]
+        
+        for role in roles_data:
+            if not db.query(Role).filter_by(role_id=role.role_id).first():
+                db.add(role)
+                
+        for part in parts_data:
+            if not db.query(BodyPart).filter_by(body_part_id=part.body_part_id).first():
+                db.add(part)
+                
+        db.commit()
+        print("✅ ป้อนข้อมูล Roles และ Body Parts เริ่มต้นลงฐานข้อมูลสำเร็จ!")
+    except Exception as e:
+        print(f"❌ เกิดข้อผิดพลาดในการใส่ข้อมูลตั้งต้น: {e}")
+        db.rollback()
+    finally:
+        db.close()
+
+if __name__ == "__main__":
+    seed_initial_data()</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: RUN TEST -->
+        <section id="runtest" class="section-content">
+            <header>
+                <div class="tag">Run & Test</div>
+                <h2>ขั้นตอนการเปิดใช้งานและรันทดสอบระบบจริง</h2>
+                <p class="subtitle">การประกอบรวมระบบทั้งหมดเข้าด้วยกันเพื่อเริ่มทำการทดลองใช้งานผ่าน API Docs</p>
+            </header>
+
+            <div class="card">
+                <h3><div class="card-number">1</div>โค้ดแอปหลัก `app/main.py`</h3>
+                <p>สร้างไฟล์หลังบ้านเพื่อรัน FastAPI:</p>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="file-path">server/app/main.py</span>
+                        <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code>from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
+from typing import List
+
+from app.core.config import settings
+from app.db.session import SessionLocal
+from app.models import Role, BodyPart
+
+app = FastAPI(title=settings.PROJECT_NAME)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+@app.get("/")
+def read_root():
+    return {"message": "FastAPI และระบบฐานข้อมูลพร้อมใช้งานแล้ว!"}
+
+@app.get("/test-db-connection", response_model=List[dict])
+def test_db_connection(db: Session = Depends(get_db)):
+    parts = db.query(BodyPart).all()
+    return [{"id": p.body_part_id, "name": p.body_part_name} for p in parts]</code></pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-number">2</div>คำสั่งในการเทสต์</h3>
+                <ol>
+                    <li>รันดีบี: <code>docker compose up -d db</code></li>
+                    <li>รันสร้างตาราง: <code>alembic revision --autogenerate -m "Create initial tables"</code> จากนั้นสั่ง <code>alembic upgrade head</code></li>
+                    <li>กรอกข้อมูลตั้งต้น: <code>python app/db/seed.py</code></li>
+                    <li>เปิดหลังบ้าน: <code>uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload</code></li>
+                </ol>
+            </div>
+        </section>
+
+        <footer>
+            คู่มือระบบวิเคราะห์แผลเบาหวานด้วยการเรียนรู้เชิงลึก (DFU Project) | จัดทำเพื่อการศึกษาและพัฒนาซอฟต์แวร์
+        </footer>
+    </main>
+
+    <!-- Navigation JS -->
+    <script>
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+                
+                const targetId = this.getAttribute('data-target');
+                document.querySelectorAll('.section-content').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(targetId).classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+
+        // Copy function
+        function copyCode(button) {
+            const container = button.closest('.code-container');
+            const code = container.querySelector('code').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = button.innerText;
+                button.innerText = 'Copied!';
+                setTimeout(() => { button.innerText = originalText; }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

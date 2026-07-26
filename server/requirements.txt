@@ -1,0 +1,23 @@
+fastapi==0.111.0
+uvicorn==0.30.1
+sqlalchemy==2.0.31
+psycopg2-binary==2.9.9
+
+alembic==1.13.1
+pydantic-settings==2.3.3
+opencv-python-headless==4.9.0.80
+pyzbar==0.1.9
+
+# (Deep Learning & Image Processing Packages)
+pillow==10.3.0
+numpy==1.26.4
+segmentation-models-pytorch==0.3.3
+torch==2.3.1+cpu
+torchvision==0.18.1+cpu
+
+# Authentication & Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+bcrypt==3.2.2
+python-multipart==0.0.9
+--extra-index-url https://download.pytorch.org/whl/cpu
