@@ -28,6 +28,11 @@ def create_wound(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    if current_user.role_id not in ["NURSE", "ADMIN"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="ขออภัย เฉพาะบุคลากรทางการแพทย์ (พยาบาล/แอดมิน) เท่านั้นที่มีสิทธิ์เพิ่มเคสแผลใหม่"
+        )
 
     patient = db.query(Patient).filter(Patient.HN == wound_in.HN).first()
     if not patient:
@@ -65,6 +70,11 @@ def get_patient_wounds(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    if current_user.role_id == "PATIENT" and current_user.username != HN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="ขออภัย คุณไม่มีสิทธิ์ดึงประวัติแผลของผู้ป่วยรายอื่น"
+        )
     wounds = db.query(Wound).options(joinedload(Wound.body_part)).filter(Wound.HN == HN).all()
     return wounds
 
@@ -76,6 +86,12 @@ async def upload_wound_image_and_evaluate(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    if current_user.role_id not in ["NURSE", "ADMIN"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="ขออภัย เฉพาะบุคลากรทางการแพทย์ (พยาบาล/แอดมิน) เท่านั้นที่มีสิทธิ์อัปโหลดและวิเคราะห์แผล"
+        )
+
     # 1. Verify whether the primary wound with this code actually exists in the system.
     wound = db.query(Wound).filter(Wound.wound_id == wound_id).first()
     if not wound:
@@ -193,6 +209,19 @@ def get_wound_records(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    wound = db.query(Wound).filter(Wound.wound_id == wound_id).first()
+    if not wound:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="ไม่พบข้อมูลแผลหลักรหัสนี้ในระบบ"
+        )
+
+    if current_user.role_id == "PATIENT" and current_user.username != wound.HN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="ขออภัย คุณไม่มีสิทธิ์เข้าถึงบันทึกการวัดแผลของคนไข้รายอื่น"
+        )
+
     records = (
         db.query(WoundRecord)
         .filter(WoundRecord.wound_id == wound_id)
