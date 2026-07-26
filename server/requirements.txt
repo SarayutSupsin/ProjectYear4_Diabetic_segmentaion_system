@@ -19,5 +19,7 @@ torchvision==0.18.1+cpu
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 bcrypt==3.2.2
-python-multipart==0.0.9
+python-multipart==0.0.9         
+
 --extra-index-url https://download.pytorch.org/whl/cpu
+

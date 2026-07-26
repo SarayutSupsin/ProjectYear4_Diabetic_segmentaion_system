@@ -26,5 +26,5 @@
 #         "px_per_cm": px_per_cm, # Pixel density per centimeter
 #         "polygon": polygon # Coordinates of the four vertices of QR on the raw image plane
 
-#     }
+    }
     
