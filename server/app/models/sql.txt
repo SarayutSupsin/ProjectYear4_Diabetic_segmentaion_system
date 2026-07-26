@@ -1,0 +1,52 @@
+insert into roles values ('TEACHER','teacher');
+
+INSERT INTO users (user_id, username, password, role_id, created_at)
+VALUES
+('U001', 'admin', '123456', 'ADMIN', NOW()),
+('U002', 'nurse01', '123456', 'NURSE', NOW()),
+('U003', 'patient01', '123456', 'PATIENT', NOW());
+
+INSERT INTO users (user_id, username, password, role_id, created_at)
+values ('U004', 'HN0002', '123456', 'PATIENT', now());
+
+INSERT INTO patients
+("HN", user_id, first_name, last_name, birth_date, gender, phone, admit_date)
+VALUES
+('HN0001', 'U003', 'สมชาย', 'ใจดี', '2002-05-10', 'ชาย', '0812345678', NOW());
+
+SELECT column_name
+FROM information_schema.columns
+WHERE table_name = 'patients';
+
+UPDATE users
+SET username = 'HN0001'
+WHERE user_id = 'U003';
+
+commit;
+
+insert into appointments (appointment_id, "HN", nurse_user_id,appointment_date, appointment_time, note, created_at)
+VALUES(1, 'HN0001', 'U001', '2027-03-15', '09:00', 'ติดตามแผล W001', NOW());
+
+insert into nurse (user_id, first_name, last_name, department)
+values ('U002', 'อรทัย', 'ใจดี', 'ห้องทำแผล');	
+
+UPDATE users
+SET username = 'nurse_oratai'
+WHERE user_id = 'U002';
+
+commit;
+
+INSERT INTO patients("HN", user_id, first_name, last_name, birth_date, gender, phone, admit_date)
+VALUES('HN0002', 'U003', 'มาลี', 'สวรรค์', '2002-07-25', 'หญิง', '0887153549', NOW());
+
+update patients
+SET user_id  = 'U004'
+WHERE "HN" = 'HN0002';
+
+commit;
+
+insert into wounds (wound_id, "HN", body_part_id, side, created_at) values ('W001', 'HN0001', 'BP002', 'ขวา', now());
+insert into wounds (wound_id, "HN", body_part_id, side, created_at) values ('W002', 'HN0002', 'BP005', 'ช้าย', now());
+
+insert into wound_records (record_id, wound_id, user_id, image_path, area_pixel, area_cm2, record_date, note)
+values (1, 'W001', 'U003', 'static/wounds/HN0001_20270717.jpg', 12450, 3.45, now(), 'ครั้งแรก ทำความสะอาดด้วย NSS');
