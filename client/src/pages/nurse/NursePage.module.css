@@ -1,0 +1,1934 @@
+/* Layout container for the Nurse panel */
+.nurseLayout {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  background-color: #f8fafc;
+}
+
+/* Sidebar navigation styling (Desktop view) */
+.nurseSidebar {
+  width: 260px;
+  background-color: #0f172a;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  flex-shrink: 0;
+}
+
+.sidebarBrand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.brandLogo {
+  font-size: 24px;
+}
+
+.sidebarBrand h3 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.sidebarNav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+/* Sidebar navigation buttons */
+.navItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  text-align: left;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.navItem:hover,
+.navItem.active {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* --- Active navigation state classes --- */
+.activeNavItem {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.activeBtn {
+  color: #0d9488 !important; /* Clinical Teal active color highlight */
+}
+
+.activeBtn .icon {
+  display: inline-block;
+  transform: scale(1.15);
+  filter: drop-shadow(0 2px 6px rgba(13, 148, 136, 0.4));
+  transition: var(--transition);
+}
+
+.active {
+  /* Standalone active class placeholder to enable CSS Modules hashing and export */
+}
+
+/* Sidebar footer area */
+.sidebarFooter {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background-color: #0d9488;
+  /* Teal primary theme color for Nurse */
+  color: #ffffff;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.userInfo .name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.userInfo .role {
+  font-size: 11px;
+  color: #64748b;
+}
+
+/* Sidebar logout button */
+.logoutBtnNav {
+  width: 100%;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  color: #f8fafc;
+  background-color: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.logoutBtnNav:hover {
+  background-color: #ef4444;
+}
+
+/* Main workspace area */
+.nurseMain {
+  flex: 1;
+  overflow-y: auto;
+  padding: 40px;
+  padding-bottom: 80px;
+}
+
+/* Floating bottom navigation bar for mobile view */
+.nurseBottomNav {
+  display: none;
+}
+
+/* Page fade-in transition */
+.fadeUp {
+  animation: fadeUp 0.3s ease forwards;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive Media Queries (Mobile layout overrides) */
+@media (max-width: 768px) {
+  .nurseLayout {
+    flex-direction: column;
+  }
+
+  .nurseSidebar {
+    display: none;
+  }
+
+  .nurseBottomNav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background-color: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    z-index: 100;
+  }
+
+  .navBtnMobile {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .navBtnMobile .icon {
+    font-size: 20px;
+    margin-bottom: 2px;
+  }
+
+  .navBtnMobile.active {
+    color: #0d9488;
+    /* Teal color active state for mobile nav */
+  }
+
+  .nurseMain {
+    padding: 16px;
+    padding-bottom: 100px;
+  }
+}
+
+/* --- Nurse Dashboard Components Styling --- */
+
+.pageHeader {
+  margin-bottom: 24px;
+}
+
+.pageHeader h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: #0f172a;
+}
+
+.pageHeader p {
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* Stats dashboard layout */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.statCard {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.statCard .icon {
+  font-size: 28px;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background-color: #f0fdfa;
+  /* Light teal bg */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statCard .info {
+  display: flex;
+  flex-direction: column;
+}
+
+.statCard .value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0d9488;
+}
+
+.statCard .label {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+/* Queue card container */
+.sectionCard {
+  background-color: #ffffff;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 16px;
+}
+
+/* Today's patient dressing queue list */
+.queueList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.queueItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  background-color: #f8fafc;
+  border-left: 4px solid #0d9488;
+}
+
+.queueTime {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0d9488;
+  white-space: nowrap;
+  background-color: #f0fdfa;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+
+.queuePatient {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.patientMeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.boldText {
+  font-weight: 700;
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.hnBadge {
+  font-size: 11px;
+  background-color: #e2e8f0;
+  color: #475569;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.genderBadge {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.genderBadge.male {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.genderBadge.female {
+  background-color: #fce7f3;
+  color: #9d174d;
+}
+
+.queueNote {
+  font-size: 12px;
+  color: #64748b;
+  background-color: #ffffff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px dashed #e2e8f0;
+  margin-top: 4px;
+}
+
+.emptyText {
+  font-size: 13px;
+  color: #64748b;
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* Loading and error state templates */
+.pageLoading,
+.pageError {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+  gap: 12px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.retryBtn {
+  padding: 8px 16px;
+  background-color: #0d9488;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: var(--transition);
+}
+
+.retryBtn:hover {
+  background-color: #0f766e;
+}
+
+/* --- Patient Search Page Styling --- */
+
+.patientCardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.patientCard {
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 1px solid #f1f5f9;
+  transition: var(--transition);
+}
+
+.patientCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  border-color: #0d9488;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.patientAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background-color: #f0fdfa;
+  color: #0d9488;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.patientName {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.hnText {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12px;
+  color: #475569;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 12px;
+}
+
+.metaRow {
+  display: flex;
+  justify-content: space-between;
+}
+
+.admitRow {
+  color: #64748b;
+}
+
+.cardFooter {
+  margin-top: 4px;
+}
+
+.viewHistoryBtn {
+  width: 100%;
+  padding: 10px;
+  background-color: #f0fdfa;
+  color: #0d9488;
+  border: 1px solid #ccfbf1;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.viewHistoryBtn:hover {
+  background-color: #0d9488;
+  color: #ffffff;
+  border-color: #0d9488;
+}
+
+/* Control positioning and layout of input forms */
+.filterBar {
+  margin-bottom: 20px;
+}
+
+.searchInput {
+  width: 100%;
+  max-width: 360px;
+  padding: 12px 16px;
+  font-size: 13px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  outline: none;
+  font-family: inherit;
+  background-color: #ffffff;
+  transition: var(--transition);
+}
+
+.searchInput:focus {
+  border-color: #0d9488;
+  box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1);
+}
+
+@media (max-width: 768px) {
+  .searchInput {
+    max-width: 100%;
+  }
+}
+
+/* --- Wound Detail Page Component Styling --- */
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 0;
+  margin-bottom: 16px;
+  font-family: inherit;
+  transition: var(--transition);
+}
+
+.backBtn:hover {
+  color: #0d9488;
+}
+
+.detailHeader {
+  margin-bottom: 24px;
+}
+
+.detailPatientMeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.detailPatientMeta h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.hnBadgeLarge {
+  font-size: 13px;
+  background-color: #e2e8f0;
+  color: #475569;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.genderBadgeLarge {
+  font-size: 13px;
+  background-color: #dbeafe;
+  color: #1e40af;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.cardHeaderFlex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.addWoundBtn {
+  background-color: #0d9488;
+  color: #ffffff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: var(--transition);
+}
+
+.addWoundBtn:hover {
+  background-color: #0f766e;
+}
+
+.createWoundForm {
+  background-color: #f8fafc;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  border: 1px solid #e2e8f0;
+}
+
+.formRow {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 600px) {
+  .formRow {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+.formGroupCompact {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formGroupCompact label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.selectField {
+  padding: 10px 12px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  background-color: #ffffff;
+}
+
+.selectField:focus {
+  border-color: #0d9488;
+}
+
+.submitWoundBtn {
+  background-color: #0d9488;
+  color: #ffffff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  font-family: inherit;
+  transition: var(--transition);
+}
+
+.submitWoundBtn:hover:not(:disabled) {
+  background-color: #0f766e;
+}
+
+.woundSelectorContainer {
+  margin-top: 12px;
+}
+
+.woundSelectWrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.woundSelectWrapper label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.selectWoundDropdown {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 12px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  background-color: #ffffff;
+  font-weight: 600;
+}
+
+.selectWoundDropdown:focus {
+  border-color: #0d9488;
+}
+
+.chartWrapper {
+  margin-top: 16px;
+  padding: 10px 0;
+}
+
+/* Wound records Timeline style */
+.recordsTimeline {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.timelineItem {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background-color: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+@media (max-width: 600px) {
+  .timelineItem {
+    flex-direction: column;
+  }
+}
+
+.timelineImgWrapper {
+  width: 120px;
+  height: 120px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  flex-shrink: 0;
+}
+
+.timelineImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.timelineInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.timelineDate {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.timelineArea {
+  font-size: 13px;
+  color: #475569;
+}
+
+.timelineNote {
+  font-size: 12px;
+  color: #64748b;
+  background-color: #ffffff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px dashed #cbd5e1;
+  margin-top: 4px;
+}
+
+/* Appointment booking style */
+.bookingForm {
+  margin-top: 8px;
+}
+
+.inputFieldCompact {
+  padding: 10px 12px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  background-color: #ffffff;
+}
+
+.inputFieldCompact:focus {
+  border-color: #0d9488;
+}
+
+.submitBookingBtn {
+  margin-top: 16px;
+  width: 100%;
+  padding: 12px;
+  background-color: #0f172a;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.submitBookingBtn:hover:not(:disabled) {
+  background-color: #1e293b;
+}
+
+.successMessage {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #0d9488;
+  font-weight: 700;
+}
+
+.errorMessage {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #ef4444;
+  font-weight: 700;
+}
+
+/* --- WoundScan Page Component Styling (AI U-Net Upload & Results) --- */
+
+.scannerContainer {
+  margin-top: 16px;
+}
+
+.uploadBoxWrapper {
+  background-color: #ffffff;
+  border: 2px dashed #cbd5e1;
+  border-radius: 16px;
+  padding: 32px 16px;
+  text-align: center;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.uploadBoxWrapper:hover {
+  border-color: #0d9488;
+  background-color: #f0fdfa;
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+.uploadAreaLabel {
+  display: block;
+  cursor: pointer;
+  width: 100%;
+}
+
+.emptyUploadState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.cameraIconBig {
+  font-size: 40px;
+}
+
+.uploadMainText {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.uploadSubText {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.uploadedFileState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #0d9488;
+}
+
+.checkmarkIcon {
+  font-size: 36px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: #f0fdfa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #0d9488;
+}
+
+.fileNameText {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.changeFileLink {
+  font-size: 12px;
+  color: #64748b;
+  text-decoration: underline;
+}
+
+/* New wound case input selections */
+.nestedFormCard {
+  background-color: #f8fafc;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  margin-top: -8px;
+  margin-bottom: 16px;
+}
+
+.pillsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.pillBtn {
+  background-color: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  color: #475569;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: var(--transition);
+}
+
+.pillBtn:hover,
+.pillBtn.active {
+  border-color: #0d9488;
+  color: #0d9488;
+  background-color: #f0fdfa;
+}
+
+.sideButtonsRow {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.sideSelectBtn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1.5px solid #cbd5e1;
+  cursor: pointer;
+  background-color: #ffffff;
+  transition: var(--transition);
+}
+
+.sideSelectBtn.leftFoot.active {
+  background-color: #fffbeb;
+  color: #d97706;
+  border-color: #d97706;
+}
+
+.sideSelectBtn.rightFoot.active {
+  background-color: #eff6ff;
+  color: #2563eb;
+  border-color: #2563eb;
+}
+
+.textareaField {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  background-color: #ffffff;
+  resize: none;
+}
+
+.textareaField:focus {
+  border-color: #0d9488;
+}
+
+.shootInstructionsCard {
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 14px;
+  border-radius: 12px;
+  margin-top: 20px;
+  color: #1e40af;
+}
+
+.shootInstructionsCard h5 {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.shootInstructionsCard ul {
+  padding-left: 16px;
+  font-size: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Modals layout variations */
+.modalCardCompact {
+  background-color: #ffffff;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeUp 0.3s ease;
+}
+
+.modalCardCompact h4 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: center;
+  margin: 0;
+}
+
+.modalSubtitle {
+  font-size: 12px;
+  color: #64748b;
+  text-align: center;
+  margin-top: -12px;
+  font-weight: 600;
+}
+
+.confirmModalDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.confirmThumbnail {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.confirmMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.modalActions {
+  display: flex;
+  gap: 12px;
+}
+
+.cancelBtn,
+.confirmBtn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: var(--transition);
+}
+
+.cancelBtn {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.cancelBtn:hover {
+  background-color: #e2e8f0;
+}
+
+.confirmBtn {
+  background-color: #0d9488;
+  color: #ffffff;
+}
+
+.confirmBtn:hover {
+  background-color: #0f766e;
+}
+
+/* Result outputs styling */
+.resultImageContainer {
+  width: 100%;
+  max-height: 240px;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background-color: #000000;
+}
+
+.resultImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.resultMetricsRow {
+  display: flex;
+  gap: 12px;
+}
+
+.resultMetricBlock {
+  flex: 1;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 12px;
+  border-radius: 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.resultMetricVal {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0d9488;
+}
+
+.resultMetricLabel {
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.closeResultBtn {
+  width: 100%;
+  padding: 12px;
+  background-color: #0f172a;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.closeResultBtn:hover {
+  background-color: #1e293b;
+}
+
+/* Full backdrop spinner loading overlay */
+.loadingSpinnerCard {
+  background-color: #ffffff;
+  padding: 24px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 320px;
+  text-align: center;
+}
+
+.loadingSpinnerCard p {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #0d9488;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- Nurse Dashboard & Patient Search (Fig 4.10 - 4.11 Mockup Styles) --- */
+
+.hospitalTopBanner {
+  background-color: #2563eb;
+  /* Premium Medical Deep Blue */
+  padding: 24px;
+  border-radius: 16px;
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+}
+
+.bannerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.greetingText {
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.nurseProfileName {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.nurseSubRole {
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.8;
+  background-color: rgba(255, 255, 255, 0.15);
+  padding: 2px 8px;
+  border-radius: 6px;
+  align-self: flex-start;
+}
+
+.bannerAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+/* Metrics horizontal row */
+.horizontalStatsBar {
+  background-color: #ffffff;
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.statMetric {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #e2e8f0;
+}
+
+.statMetric:last-child {
+  border-right: none;
+}
+
+.metricVal {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.metricVal.redText {
+  color: #ef4444;
+}
+
+.metricLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* Vigilance warnings */
+.alertCardContainer {
+  background-color: #fef2f2;
+  border: 1px solid #fee2e2;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.alertTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #991b1b;
+  margin-bottom: 10px;
+}
+
+.alertItemCard {
+  background-color: #ffffff;
+  padding: 12px 16px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  cursor: pointer;
+  border: 1px solid #fecaca;
+  transition: var(--transition);
+}
+
+.alertItemCard:last-child {
+  margin-bottom: 0;
+}
+
+.alertItemCard:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.05);
+}
+
+.alertContent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #991b1b;
+}
+
+.alertWarningSymbol {
+  font-size: 15px;
+}
+
+.alertArrow {
+  color: #fca5a5;
+  font-size: 13px;
+}
+
+/* Quick access card for UNet evaluation */
+.quickAnalyzeWoundCard {
+  background-color: #ffffff;
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  border: 1px solid #f1f5f9;
+  margin-bottom: 20px;
+  transition: var(--transition);
+}
+
+.quickAnalyzeWoundCard:hover {
+  border-color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.05);
+}
+
+.quickCardBody {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.quickCardIcon {
+  font-size: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background-color: #eff6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quickCardBody h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.quickCardBody p {
+  font-size: 11px;
+  color: #64748b;
+  margin: 2px 0 0 0;
+  font-weight: 500;
+}
+
+.quickCardArrow {
+  color: #cbd5e1;
+  font-size: 13px;
+}
+
+/* Recent list layouts */
+.recentPatientsSection {
+  margin-top: 8px;
+}
+
+.sectionHeaderTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 12px;
+}
+
+.recentPatientsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recentPatientRowCard {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.recentPatientRowCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  border-color: #2563eb;
+}
+
+.recentPatientMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.letterAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background-color: #eff6ff;
+  color: #2563eb;
+  font-weight: 700;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.patientRowName {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.patientRowHN {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.statusBadgeRow {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  text-align: center;
+  display: inline-block;
+}
+
+.statusGreen {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.statusRed {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.statusGray {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+/* Patient Search elements */
+.searchInputFull {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 13px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  outline: none;
+  font-family: inherit;
+  background-color: #ffffff;
+  transition: var(--transition);
+}
+
+.searchInputFull:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.patientsListContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.patientRowMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.patientRowDetails {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.rowArrowIcon {
+  font-size: 14px;
+  color: #cbd5e1;
+  transition: var(--transition);
+}
+
+.recentPatientRowCard:hover .rowArrowIcon,
+.patientRowCard:hover .rowArrowIcon {
+  color: #2563eb;
+  transform: translateX(4px);
+}
+
+/* --- Wound Detail 3-Tab Mockup Layout Styles (Fig 4.12 - 4.14) --- */
+
+.detailPatientCard {
+  background-color: #2563eb;
+  /* Unified Brand Blue matching the mockups */
+  padding: 20px;
+  border-radius: 16px;
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.detailPatientHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.detailUserAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.detailPatientName {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.detailPatientSubtext {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+/* Tabs bar segment control */
+.segmentedTabsBar {
+  display: flex;
+  background-color: #e2e8f0;
+  padding: 4px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.segmentTabBtn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.segmentTabBtn.active {
+  background-color: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Wound select item grid */
+.woundsGridSelector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.woundSelectItemCard {
+  background-color: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.woundSelectItemCard:hover,
+.woundSelectItemCard.active {
+  border-color: #0d9488;
+  background-color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(13, 148, 136, 0.05);
+}
+
+.woundSelectText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.woundSelectLoc {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.woundSelectCase {
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+/* Wound Info summary block */
+.woundDataInfoBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.infoMetaRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 8px;
+}
+
+.infoMetaRow:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.infoMetaLabel {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.infoMetaVal {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+/* Active appt details card */
+.currentAppointmentCard {
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  color: #1e40af;
+}
+
+.apptLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+.apptDetails {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 4px 0;
+}
+
+.apptNote {
+  font-size: 12px;
+  margin: 4px 0 0 0;
+  opacity: 0.9;
+}
+
+/* Giant button to switch to scanner */
+.giantUploadBtn {
+  width: 100%;
+  padding: 14px;
+  background-color: #2563eb;
+  /* Vibrant blue matching PDF */
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+  transition: var(--transition);
+  margin-top: 12px;
+  margin-bottom: 24px;
+}
+
+.giantUploadBtn:hover {
+  background-color: #1d4ed8;
+}
+
+/* History Thumbnails grid layout (Fig 4.13) */
+.woundHistoryImagesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.historyThumbCard {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.thumbImageWrapper {
+  width: 100%;
+  height: 110px;
+  overflow: hidden;
+  background-color: #000000;
+}
+
+.thumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbMetaInfo {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.thumbAreaSize {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0d9488;
+}
+
+.thumbDate {
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.thumbNote {
+  font-size: 9px;
+  color: #475569;
+  margin: 4px 0 0 0;
+  border-top: 1px dashed #f1f5f9;
+  padding-top: 4px;
+}
+
+/* --- Contextual Header Logout Elements (Option A Styles) --- */
+
+.bannerRightBlock {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.bannerLogoutBtn {
+  background-color: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.bannerLogoutBtn:hover {
+  background-color: rgba(255, 255, 255, 0.28);
+}
+
+@media (min-width: 769px) {
+  .bannerLogoutBtn {
+    display: none;
+    /* Hide on desktop view since sidebar has logout */
+  }
+}
+
+.pageHeaderWithLogout {
+  margin-bottom: 24px;
+}
+
+.headerTitleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.headerTitleRow h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.mobileHeaderLogoutBtn {
+  background-color: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.18);
+  color: #ef4444;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.mobileHeaderLogoutBtn:hover {
+  background-color: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+}
+
+@media (min-width: 769px) {
+  .mobileHeaderLogoutBtn {
+    display: none;
+    /* Hide on desktop view */
+  }
+}
