@@ -2,9 +2,10 @@
 .env
 
 # Python
-**__pycache__/
-**.pyc
-**.pyo
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+.pytest_cache/
 
 # IDE
 .vscode/
@@ -30,9 +31,10 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Dependencies
+node_modules/
+dist/
+dist-ssr/
 *.local
 
 # Editor directories and files

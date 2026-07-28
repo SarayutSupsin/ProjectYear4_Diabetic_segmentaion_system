@@ -1,11 +1,10 @@
-from app.models import body_part
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 
 from app.db.session import get_db
-from app.models import User, Patient, Wound, WoundRecord
-from app.schemas.wound import WoundCreate, WoundResponse, WoundRecordResponse
+from app.models import User, Patient, Wound, WoundRecord, BodyPart
+from app.schemas.wound import WoundCreate, WoundResponse, WoundRecordResponse, BodyPartResponse
 from app.core.security import get_current_user
 from app.core.config import settings
 
@@ -28,10 +27,10 @@ def create_wound(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    if current_user.role_id not in ["NURSE", "ADMIN"]:
+    if current_user.role_id not in ["NURSE"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="ขออภัย เฉพาะบุคลากรทางการแพทย์ (พยาบาล/แอดมิน) เท่านั้นที่มีสิทธิ์เพิ่มเคสแผลใหม่"
+            detail="ขออภัย เฉพาะบุคลากรทางการแพทย์ (พยาบาล) เท่านั้นที่มีสิทธิ์เพิ่มเคสแผลใหม่"
         )
 
     patient = db.query(Patient).filter(Patient.HN == wound_in.HN).first()
@@ -86,10 +85,10 @@ async def upload_wound_image_and_evaluate(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    if current_user.role_id not in ["NURSE", "ADMIN"]:
+    if current_user.role_id not in ["NURSE"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="ขออภัย เฉพาะบุคลากรทางการแพทย์ (พยาบาล/แอดมิน) เท่านั้นที่มีสิทธิ์อัปโหลดและวิเคราะห์แผล"
+            detail="ขออภัย เฉพาะบุคลากรทางการแพทย์ (พยาบาล) เท่านั้นที่มีสิทธิ์อัปโหลดและวิเคราะห์แผล"
         )
 
     # 1. Verify whether the primary wound with this code actually exists in the system.
@@ -230,3 +229,9 @@ def get_wound_records(
     )
     return records
     
+@router.get("/body-parts", response_model=List[BodyPartResponse])
+def get_body_parts(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return db.query(BodyPart).all()

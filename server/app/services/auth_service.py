@@ -16,13 +16,13 @@ class AuthService:
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง"
+                detail="ชื่อผู้ใช้ไม่ถูกต้อง"
             )
         
         if not verify_password(login_data.password, user.password):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง"
+                detail="รหัสผ่านไม่ถูกต้อง"
             )
         
         access_token = create_access_token(
