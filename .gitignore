@@ -1,5 +1,6 @@
 # Environment variables (passwords, secrets)
 .env
+.agents
 
 # Python
 **/__pycache__/
