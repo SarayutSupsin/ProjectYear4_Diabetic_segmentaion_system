@@ -3,6 +3,9 @@ import styles from '../AdminPage.module.css';
 import type { Patient } from '../../../types';
 import { useAuth } from '../../../context/AuthContext';
 
+import { FaUserDoctor } from "react-icons/fa6";
+import { IoMdPeople } from "react-icons/io";
+
 interface NurseListItem {
   user_id: string;
   username: string;
@@ -46,14 +49,14 @@ export default function AdminDashboard({ patientsList, nursesList, formatDateTH,
       {/* Metric Cards (Total Patients & Total Nurses) */}
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
-          <div className={styles.icon}>👥</div>
+          <div className={styles.icon}> <IoMdPeople /> </div>
           <div className={styles.info}>
             <span className={styles.value}>{patientsList.length}</span>
             <span className={styles.label}>ผู้ป่วยทั้งหมด</span>
           </div>
         </div>
         <div className={styles.statCard}>
-          <div className={styles.icon}>👩‍⚕️</div>
+          <div className={styles.icon}> <FaUserDoctor /> </div>
           <div className={styles.info}>
             <span className={styles.value}>{nursesList.length}</span>
             <span className={styles.label}>พยาบาลทั้งหมด</span>

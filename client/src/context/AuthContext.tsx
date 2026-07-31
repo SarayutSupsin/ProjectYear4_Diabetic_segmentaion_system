@@ -17,8 +17,15 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // 2. Create a Provider to manage data handling behavior.
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+//   const [user, setUser] = useState<User | null>({
+//   user_id: 'NURSE001',
+//   username: 'nurse1',
+//   role_id: 'NURSE',
+//   role: 'Nurse',
+// });
   const [token, setToken] = useState<string | null>(getAuthToken());
   const [loading, setLoading] = useState<boolean>(true);
+  // const [loading, setLoading] = useState<boolean>(false);
 
   // Function to fetch the latest user profile from the `/auth/me` API
   const loadProfile = async () => {

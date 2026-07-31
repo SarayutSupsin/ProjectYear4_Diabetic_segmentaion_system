@@ -7,6 +7,10 @@ import AdminDashboard from './components/AdminDashboard';
 import PatientList from './components/PatientList';
 import NurseList from './components/NurseList';
 
+import { FaUserDoctor } from "react-icons/fa6";
+import { IoMdPeople } from "react-icons/io";
+import { FaChartPie } from "react-icons/fa6";
+
 interface NurseListItem {
   user_id: string;
   username: string;
@@ -69,13 +73,13 @@ export default function AdminPage() {
         </div>
         <nav className={styles.sidebarNav}>
           <button className={`${styles.navItem} ${tab === 'dashboard' ? styles.activeNavItem : ''}`} onClick={() => setTab('dashboard')}>
-            <span>📊</span> ภาพรวมระบบ
+            <span> <FaChartPie /> </span> ภาพรวมระบบ
           </button>
           <button className={`${styles.navItem} ${tab === 'patients' ? styles.activeNavItem : ''}`} onClick={() => setTab('patients')}>
-            <span>👥</span> รายชื่อผู้ป่วย
+            <span> <IoMdPeople /> </span> รายชื่อผู้ป่วย
           </button>
           <button className={`${styles.navItem} ${tab === 'nurses' ? styles.activeNavItem : ''}`} onClick={() => setTab('nurses')}>
-            <span>👩‍⚕️</span> บัญชีพยาบาล
+            <span> <FaUserDoctor /> </span> บัญชีพยาบาล
           </button>
         </nav>
         <div className={styles.sidebarFooter}>
@@ -148,15 +152,15 @@ export default function AdminPage() {
 
       <div className={styles.adminBottomNav}>
         <button onClick={() => setTab('dashboard')} className={`${styles.navBtnMobile} ${tab === 'dashboard' ? styles.activeBtn : ''}`}>
-          <span className={styles.icon}>📊</span>
+          <span className={styles.icon}> <FaChartPie /> </span>
           <span>ภาพรวม</span>
         </button>
         <button onClick={() => setTab('patients')} className={`${styles.navBtnMobile} ${tab === 'patients' ? styles.activeBtn : ''}`}>
-          <span className={styles.icon}>👥</span>
+          <span className={styles.icon}> <IoMdPeople /> </span>
           <span>ผู้ป่วย</span>
         </button>
         <button onClick={() => setTab('nurses')} className={`${styles.navBtnMobile} ${tab === 'nurses' ? styles.activeBtn : ''}`}>
-          <span className={styles.icon}>👩‍⚕️</span>
+          <span className={styles.icon}> <FaUserDoctor /> </span>
           <span>พยาบาล</span>
         </button>
       </div>

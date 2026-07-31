@@ -6,6 +6,12 @@ import PatientSearch from './components/PatientSearch';
 import WoundDetail from './components/WoundDetail';
 import WoundScan from './components/WoundScan';
 
+import { FaMagnifyingGlass } from "react-icons/fa6";
+import { FaChartPie } from "react-icons/fa6";
+import { FaCamera } from "react-icons/fa";
+
+
+
 export default function NursePage() {
     const { user, logout } = useAuth();
     // State to manage current tab selection
@@ -32,19 +38,19 @@ export default function NursePage() {
                         className={`${styles.navItem} ${tab === 'dashboard' ? styles.activeNavItem : ''}`}
                         onClick={() => setTab('dashboard')}
                     >
-                        <span>📊</span> ภาพรวมระบบ
+                        <span> <FaChartPie /> </span> ภาพรวมระบบ
                     </button>
                     <button
                         className={`${styles.navItem} ${tab === 'search' ? styles.activeNavItem : ''}`}
                         onClick={() => setTab('search')}
                     >
-                        <span>🔍</span> ค้นหาผู้ป่วย
+                        <span> <FaMagnifyingGlass /> </span> ค้นหาผู้ป่วย
                     </button>
                     <button
                         className={`${styles.navItem} ${tab === 'upload' ? styles.activeNavItem : ''}`}
                         onClick={() => setTab('upload')}
                     >
-                        <span>📸</span> สแกนวิเคราะห์แผล
+                        <span> <FaCamera /> </span> สแกนวิเคราะห์แผล
                     </button>
                 </nav>
                 <div className={styles.sidebarFooter}>

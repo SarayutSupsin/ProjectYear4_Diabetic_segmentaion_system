@@ -4,6 +4,8 @@ import { api } from '../../../services/api';
 import type { Patient, Wound, WoundRecord, Appointment } from '../../../types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
+import { MdDateRange, MdTimer } from "react-icons/md";
+
 interface WoundDetailProps {
   HN: string;
   onBackToSearch: () => void;
@@ -393,7 +395,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab }: WoundDe
               <div className={styles.currentAppointmentCard}>
                 <span className={styles.apptLabel}>วันนัดปัจจุบัน</span>
                 <h5 className={styles.apptDetails}>
-                  📅 {formatDateTH(latestAppointment.appointment_date)} · ⏱️ {latestAppointment.appointment_time.slice(0, 5)} น.
+                  <MdDateRange /> {formatDateTH(latestAppointment.appointment_date)} · <MdTimer /> {latestAppointment.appointment_time.slice(0, 5)} น.
                 </h5>
                 {latestAppointment.note && (
                   <p className={styles.apptNote}>💡 {latestAppointment.note}</p>

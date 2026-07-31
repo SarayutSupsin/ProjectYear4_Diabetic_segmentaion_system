@@ -4,6 +4,9 @@ import { api } from '../../../services/api';
 import type { Patient, Wound, WoundRecord } from '../../../types';
 import { useAuth } from '../../../context/AuthContext';
 
+import { MdOutlineEventNote } from "react-icons/md";
+
+
 interface WoundScanProps {
   preselectedHN: string | null;
   onViewPatientWounds: (HN: string) => void;
@@ -185,7 +188,7 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundS
 
         {/* Step 2: Patient and Wound Selection Forms */}
         <div className={styles.sectionCard}>
-          <h4 className={styles.sectionTitle}>📋 ข้อมูลการบันทึก</h4>
+          <h4 className={styles.sectionTitle}> <MdOutlineEventNote /> ข้อมูลการบันทึก</h4>
           
           <div className={styles.formGroupCompact} style={{ marginBottom: '16px' }}>
             <label>ผู้ป่วย</label>
