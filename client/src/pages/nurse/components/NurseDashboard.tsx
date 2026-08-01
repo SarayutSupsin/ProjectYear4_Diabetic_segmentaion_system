@@ -4,7 +4,7 @@ import { api } from '../../../services/api';
 import type { Patient, Wound, WoundRecord, Appointment } from '../../../types';
 import { useAuth } from '../../../context/AuthContext';
 
-import { FaChartPie } from "react-icons/fa6";
+
 
 
 interface NurseDashboardProps {

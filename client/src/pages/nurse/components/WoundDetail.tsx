@@ -5,6 +5,12 @@ import type { Patient, Wound, WoundRecord, Appointment } from '../../../types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 import { MdDateRange, MdTimer } from "react-icons/md";
+import { MdArrowBackIosNew } from "react-icons/md";
+import { FaSave } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
+import { ImCross } from "react-icons/im";
+
+
 
 interface WoundDetailProps {
   HN: string;
@@ -233,8 +239,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab }: WoundDe
     <div className={styles.fadeUp}>
       {/* Return button and Patient header */}
       <button onClick={onBackToSearch} className={styles.backBtn}>
-        ⬅️ รายละเอียดผู้ป่วย
-      </button>
+        <MdArrowBackIosNew /> รายละเอียดผู้ป่วย </button>
 
       {/* Blue Header Card containing Patient profile (Fig 4.12 Mockup) */}
       <div className={styles.detailPatientCard}>
@@ -286,7 +291,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab }: WoundDe
             onClick={() => setShowCreateWound(!showCreateWound)} 
             className={styles.addWoundBtn}
           >
-            {showCreateWound ? '✖️ ยกเลิก' : '➕ เปิดเคสแผลใหม่'}
+            {showCreateWound ? <> <ImCross /> <span> ยกเลิก </span> </> : <> <FaPlus /> <span> เปิดเคสแผลใหม่ </span> </>}
           </button>
         </div>
 
@@ -326,7 +331,8 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab }: WoundDe
               disabled={creatingWound || bodyParts.length === 0} 
               className={styles.submitWoundBtn}
             >
-              {creatingWound ? 'กำลังบันทึก...' : '💾 บันทึกเปิดเคสรักษา'}
+              <>
+              <FaSave /> <span> บันทึกเปิดเคสรักษา </span> </>
             </button>
           </form>
         )}

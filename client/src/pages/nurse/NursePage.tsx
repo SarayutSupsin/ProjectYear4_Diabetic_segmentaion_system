@@ -9,6 +9,7 @@ import WoundScan from './components/WoundScan';
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { FaChartPie } from "react-icons/fa6";
 import { FaCamera } from "react-icons/fa";
+import { FaStethoscope } from "react-icons/fa";
 
 
 
@@ -30,7 +31,7 @@ export default function NursePage() {
             {/* Sidebar Navigation for Desktop view */}
             <aside className={styles.nurseSidebar}>
                 <div className={styles.sidebarBrand}>
-                    <div className={styles.brandLogo}>🩺</div>
+                    <div className={styles.brandLogo}> <FaStethoscope /> </div>
                     <h3>ระบบพยาบาล</h3>
                 </div>
                 <nav className={styles.sidebarNav}>
@@ -104,21 +105,21 @@ export default function NursePage() {
                     onClick={() => setTab('dashboard')}
                     className={`${styles.navBtnMobile} ${tab === 'dashboard' ? styles.activeBtn : ''}`}
                 >
-                    <span className={styles.icon}>📊</span>
+                    <span className={styles.icon}> <FaChartPie /> </span>
                     <span>ภาพรวม</span>
                 </button>
                 <button
                     onClick={() => setTab('search')}
                     className={`${styles.navBtnMobile} ${tab === 'search' ? styles.activeBtn : ''}`}
                 >
-                    <span className={styles.icon}>🔍</span>
+                    <span className={styles.icon}> <FaMagnifyingGlass /> </span>
                     <span>ค้นหา</span>
                 </button>
                 <button
                     onClick={() => setTab('upload')}
                     className={`${styles.navBtnMobile} ${tab === 'upload' ? styles.activeBtn : ''}`}
                 >
-                    <span className={styles.icon}>📸</span>
+                    <span className={styles.icon}> <FaCamera /> </span>
                     <span>สแกนแผล</span>
                 </button>
             </div>

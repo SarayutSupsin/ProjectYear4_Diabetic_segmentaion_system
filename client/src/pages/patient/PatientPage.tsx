@@ -5,6 +5,9 @@ import { api } from '../../services/api';
 import type { Patient, Wound, WoundRecord, Appointment } from '../../types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
+import { MdDateRange, MdTimer } from "react-icons/md";
+import { IoDocument } from "react-icons/io5";
+
 interface BodyPartItem {
   body_part_id: string;
   body_part_name: string;
@@ -267,21 +270,21 @@ export default function PatientPage() {
           </div>
 
           <div className={styles.sectionCard}>
-            <h4 className={styles.sectionTitle}>🗓️ ตารางนัดล้างแผล/ติดตามผลของคุณ</h4>
+            <h4 className={styles.sectionTitle}><span> <MdDateRange /> </span> ตารางนัดล้างแผล/ติดตามผลของคุณ</h4>
             {myAppointments.length === 0 ? (
               <p className={styles.emptyText}>คุณไม่มีตารางนัดหมายล้างแผลช่วงนี้</p>
             ) : (
               <div className={styles.queueList}>
                 {myAppointments.map(appt => (
                   <div key={appt.appointment_id} className={styles.queueItem} style={{ borderLeftColor: '#0d9488' }}>
-                    <div className={styles.queueTime}>⏱️ {appt.appointment_time.slice(0, 5)} น.</div>
+                    <div className={styles.queueTime}><span> <MdTimer /> </span> {appt.appointment_time.slice(0, 5)} น.</div>
                     <div className={styles.queuePatient}>
                       <span className={styles.boldText} style={{ display: 'block', fontSize: '13px' }}>
-                        📅 วันที่นัด: {formatDateTH(appt.appointment_date)}
+                        <span> <MdDateRange /> </span> วันที่นัด: {formatDateTH(appt.appointment_date)}
                       </span>
                       {appt.note && (
                         <p className={styles.queueNote} style={{ marginTop: '4px' }}>
-                          🏥 รายละเอียดนัด: {appt.note}
+                          <span> <IoDocument /> </span> รายละเอียดนัด: {appt.note}
                         </p>
                       )}
                     </div>
