@@ -49,9 +49,13 @@ export default function NursePage() {
                 </nav>
                 <div className={styles.sidebarFooter}>
                     <div className={styles.userInfo}>
-                        <div className={styles.avatar}>N</div>
+                        <div className={styles.avatar}>
+                            {(user?.first_name ? user.first_name[0] : user?.username[0] || 'N').toUpperCase()}
+                        </div>
                         <div>
-                            <div className={styles.name}>พยาบาลผู้ดูแล</div>
+                            <div className={styles.name}>
+                                {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : 'พยาบาลผู้ดูแล'}
+                            </div>
                             <div className={styles.role}>{user?.username}</div>
                         </div>
                     </div>
@@ -61,22 +65,53 @@ export default function NursePage() {
 
             {/* Main Content Area */}
             <main className={styles.nurseMain}>
+                {/* Global Welcome Banner (Rendered only on Dashboard tab, scrolls with content, stays static on tab switch) */}
+                {tab === 'dashboard' && (
+                    <div className={styles.hospitalTopBanner}>
+                        <div className={styles.bannerInfo}>
+                            <h2 className={styles.nurseProfileName}>
+                                {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : 'พยาบาลผู้ดูแล'}
+                            </h2>
+                            <span className={styles.nurseSubRole}>
+                                พยาบาล · {user?.department || 'ห้องทำแผล'}
+                            </span>
+                        </div>
+                        <div className={styles.bannerRightBlock}>
+                            <button onClick={logout} className={styles.bannerLogoutBtn} title="ออกจากระบบ">
+                                ออกจากระบบ
+                            </button>
+                            <div className={styles.bannerAvatar}>
+                                {(user?.first_name ? user.first_name[0] : user?.username[0] || 'N').toUpperCase()}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <div className={styles.fadeUp}>
-                    {tab === 'dashboard' && (
+                    {/* ภาพรวม */}
+                    <div style={{ display: tab === 'dashboard' ? 'block' : 'none' }}>
                         <NurseDashboard
                             onViewPatientWounds={onViewPatientWounds}
                             onSwitchTab={(t) => setTab(t)}
                         />
-                    )}
-                    {tab === 'search' && <PatientSearch onViewPatientWounds={onViewPatientWounds} />}
-                    {tab === 'upload' && (
+                    </div>
+
+                    {/* ค้นหา */}
+                    <div style={{ display: tab === 'search' ? 'block' : 'none' }}>
+                        <PatientSearch onViewPatientWounds={onViewPatientWounds} />
+                    </div>
+
+                    {/* สแกน/อัปโหลดแผล */}
+                    <div style={{ display: tab === 'upload' ? 'block' : 'none' }}>
                         <WoundScan
                             preselectedHN={selectedHN}
                             onViewPatientWounds={onViewPatientWounds}
                         />
-                    )}
-                    {tab === 'detail' && (
-                        selectedHN ? (
+                    </div>
+
+                    {/* รายละเอียดการรักษา */}
+                    <div style={{ display: tab === 'detail' ? 'block' : 'none' }}>
+                        {selectedHN ? (
                             <WoundDetail
                                 HN={selectedHN}
                                 onBackToSearch={() => setTab('search')}
@@ -87,8 +122,8 @@ export default function NursePage() {
                                 <h2>รายละเอียดการรักษา</h2>
                                 <p style={{ color: '#64748b' }}>กรุณาค้นหาและเลือกผู้ป่วยจากหน้าค้นหาก่อน เพื่อเข้าดูประวัติและบันทึกแผล</p>
                             </div>
-                        )
-                    )}
+                        )}
+                    </div>
                 </div>
             </main>
 

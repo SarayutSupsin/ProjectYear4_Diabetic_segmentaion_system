@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import styles from '../NursePage.module.css';
 import { api } from '../../../services/api';
-import type { Patient, Wound, WoundRecord, Appointment } from '../../../types';
-import { useAuth } from '../../../context/AuthContext';
+import type { Patient, Appointment } from '../../../types';
 
 interface NurseDashboardProps {
   onViewPatientWounds: (HN: string) => void;
@@ -17,12 +16,13 @@ interface CalculatedPatientStatus {
 }
 
 export default function NurseDashboard({ onViewPatientWounds, onSwitchTab }: NurseDashboardProps) {
-  const { logout } = useAuth();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [patientStatuses, setPatientStatuses] = useState<CalculatedPatientStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isVigilanceExpanded, setIsVigilanceExpanded] = useState(true);
+  const [isAppointmentsExpanded, setIsAppointmentsExpanded] = useState(true);
 
   // Fetch data dynamically and evaluate patient wound trends in parallel
   const fetchDashboardData = async () => {
@@ -39,51 +39,8 @@ export default function NurseDashboard({ onViewPatientWounds, onSwitchTab }: Nur
       setPatients(patientsList);
       setAppointments(appointmentsList);
 
-      // Fetch wounds and calculate progress dynamically for each patient
-      const evaluatedStatuses: CalculatedPatientStatus[] = await Promise.all(
-        patientsList.map(async (p) => {
-          try {
-            const patientWounds = await api.get<Wound[]>(`/wounds/patient/${p.HN}`);
-            
-            // Check status of latest wound changes
-            let status: 'ดีขึ้น' | 'แย่ลง' | 'คงที่' = 'คงที่';
-            
-            // Analyze the records of each wound to see if any are worsening
-            for (const w of patientWounds) {
-              const records = await api.get<WoundRecord[]>(`/wounds/${w.wound_id}/records`);
-
-              if (records.length >= 2) {
-                // Sort records by date to compare the two latest measurements
-                const sorted = [...records].sort(
-                  (a, b) => new Date(a.record_date).getTime() - new Date(b.record_date).getTime()
-                );
-                const latest = sorted[sorted.length - 1];
-                const previous = sorted[sorted.length - 2];
-
-                if (latest.area_cm2 > previous.area_cm2) {
-                  status = 'แย่ลง'; // Mark as worsening if area increased
-                } else if (latest.area_cm2 < previous.area_cm2 && status !== 'แย่ลง') {
-                  status = 'ดีขึ้น'; // Mark as improving if area decreased
-                }
-              }
-            }
-
-            return {
-              HN: p.HN,
-              name: `${p.first_name} ${p.last_name}`,
-              woundsCount: patientWounds.length,
-              status
-            };
-          } catch {
-            return {
-              HN: p.HN,
-              name: `${p.first_name} ${p.last_name}`,
-              woundsCount: 0,
-              status: 'คงที่' as const
-            };
-          }
-        })
-      );
+      // Fetch consolidated patient wound statuses in one single request to prevent N+1 network flooding
+      const evaluatedStatuses = await api.get<CalculatedPatientStatus[]>('/wounds/progress-statuses');
 
       setPatientStatuses(evaluatedStatuses);
     } catch (err: any) {
@@ -131,21 +88,6 @@ export default function NurseDashboard({ onViewPatientWounds, onSwitchTab }: Nur
 
   return (
     <div className={styles.fadeUp}>
-      {/* 4.2 Top banner design as shown in PDF Fig 4.10 */}
-      <div className={styles.hospitalTopBanner}>
-        <div className={styles.bannerInfo}>
-          <span className={styles.greetingText}>สวัสดีตอนเช้า ☀️</span>
-          <h2 className={styles.nurseProfileName}>พยาบาลผู้ดูแล</h2>
-          <span className={styles.nurseSubRole}>พยาบาล · ห้องทำแผล</span>
-        </div>
-        <div className={styles.bannerRightBlock}>
-          <button onClick={logout} className={styles.bannerLogoutBtn} title="ออกจากระบบ">
-            ออกจากระบบ
-          </button>
-          <div className={styles.bannerAvatar}>N</div>
-        </div>
-      </div>
-
       {/* Metrics Row: Patients | Today's Appt | Vigilance cases */}
       <div className={styles.horizontalStatsBar}>
         <div className={styles.statMetric}>
@@ -167,8 +109,17 @@ export default function NurseDashboard({ onViewPatientWounds, onSwitchTab }: Nur
       {/* Vigilance Warning Cards (ต้องเฝ้าระวัง) */}
       {vigilanceList.length > 0 && (
         <div className={styles.alertCardContainer}>
-          <h4 className={styles.alertTitle}>🚨 ต้องเฝ้าระวัง</h4>
-          {vigilanceList.map(vigilance => (
+          <h4 
+            className={styles.alertTitle}
+            onClick={() => setIsVigilanceExpanded(!isVigilanceExpanded)}
+            style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', userSelect: 'none' }}
+          >
+            <span>🚨 ต้องเฝ้าระวัง ({vigilanceList.length})</span>
+            <span style={{ fontSize: '11px', transition: 'transform 0.2s', transform: isVigilanceExpanded ? 'rotate(0deg)' : 'rotate(-90deg)', display: 'inline-block' }}>
+              ▼
+            </span>
+          </h4>
+          {isVigilanceExpanded && vigilanceList.map(vigilance => (
             <div 
               key={vigilance.HN} 
               className={styles.alertItemCard}
@@ -181,6 +132,45 @@ export default function NurseDashboard({ onViewPatientWounds, onSwitchTab }: Nur
               <span className={styles.alertArrow}>➔</span>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Today's Appointments List (รายชื่อคนไข้ที่มีนัดวันนี้) */}
+      {todayAppointments.length > 0 && (
+        <div className={styles.appointmentCardContainer}>
+          <h4 
+            className={styles.appointmentTitle}
+            onClick={() => setIsAppointmentsExpanded(!isAppointmentsExpanded)}
+            style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', userSelect: 'none' }}
+          >
+            <span>📅 รายชื่อผู้นัดหมายวันนี้ ({todayAppointments.length}) </span>
+            <span style={{ fontSize: '11px', transition: 'transform 0.2s', transform: isAppointmentsExpanded ? 'rotate(0deg)' : 'rotate(-90deg)', display: 'inline-block' }}>
+              ▼
+            </span>
+          </h4>
+          {isAppointmentsExpanded && todayAppointments.map(appt => {
+            const pt = patients.find(p => p.HN === appt.HN);
+            const ptName = pt ? `${pt.first_name} ${pt.last_name}` : `HN: ${appt.HN}`;
+            
+            return (
+              <div 
+                key={appt.appointment_id} 
+                className={styles.appointmentItemCard}
+                onClick={() => onViewPatientWounds(appt.HN)}
+              >
+                <div className={styles.alertContent} style={{ color: '#1e40af' }}>
+                  <span className={styles.alertWarningSymbol} style={{ color: '#2563eb' }}>⏱️</span>
+                  <div>
+                    <span style={{ fontWeight: 600, color: '#0f172a' }}>{ptName}</span>
+                    <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
+                      เวลานัด: <strong>{appt.appointment_time.slice(0, 5)} น.</strong> {appt.note && `· ${appt.note}`}
+                    </div>
+                  </div>
+                </div>
+                <span className={styles.appointmentArrow}>➔</span>
+              </div>
+            );
+          })}
         </div>
       )}
 
