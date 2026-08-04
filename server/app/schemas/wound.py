@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import Optional
-from datetime import datetime
+from typing import Optional, List
 
 class BodyPartResponse(BaseModel):
     body_part_id: str
@@ -18,18 +17,6 @@ class WoundBase(BaseModel):
 class WoundCreate(WoundBase):
     pass
 
-class WoundResponse(BaseModel):
-    wound_id: str
-    HN: str
-    body_part_id: str
-    side: str
-    created_at: datetime
-    
-    body_part: Optional[BodyPartResponse] = None
-
-    class Config:
-        from_attributes = True
-
 class WoundRecordResponse(BaseModel):
     record_id: int
     wound_id: str
@@ -39,6 +26,19 @@ class WoundRecordResponse(BaseModel):
     area_cm2: float
     record_date: datetime
     note: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+class WoundResponse(BaseModel):
+    wound_id: str
+    HN: str
+    body_part_id: str
+    side: str
+    created_at: datetime
+    
+    body_part: Optional[BodyPartResponse] = None
+    records: List[WoundRecordResponse] = []
 
     class Config:
         from_attributes = True

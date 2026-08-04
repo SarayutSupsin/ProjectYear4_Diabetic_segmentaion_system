@@ -16,7 +16,6 @@ import cv2
 import numpy as np
 import os 
 from datetime import datetime
-import time
 from fastapi import File, UploadFile, Form
 
 router = APIRouter()
@@ -74,7 +73,15 @@ def get_patient_wounds(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="ขออภัย คุณไม่มีสิทธิ์ดึงประวัติแผลของผู้ป่วยรายอื่น"
         )
-    wounds = db.query(Wound).options(joinedload(Wound.body_part)).filter(Wound.HN == HN).all()
+    wounds = (
+        db.query(Wound)
+        .options(
+            joinedload(Wound.body_part),
+            joinedload(Wound.records)
+        )
+        .filter(Wound.HN == HN)
+        .all()
+    )
     return wounds
 
 @router.post("/{wound_id}/records", response_model=WoundRecordResponse, status_code=status.HTTP_201_CREATED)
@@ -116,7 +123,7 @@ async def upload_wound_image_and_evaluate(
     if qr_data is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="ไม่พบคิวอาร์โค้ดอ้างอิงบนสติกเกอร์ในรูปภาพ กรุณาถ่ายภาพใหม่ให้เห็นสติกเกอร์ที่ชัดเจน"
+            detail="ไม่พบสติกเกอร์ QR Code ในรูปภาพ กรุณาถ่ายภาพใหม่ให้เห็น QR Code ชัดเจน"
         )
     
     # Step 2: Predict location and generate wound boundary mask
@@ -154,7 +161,7 @@ async def upload_wound_image_and_evaluate(
 
     # Step 5: Save the processed frontal-view image files to the folder for web viewing.
     patient_hn = wound.HN.replace("/", "-")
-    timestamp = datetime.now().strftime("%Y%m%d")
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename_base = f"{patient_hn}_{wound_id}_{timestamp}"
 
     original_filename = f"{filename_base}_original.jpg"
@@ -229,6 +236,63 @@ def get_wound_records(
     )
     return records
     
+@router.get("/progress-statuses")
+def get_all_patients_wound_statuses(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role_id not in ["NURSE"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="ขออภัย เฉพาะพยาบาลเท่านั้นที่มีสิทธิ์เข้าถึงรายงานนี้"
+        )
+        
+    patients = (
+        db.query(Patient)
+        .options(
+            joinedload(Patient.wounds)
+            .joinedload(Wound.records)
+        )
+        .all()
+    )
+    results = []
+    
+    for p in patients:
+        patient_wounds = p.wounds
+        status = 'คงที่'
+        
+        # Calculate patient age
+        age = 0
+        if p.birth_date:
+            today = datetime.today().date()
+            birth_date = p.birth_date
+            age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+        
+        for w in patient_wounds:
+            records = w.records
+            if len(records) >= 2:
+                sorted_records = sorted(
+                    records,
+                    key=lambda r: r.record_date if r.record_date else datetime.min,
+                    reverse=True
+                )
+                latest = sorted_records[0]
+                previous = sorted_records[1]
+                if latest.area_cm2 > previous.area_cm2:
+                    status = 'แย่ลง'
+                elif latest.area_cm2 < previous.area_cm2 and status != 'แย่ลง':
+                    status = 'ดีขึ้น'
+                    
+        results.append({
+            "HN": p.HN,
+            "name": f"{p.first_name} {p.last_name}",
+            "age": age,
+            "woundsCount": len(patient_wounds),
+            "status": status
+        })
+        
+    return results
+
 @router.get("/body-parts", response_model=List[BodyPartResponse])
 def get_body_parts(
     db: Session = Depends(get_db),
