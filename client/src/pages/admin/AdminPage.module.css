@@ -202,7 +202,11 @@
 }
 
 .filterBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 16px;
+  gap: 16px;
 }
 
 .searchInput {
@@ -393,6 +397,10 @@
   font-weight: 700;
   font-size: 15px; /* Scaled up from 14px */
   cursor: pointer;
+}
+
+.mobileBtnText {
+  display: none;
 }
 
 .deleteCard {
@@ -886,6 +894,46 @@
   /* Hide on desktop by default */
 }
 
+.paginationRow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+  padding: 10px 0;
+}
+
+.pageBtn {
+  padding: 8px 16px;
+  background-color: #ffffff;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.pageBtn:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.pageBtn:disabled {
+  background-color: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+  border-color: #e2e8f0;
+}
+
+.pageInfo {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 700;
+}
+
 @media (max-width: 768px) {
   .mobileTopHeaderGlobal {
     display: flex;
@@ -945,6 +993,63 @@
   .pageHeader {
     display: none !important;
     /* Hide dashboard title on mobile to let the global header rule */
+  }
+
+  .mobileBtnText {
+    display: inline !important;
+  }
+
+  .desktopBtnText {
+    display: none !important;
+  }
+
+  .contentHeader {
+    border-radius: 0 !important;
+    margin: -16px -16px 20px -16px !important;
+    padding: 16px 20px !important;
+    background-color: #ffffff !important;
+    border: none !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+    display: block !important;
+  }
+
+  .contentHeader h2 {
+    font-size: 18px !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+  }
+
+  .contentHeader p {
+    color: #64748b !important;
+    margin: 4px 0 0 0 !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+  }
+
+  .filterBar {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .searchInput {
+    flex: 1 !important;
+    max-width: none !important;
+    font-size: 12px !important;
+    padding: 10px 12px !important;
+  }
+
+  .addBtn {
+    width: auto !important;
+    padding: 10px 12px !important;
+    font-size: 12px !important;
+    border-radius: 8px !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
   }
 
   .tableContainer {

@@ -41,11 +41,20 @@ export default function PatientSearch({ onViewPatientWounds }: PatientSearchProp
     fetchAndEvaluatePatients();
   }, []);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   // Filter patients by name or HN search input
   const filteredPatients = evaluatedPatients.filter(p =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.HN.includes(searchTerm)
   );
+
+  const totalPages = Math.ceil(filteredPatients.length / itemsPerPage);
+  const activePage = Math.min(currentPage, Math.max(1, totalPages));
+  const indexOfLastItem = activePage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentPatients = filteredPatients.slice(indexOfFirstItem, indexOfLastItem);
 
   if (loading) {
     return (
@@ -78,17 +87,20 @@ export default function PatientSearch({ onViewPatientWounds }: PatientSearchProp
           type="text"
           placeholder="ค้นหาชื่อ, HN..."
           value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
+          onChange={e => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
           className={styles.searchInputFull}
         />
       </div>
 
       {/* Patient rows matching Fig 4.11 */}
       <div className={styles.patientsListContainer}>
-        {filteredPatients.length === 0 ? (
+        {currentPatients.length === 0 ? (
           <p className={styles.emptyText}>ไม่พบรายชื่อผู้ป่วยที่ค้นหา</p>
         ) : (
-          filteredPatients.map(p => (
+          currentPatients.map(p => (
             <div
               key={p.HN}
               className={styles.patientRowCard}
@@ -118,6 +130,28 @@ export default function PatientSearch({ onViewPatientWounds }: PatientSearchProp
           ))
         )}
       </div>
+
+      {totalPages > 1 && (
+        <div className={styles.paginationRow}>
+          <button
+            disabled={activePage === 1}
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            className={styles.pageBtn}
+          >
+            ก่อนหน้า
+          </button>
+          <span className={styles.pageInfo}>
+            หน้า {activePage} จาก {totalPages}
+          </span>
+          <button
+            disabled={activePage === totalPages}
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            className={styles.pageBtn}
+          >
+            ถัดไป
+          </button>
+        </div>
+      )}
     </div>
   );
 }
