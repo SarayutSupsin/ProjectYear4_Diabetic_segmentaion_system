@@ -76,9 +76,18 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
     }
   };
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   const filteredPatients = patientsList.filter(p =>
     `${p.first_name} ${p.last_name}`.includes(searchPatient) || p.HN.includes(searchPatient)
   );
+
+  const totalPages = Math.ceil(filteredPatients.length / itemsPerPage);
+  const activePage = Math.min(currentPage, Math.max(1, totalPages));
+  const indexOfLastItem = activePage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentPatients = filteredPatients.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
     <div className={`${styles.tabContent} ${styles.fadeUp}`}>
@@ -87,7 +96,6 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
           <h2>จัดการข้อมูลผู้ป่วย</h2>
           <p>ลงทะเบียน ค้นหา แก้ไข และลบประวัติเวชระเบียนคนไข้</p>
         </div>
-        <button onClick={openAddPatient} className={styles.addBtn}>+ ลงทะเบียนผู้ป่วยใหม่</button>
       </div>
 
       <div className={styles.filterBar}>
@@ -95,9 +103,16 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
           type="text"
           placeholder="ค้นหาด้วยชื่อ-นามสกุล หรือ รหัส HN..."
           value={searchPatient}
-          onChange={e => setSearchPatient(e.target.value)}
+          onChange={e => {
+            setSearchPatient(e.target.value);
+            setCurrentPage(1);
+          }}
           className={styles.searchInput}
         />
+        <button onClick={openAddPatient} className={styles.addBtn}>
+          <span className={styles.desktopBtnText}>+ ลงทะเบียนผู้ป่วยใหม่</span>
+          <span className={styles.mobileBtnText}>+ ลงทะเบียน</span>
+        </button>
       </div>
 
       <div className={styles.tableContainer}>
@@ -114,7 +129,7 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
             </tr>
           </thead>
           <tbody>
-            {filteredPatients.map(p => (
+            {currentPatients.map(p => (
               <tr key={p.HN}>
                 <td className={styles.bold}>{p.HN}</td>
                 <td>{p.first_name} {p.last_name}</td>
@@ -134,10 +149,10 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
 
       {/* Mobile-first card list matching Fig 4.3 - 4.5 layout */}
       <div className={styles.mobileCardsList}>
-        {filteredPatients.length === 0 ? (
+        {currentPatients.length === 0 ? (
           <p className={styles.emptyText}>ไม่พบข้อมูลคนไข้ที่ค้นหา</p>
         ) : (
-          filteredPatients.map(p => {
+          currentPatients.map(p => {
             const today = new Date();
             const birth = new Date(p.birth_date);
             let age = today.getFullYear() - birth.getFullYear();
@@ -177,6 +192,28 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
           })
         )}
       </div>
+
+      {totalPages > 1 && (
+        <div className={styles.paginationRow}>
+          <button
+            disabled={activePage === 1}
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            className={styles.pageBtn}
+          >
+            ก่อนหน้า
+          </button>
+          <span className={styles.pageInfo}>
+            หน้า {activePage} จาก {totalPages}
+          </span>
+          <button
+            disabled={activePage === totalPages}
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            className={styles.pageBtn}
+          >
+            ถัดไป
+          </button>
+        </div>
+      )}
 
       {/* ป็อปอัปแบบฟอร์มผู้ป่วย */}
       {showPatientModal && (

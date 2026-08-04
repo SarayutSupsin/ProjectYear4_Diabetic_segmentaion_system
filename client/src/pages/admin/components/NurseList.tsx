@@ -78,18 +78,26 @@ export default function NurseList({ nursesList, fetchData }: NurseListProps) {
     }
   };
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   const filteredNurses = nursesList.filter(n =>
     `${n.first_name || ''} ${n.last_name || ''}`.includes(searchNurse) || n.username.includes(searchNurse)
   );
+
+  const totalPages = Math.ceil(filteredNurses.length / itemsPerPage);
+  const activePage = Math.min(currentPage, Math.max(1, totalPages));
+  const indexOfLastItem = activePage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentNurses = filteredNurses.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
     <div className={`${styles.tabContent} ${styles.fadeUp}`}>
       <div className={styles.contentHeader}>
         <div>
           <h2>จัดการบัญชีพยาบาล</h2>
-          <p>กำหนดแผนก ค้นหา แก้ไขสิทธิ์ และลบผู้ใช้</p>
+          <p>กำหนดแผนก ค้นหา แก้ไข และลบบัญชีผู้ใช้</p>
         </div>
-        <button onClick={openAddNurse} className={styles.addBtn}>+ เพิ่มพยาบาลใหม่</button>
       </div>
 
       <div className={styles.filterBar}>
@@ -97,9 +105,16 @@ export default function NurseList({ nursesList, fetchData }: NurseListProps) {
           type="text"
           placeholder="ค้นหาชื่อพยาบาล หรือ Username..."
           value={searchNurse}
-          onChange={e => setSearchNurse(e.target.value)}
+          onChange={e => {
+            setSearchNurse(e.target.value);
+            setCurrentPage(1);
+          }}
           className={styles.searchInput}
         />
+        <button onClick={openAddNurse} className={styles.addBtn}>
+          <span className={styles.desktopBtnText}>+ เพิ่มพยาบาลใหม่</span>
+          <span className={styles.mobileBtnText}>+ เพิ่มบัญชี</span>
+        </button>
       </div>
 
       <div className={styles.tableContainer}>
@@ -114,7 +129,7 @@ export default function NurseList({ nursesList, fetchData }: NurseListProps) {
             </tr>
           </thead>
           <tbody>
-            {filteredNurses.map(n => (
+            {currentNurses.map(n => (
               <tr key={n.user_id}>
                 <td className={styles.bold}>{n.username}</td>
                 <td>{n.first_name && n.last_name ? `${n.first_name} ${n.last_name}` : 'ยังไม่ตั้งค่า'}</td>
@@ -132,10 +147,10 @@ export default function NurseList({ nursesList, fetchData }: NurseListProps) {
 
       {/* Mobile-first card list matching Fig 4.6 - 4.8 layout */}
       <div className={styles.mobileCardsList}>
-        {filteredNurses.length === 0 ? (
+        {currentNurses.length === 0 ? (
           <p className={styles.emptyText}>ไม่พบข้อมูลบัญชีพยาบาลที่ค้นหา</p>
         ) : (
-          filteredNurses.map(n => (
+          currentNurses.map(n => (
             <div key={n.user_id} className={styles.mobileItemCard}>
               <div className={styles.cardInfoRow}>
                 <div className={styles.itemAvatar} style={{ backgroundColor: '#e2e8f0', color: '#475569' }}>
@@ -168,6 +183,28 @@ export default function NurseList({ nursesList, fetchData }: NurseListProps) {
           ))
         )}
       </div>
+
+      {totalPages > 1 && (
+        <div className={styles.paginationRow}>
+          <button
+            disabled={activePage === 1}
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            className={styles.pageBtn}
+          >
+            ก่อนหน้า
+          </button>
+          <span className={styles.pageInfo}>
+            หน้า {activePage} จาก {totalPages}
+          </span>
+          <button
+            disabled={activePage === totalPages}
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            className={styles.pageBtn}
+          >
+            ถัดไป
+          </button>
+        </div>
+      )}
 
       {/* ป็อปอัปแบบฟอร์มพยาบาล */}
       {showNurseModal && (
