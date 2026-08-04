@@ -72,7 +72,8 @@
 }
 
 .activeBtn {
-  color: #0d9488 !important; /* Clinical Teal active color highlight */
+  color: #0d9488 !important;
+  /* Clinical Teal active color highlight */
 }
 
 .activeBtn .icon {
@@ -222,12 +223,44 @@
     padding: 16px;
     padding-bottom: 100px;
   }
+
+  .hospitalTopBanner {
+    border-radius: 0 !important;
+    /* Remove rounded corners on mobile */
+    margin: -16px -16px 16px -16px !important;
+    /* Stretch flat banner edge-to-edge on mobile */
+    padding: 16px 20px !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .pageHeader {
+    border-radius: 0 !important;
+    margin: -16px -16px 20px -16px !important;
+    padding: 16px 20px !important;
+    background-color: #ffffff !important;
+    border: none !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+  }
+
+  .pageHeader h2 {
+    font-size: 18px !important;
+    color: #0f172a !important;
+  }
+
+  .pageHeader p {
+    color: #64748b !important;
+  }
 }
 
 /* --- Nurse Dashboard Components Styling --- */
 
+/* Base style for pageHeader (Flat white edge-to-edge banner on Desktop) */
 .pageHeader {
-  margin-bottom: 24px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 20px 40px;
+  margin: -40px -40px 24px -40px; /* Cancel desktop main padding */
 }
 
 .pageHeader h2 {
@@ -561,23 +594,27 @@
 /* --- Wound Detail Page Component Styling --- */
 
 .backBtn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: none;
-  border: none;
-  color: #64748b;
-  font-size: 14px;
-  font-weight: 600;
+  gap: 6px;
+  background-color: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
-  padding: 8px 0;
+  padding: 8px 14px;
+  border-radius: 10px;
   margin-bottom: 16px;
   font-family: inherit;
   transition: var(--transition);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .backBtn:hover {
-  color: #0d9488;
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
 }
 
 .detailHeader {
@@ -972,12 +1009,29 @@
   background-color: #ffffff;
   border: 1.5px solid #cbd5e1;
   color: #475569;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 10px;
   cursor: pointer;
   font-family: inherit;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 44px;
+}
+
+.pillThText {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pillEnText {
+  font-size: 9px;
+  color: #94a3b8;
+  font-weight: 600;
+  margin-top: 2px;
   transition: var(--transition);
 }
 
@@ -986,6 +1040,11 @@
   border-color: #0d9488;
   color: #0d9488;
   background-color: #f0fdfa;
+}
+
+.pillBtn:hover .pillEnText,
+.pillBtn.active .pillEnText {
+  color: #0d9488;
 }
 
 .sideButtonsRow {
@@ -1398,6 +1457,51 @@
   font-size: 13px;
 }
 
+/* Appointment container on dashboard */
+.appointmentCardContainer {
+  background-color: #eff6ff;
+  border: 1.5px solid #dbeafe;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 20px;
+  margin-top: 16px;
+}
+
+.appointmentTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e40af;
+  margin: 0 0 10px 0;
+}
+
+.appointmentItemCard {
+  background-color: #ffffff;
+  padding: 12px 16px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  cursor: pointer;
+  border: 1.5px solid #bfdbfe;
+  transition: var(--transition);
+}
+
+.appointmentItemCard:last-child {
+  margin-bottom: 0;
+}
+
+.appointmentItemCard:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.05);
+  border-color: #3b82f6;
+}
+
+.appointmentArrow {
+  color: #93c5fd;
+  font-size: 13px;
+}
+
 /* Quick access card for UNet evaluation */
 .quickAnalyzeWoundCard {
   background-color: #ffffff;
@@ -1473,6 +1577,7 @@
   gap: 8px;
 }
 
+.patientRowCard,
 .recentPatientRowCard {
   background-color: #ffffff;
   border-radius: 16px;
@@ -1486,6 +1591,7 @@
   transition: var(--transition);
 }
 
+.patientRowCard:hover,
 .recentPatientRowCard:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
@@ -1583,6 +1689,12 @@
   font-size: 11px;
   color: #64748b;
   font-weight: 500;
+}
+
+.patientRowRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .rowArrowIcon {
@@ -1692,9 +1804,10 @@
 
 .woundSelectItemCard:hover,
 .woundSelectItemCard.active {
-  border-color: #0d9488;
+  border-color: #2563eb;
+  /* Highlight active wound in brand blue */
   background-color: #ffffff;
-  box-shadow: 0 4px 6px -1px rgba(13, 148, 136, 0.05);
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.08);
 }
 
 .woundSelectText {
@@ -1799,12 +1912,19 @@
   background-color: #1d4ed8;
 }
 
-/* History Thumbnails grid layout (Fig 4.13) */
-.woundHistoryImagesGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+/* Horizontal scrolling row for history thumbnails (Fig 4.13) */
+.woundHistoryImagesScrollRow {
+  display: flex;
   gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
   margin-top: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.woundHistoryImagesScrollRow::-webkit-scrollbar {
+  display: none;
+  /* Hide scrollbar for native app look */
 }
 
 .historyThumbCard {
@@ -1815,6 +1935,10 @@
   display: flex;
   flex-direction: column;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  flex-shrink: 0;
+  /* Prevent squishing inside scrolling strip */
+  width: 130px;
+  /* Fixed width matching Fig 4.13 */
 }
 
 .thumbImageWrapper {
@@ -1931,4 +2055,720 @@
     display: none;
     /* Hide on desktop view */
   }
+}
+
+/* --- Form Layout and Input Fields styling inside details tab --- */
+.formRow {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.formGroupCompact {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formGroupCompact label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.selectField,
+.inputFieldCompact {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  font-size: 13px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  font-family: inherit;
+  background-color: #ffffff;
+  transition: var(--transition);
+}
+
+.selectField:focus,
+.inputFieldCompact:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Custom Pop-up selection modal time picker */
+.timePickerButtonDisplay {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #0f172a;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: var(--transition);
+}
+
+.timePickerButtonDisplay:hover {
+  border-color: #2563eb;
+  background-color: #f8fafc;
+}
+
+.customTimePickerOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.6);
+  /* Semi-transparent backdrop */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  /* Float on top of everything */
+  padding: 20px;
+}
+
+.customTimePickerModalCard {
+  background-color: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 300px;
+  padding: 20px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.customTimePickerModalCard h4 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.customTimePickerColumns {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 10px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+}
+
+.customTimePickerColumn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 180px;
+}
+
+.columnLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.columnScrollList {
+  width: 100%;
+  height: 150px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  scrollbar-width: thin;
+  /* Thin scrollbar for Firefox on PC */
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.columnScrollList::-webkit-scrollbar {
+  width: 5px;
+  /* Thin scrollbar for Chrome/Safari/Edge on PC */
+}
+
+.columnScrollList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.columnScrollList::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.columnScrollList::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.customTimePickerItem {
+  padding: 8px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #475569;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.customTimePickerItem:hover {
+  background-color: #cbd5e1;
+}
+
+.customTimePickerItem.active {
+  background-color: #2563eb;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.pickerColonSeparator {
+  font-size: 20px;
+  font-weight: 800;
+  color: #94a3b8;
+  padding-top: 18px;
+}
+
+.customTimePickerActions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.pickerCancelBtn {
+  flex: 1;
+  padding: 10px;
+  background-color: #f1f5f9;
+  color: #475569;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.pickerCancelBtn:hover {
+  background-color: #e2e8f0;
+}
+
+.pickerConfirmBtn {
+  flex: 1;
+  padding: 10px;
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.pickerConfirmBtn:hover {
+  background-color: #1d4ed8;
+}
+
+/* Custom Date Picker CSS styles */
+.datePickerButtonDisplay {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  font-size: 13px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #0f172a;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--transition);
+}
+
+.datePickerButtonDisplay:hover {
+  border-color: #2563eb;
+  background-color: #f8fafc;
+}
+
+.customDatePickerOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.customDatePickerModalCard {
+  background-color: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 320px;
+  padding: 20px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+}
+
+.calendarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.calendarNavBtn {
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: var(--transition);
+}
+
+.calendarNavBtn:hover {
+  color: #2563eb;
+}
+
+.calendarMonthTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.calendarWeekdaysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+  width: 100%;
+  text-align: center;
+}
+
+.weekdayLabel {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 0;
+}
+
+.calendarDaysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.emptyDayCell {
+  height: 36px;
+}
+
+.calendarDayBtn {
+  height: 36px;
+  border: none;
+  background: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.calendarDayBtn:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.calendarDayBtn.active {
+  background-color: #2563eb;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.calendarCloseBtn {
+  width: 100%;
+  padding: 10px;
+  background-color: #f1f5f9;
+  color: #475569;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.calendarCloseBtn:hover {
+  background-color: #e2e8f0;
+}
+
+/* Custom Dropdown selectors */
+.customDropdownWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.customDropdownTrigger {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  font-size: 13px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #0f172a;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  height: 42px;
+  transition: var(--transition);
+  font-family: inherit;
+  text-align: left;
+}
+
+.customDropdownTrigger:hover {
+  border-color: #2563eb;
+}
+
+.dropdownArrow {
+  font-size: 10px;
+  color: #64748b;
+}
+
+.dropdownBackdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 990;
+  background: transparent;
+}
+
+.customDropdownList {
+  position: absolute;
+  top: 46px;
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+  max-height: 240px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dropdownSearchInput {
+  width: calc(100% - 24px);
+  margin: 12px;
+  padding: 8px 12px;
+  font-size: 13px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 6px;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.dropdownSearchInput:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.dropdownItemsScroll {
+  overflow-y: auto;
+  flex: 1;
+  max-height: 200px;
+}
+
+.dropdownItem {
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.dropdownItem:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.dropdownItem.active {
+  background-color: #eff6ff;
+  color: #2563eb;
+}
+
+.dropdownItem.newItem {
+  border-top: 1px dashed #e2e8f0;
+  color: #0d9488;
+}
+
+.dropdownItem.newItem:hover {
+  background-color: #f0fdfa;
+  color: #0f766e;
+}
+
+.dropdownItem.newItem.active {
+  background-color: #f0fdfa;
+  color: #0d9488;
+}
+
+/* Custom Modal Backdrop Overlay */
+.modalBackdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.modalCardCompact {
+  background-color: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 340px;
+  padding: 24px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.modalCardCompact h4 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: center;
+}
+
+.modalSubtitle {
+  font-size: 12px;
+  color: #64748b;
+  text-align: center;
+  margin: -12px 0 16px 0;
+  font-weight: 600;
+}
+
+.confirmModalDetails {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.confirmThumbnail {
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 2px solid #e2e8f0;
+}
+
+.confirmMeta {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.confirmMeta p {
+  margin: 0;
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.confirmMeta p strong {
+  color: #0f172a;
+}
+
+.modalActions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.cancelBtn {
+  flex: 1;
+  padding: 10px;
+  background-color: #f1f5f9;
+  color: #475569;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.cancelBtn:hover {
+  background-color: #e2e8f0;
+}
+
+.confirmBtn {
+  flex: 1;
+  padding: 10px;
+  background-color: #0d9488;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.confirmBtn:hover {
+  background-color: #0f766e;
+}
+
+/* Result Modal details */
+.resultImageContainer {
+  width: 100%;
+  height: 180px;
+  background-color: #000000;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e2e8f0;
+}
+
+.resultImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.resultMetricsRow {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.resultMetricBlock {
+  flex: 1;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.resultMetricVal {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0d9488;
+}
+
+.resultMetricLabel {
+  font-size: 10px;
+  color: #64748b;
+  margin-top: 2px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.closeResultBtn {
+  width: 100%;
+  padding: 10px;
+  background-color: #0f172a;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.closeResultBtn:hover {
+  background-color: #1e293b;
+}
+
+/* Loading overlay spinner */
+.loadingSpinnerCard {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  max-width: 280px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.loadingSpinnerCard p {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f1f5f9;
+  border-top-color: #0d9488;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }

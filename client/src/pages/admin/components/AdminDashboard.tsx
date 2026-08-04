@@ -1,7 +1,6 @@
 // นำเข้าสไตล์จากระดับโฟลเดอร์แม่มาใช้งานร่วมกัน
 import styles from '../AdminPage.module.css';
 import type { Patient } from '../../../types';
-import { useAuth } from '../../../context/AuthContext';
 
 interface NurseListItem {
   user_id: string;
@@ -21,7 +20,6 @@ interface AdminDashboardProps {
 }
 
 export default function AdminDashboard({ patientsList, nursesList, formatDateTH, onSwitchTab }: AdminDashboardProps) {
-  const { logout } = useAuth();
 
   // Calculate patient age dynamically
   const calculateAge = (birthDateStr: string) => {

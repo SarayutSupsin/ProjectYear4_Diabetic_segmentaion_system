@@ -5,11 +5,6 @@ import { api } from '../../services/api';
 import type { Patient, Wound, WoundRecord, Appointment } from '../../types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-interface BodyPartItem {
-  body_part_id: string;
-  body_part_name: string;
-}
-
 export default function PatientPage() {
   const { user, logout } = useAuth();
   const HN = user?.username || ''; // The username for patient accounts is their Hospital Number (HN)
@@ -19,7 +14,6 @@ export default function PatientPage() {
   const [selectedWoundId, setSelectedWoundId] = useState<string>('');
   const [records, setRecords] = useState<WoundRecord[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [bodyParts, setBodyParts] = useState<BodyPartItem[]>([]);
 
   // Sub-tabs navigation for patient view (Fig 4.21 - 4.23)
   const [subTab, setSubTab] = useState<'info' | 'history' | 'graph'>('info');
@@ -34,10 +28,9 @@ export default function PatientPage() {
       setLoading(true);
       setError(null);
 
-      const [patientsData, woundsData, bodyPartsData, appointmentsList] = await Promise.all([
+      const [patientsData, woundsData, appointmentsList] = await Promise.all([
         api.get<Patient[]>('/patients/'),
         api.get<Wound[]>(`/wounds/patient/${HN}`),
-        api.get<BodyPartItem[]>('/wounds/body-parts'),
         api.get<Appointment[]>('/appointment/')
       ]);
 
@@ -48,7 +41,6 @@ export default function PatientPage() {
 
       setPatient(currentPatient);
       setWounds(woundsData);
-      setBodyParts(bodyPartsData);
       setAppointments(appointmentsList);
 
       if (woundsData.length > 0) {
