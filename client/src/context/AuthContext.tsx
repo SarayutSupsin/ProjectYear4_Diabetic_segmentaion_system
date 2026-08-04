@@ -30,7 +30,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           user_id: profile.user_id,
           username: profile.username,
           role_id: profile.role.toUpperCase() as 'ADMIN' | 'NURSE' | 'PATIENT',
-          role: profile.role
+          role: profile.role,
+          first_name: profile.first_name,
+          last_name: profile.last_name,
+          department: profile.department
         });
       } else {
         logout();

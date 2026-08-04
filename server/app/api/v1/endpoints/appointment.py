@@ -16,10 +16,10 @@ def create_appointment(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    if current_user.role_id not in ["NURSE", "ADMIN"]:
+    if current_user.role_id not in ["NURSE"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="ขออภัย เฉพาะบุคลากรทางการแพทย์ (พยาบาล/แอดมิน) เท่านั้นที่มีสิทธิ์เพิ่มบันทึกนัดหมายใหม่"
+            detail="ขออภัย เฉพาะบุคลากรทางการแพทย์ (พยาบาล) เท่านั้นที่มีสิทธิ์เพิ่มบันทึกนัดหมายใหม่"
         )
     patient = db.query(Patient).filter(Patient.HN == appointment_in.HN).first()
     if not patient:
@@ -51,7 +51,7 @@ def get_appointments(
         appointments = db.query(Appointment).filter(Appointment.HN == current_user.username).all()
         return appointments
 
-    # 2. Clinicians (NURSE / ADMIN) can view all or filter by patient HN
+    # 2. Clinicians (NURSE) can view all or filter by patient HN
     query = db.query(Appointment)
     if HN:
         query = query.filter(Appointment.HN == HN)

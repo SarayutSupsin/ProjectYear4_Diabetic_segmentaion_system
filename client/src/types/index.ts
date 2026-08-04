@@ -4,6 +4,9 @@ export interface User {
   role_id: 'ADMIN' | 'NURSE' | 'PATIENT';
   role?: string;
   created_at?: string;
+  first_name?: string;
+  last_name?: string;
+  department?: string;
 }
 
 export interface Nurse {
@@ -34,6 +37,7 @@ export interface Wound {
     body_part_id: string;
     body_part_name: string;
   };
+  records?: WoundRecord[];
 }
 
 export interface WoundRecord {

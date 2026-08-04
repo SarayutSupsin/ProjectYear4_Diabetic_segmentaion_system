@@ -30,7 +30,7 @@ def warp_image_and_mask(img, mask, qr_polygon):
         [qr_side_px, 0.0],
         [qr_side_px, qr_side_px],
         [0.0, qr_side_px]
-    ])
+    ], dtype="float32")
 
     # Basic Homography Matrix Estimation
     H = cv2.getPerspectiveTransform(src_pts, dst_pts_ref)

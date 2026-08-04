@@ -3,10 +3,10 @@ from sqlalchemy.orm import Session
 from typing import List 
 
 from app.db.session import get_db
-from app.models import Patient
+from app.models import Patient, User, Wound, Appointment, BodyPart
+from sqlalchemy.orm import joinedload
 from app.schemas.patient import PatientCreate, PatientUpdate, PatientResponse
 from app.core.security import get_current_user, get_password_hash
-from app.models import User
 
 router = APIRouter()
 
@@ -172,5 +172,44 @@ def delete_patient(
     db.delete(patient)
     db.commit()
     return {"message": f"ลบข้อมูลผู้ป่วยรหัส HN {HN} และบัญชีผู้ใช้ระบบสำเร็จ"}
+
+@router.get("/{HN}/detail")
+def get_patient_full_detail(
+    HN: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role_id not in ["NURSE"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="ขออภัย เฉพาะพยาบาลเท่านั้นที่มีสิทธิ์เข้าถึงข้อมูลรายละเอียดนี้"
+        )
+        
+    patient = db.query(Patient).filter(Patient.HN == HN).first()
+    if not patient:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"ไม่พบข้อมูลคนไข้รหัส HN {HN}"
+        )
+        
+    wounds = (
+        db.query(Wound)
+        .options(
+            joinedload(Wound.body_part),
+            joinedload(Wound.records)
+        )
+        .filter(Wound.HN == HN)
+        .all()
+    )
+    
+    appointments = db.query(Appointment).filter(Appointment.HN == HN).all()
+    body_parts = db.query(BodyPart).all()
+    
+    return {
+        "patient": patient,
+        "wounds": wounds,
+        "appointments": appointments,
+        "body_parts": body_parts
+    }
 
 
