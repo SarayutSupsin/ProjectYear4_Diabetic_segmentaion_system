@@ -1,3 +1,8 @@
+.color {
+  color: red;
+  font-weight: bold;
+}
+
 .adminLayout {
   display: flex;
   width: 100vw;

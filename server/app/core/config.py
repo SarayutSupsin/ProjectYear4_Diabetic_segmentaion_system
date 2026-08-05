@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Deep Learning-Based System for Segmentation and Monitoring of Diabetic Foot Ulcer"
     API_V1_STR: str = "/api/v1"
-    DATABASE_URL: str
+    DATABASE_URL: str #ไม่มีค่า Default เพราะต้องอ่านจาก .env
     MODEL_PATH: str = str(BASE_DIR / "weights" / "unet_efficientnet_b4_dfu.pth")
     STATIC_DIR: str = str(BASE_DIR / "static" / "wounds")
     
@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     MAX_WARPED_DIM: int = 5000 ## Maximum image width limit to prevent system RAM crashes due to homography warping
     THRESHOLD: float = 0.5
 
-    # CORS
+    # CORS ที่รันบน localhost:5173 สามารถเรียก API ที่ localhost:8000 ได้
     BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:5173", "http://localhost:3000"]
 
     # JWT Authentication

@@ -59,7 +59,7 @@ def get_my_profile(
     elif current_user.role_id == "ADMIN":
         profile_data.update({
             "first_name": "System",
-            "last_name": "Administrator",
+            "last_name": "Administrator",   
             "department": "IT Department"
         })
 

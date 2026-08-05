@@ -176,7 +176,7 @@ export default function NurseList({ nursesList, fetchData }: NurseListProps) {
             <h3>{selectedNurse ? 'แก้ไขบัญชีพยาบาล' : 'ลงทะเบียนพยาบาลใหม่'}</h3>
             <form onSubmit={handleNurseSubmit} className={styles.modalForm}>
               <div className={styles.formGroup}>
-                <label>ชื่อบัญชีเข้าใช้งาน (Username) *</label>
+                <label>ชื่อบัญชีเข้าใช้งาน (Username) <span className={styles.color}>*</span></label>
                 <input
                   type="text"
                   required
@@ -189,7 +189,7 @@ export default function NurseList({ nursesList, fetchData }: NurseListProps) {
               </div>
 
               <div className={styles.formGroup}>
-                <label>รหัสผ่านเข้าใช้งาน *</label>
+                <label>รหัสผ่านเข้าใช้งาน <span className={styles.color}>*</span></label>
                 <input
                   type="password"
                   required={!selectedNurse}
@@ -202,7 +202,7 @@ export default function NurseList({ nursesList, fetchData }: NurseListProps) {
 
               <div className={styles.formRow2}>
                 <div className={styles.formGroup}>
-                  <label>ชื่อจริง *</label>
+                  <label>ชื่อจริง <span className={styles.color}>*</span></label>
                   <input
                     type="text"
                     required
@@ -212,7 +212,7 @@ export default function NurseList({ nursesList, fetchData }: NurseListProps) {
                   />
                 </div>
                 <div className={styles.formGroup}>
-                  <label>นามสกุล *</label>
+                  <label>นามสกุล <span className={styles.color}>*</span></label>
                   <input
                     type="text"
                     required
@@ -224,7 +224,7 @@ export default function NurseList({ nursesList, fetchData }: NurseListProps) {
               </div>
 
               <div className={styles.formGroup}>
-                <label>แผนกปฏิบัติงาน *</label>
+                <label>แผนกปฏิบัติงาน <span className={styles.color}>*</span></label>
                 <input
                   type="text"
                   required

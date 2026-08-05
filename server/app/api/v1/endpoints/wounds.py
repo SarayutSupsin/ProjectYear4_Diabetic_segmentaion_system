@@ -70,7 +70,7 @@ def get_patient_wounds(
     current_user: User = Depends(get_current_user)
 ):
     if current_user.role_id == "PATIENT" and current_user.username != HN:
-        raise HTTPException(
+        raise HTTPException(                                                    
             status_code=status.HTTP_403_FORBIDDEN,
             detail="ขออภัย คุณไม่มีสิทธิ์ดึงประวัติแผลของผู้ป่วยรายอื่น"
         )

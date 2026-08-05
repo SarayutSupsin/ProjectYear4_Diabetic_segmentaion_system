@@ -14,7 +14,7 @@ from app.api.v1.endpoints import auth, patientResponse, wounds, appointment, nur
 os.makedirs(settings.STATIC_DIR, exist_ok=True)
 
 app = FastAPI(title=settings.PROJECT_NAME)
-# add CORS
+# add CORS อนุญาตให้ Frontend ที่รันคนละ Port เรียก Backend ได้
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.BACKEND_CORS_ORIGINS,

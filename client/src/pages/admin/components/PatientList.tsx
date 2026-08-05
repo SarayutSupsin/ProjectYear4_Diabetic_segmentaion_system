@@ -186,7 +186,7 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
             <form onSubmit={handlePatientSubmit} className={styles.modalForm}>
               <div className={styles.formRow2}>
                 <div className={styles.formGroup}>
-                  <label>รหัส HN *</label>
+                  <label>รหัส HN <span className={styles.color}>*</span></label>
                   <input
                     type="text"
                     required
@@ -194,11 +194,11 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
                     value={patientForm.HN}
                     onChange={e => setPatientForm({ ...patientForm, HN: e.target.value })}
                     className={styles.inputField}
-                    placeholder="เช่น 3-123"
+                    placeholder="เช่น HN0000"
                   />
                 </div>
                 <div className={styles.formGroup}>
-                  <label>รหัสผ่านเข้าใช้งาน *</label>
+                  <label>รหัสผ่านเข้าใช้งาน <span className={styles.color}>*</span></label>
                   <input
                     type="password"
                     required={!selectedPatient}
@@ -212,7 +212,7 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
 
               <div className={styles.formRow2}>
                 <div className={styles.formGroup}>
-                  <label>ชื่อจริง *</label>
+                  <label>ชื่อจริง <span className={styles.color}>*</span></label>
                   <input
                     type="text"
                     required
@@ -222,7 +222,7 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
                   />
                 </div>
                 <div className={styles.formGroup}>
-                  <label>นามสกุล *</label>
+                  <label>นามสกุล <span className={styles.color}>*</span></label>
                   <input
                     type="text"
                     required
@@ -235,7 +235,7 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
 
               <div className={styles.formRow2}>
                 <div className={styles.formGroup}>
-                  <label>วันเกิด *</label>
+                  <label>วันเกิด <span className={styles.color}>*</span></label>
                   <input
                     type="date"
                     required
@@ -245,7 +245,7 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
                   />
                 </div>
                 <div className={styles.formGroup}>
-                  <label>เพศ *</label>
+                  <label>เพศ <span className={styles.color}>*</span></label>
                   <div className={styles.genderToggle}>
                     <button type="button" onClick={() => setPatientForm({ ...patientForm, gender: 'Male' })} className={`${styles.genderBtn} ${patientForm.gender === 'Male' ? styles.active : ''}`}>ชาย</button>
                     <button type="button" onClick={() => setPatientForm({ ...patientForm, gender: 'Female' })} className={`${styles.genderBtn} ${patientForm.gender === 'Female' ? styles.active : ''}`}>หญิง</button>
@@ -255,7 +255,7 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
 
               <div className={styles.formRow2}>
                 <div className={styles.formGroup}>
-                  <label>เบอร์โทรศัพท์ *</label>
+                  <label>เบอร์โทรศัพท์ <span className={styles.color}>*</span></label>
                   <input
                     type="text"
                     required
@@ -266,7 +266,7 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
                   />
                 </div>
                 <div className={styles.formGroup}>
-                  <label>วันที่เริ่มเข้ารับการรักษา *</label>
+                  <label>วันที่เริ่มเข้ารับการรักษา <span className={styles.color}>*</span></label>
                   <input
                     type="date"
                     required
