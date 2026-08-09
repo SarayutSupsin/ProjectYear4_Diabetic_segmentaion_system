@@ -1,4 +1,5 @@
-const BASE_URL = 'http://localhost:8000/api/v1';
+export const BACKEND_URL = 'http://localhost:8000';
+const BASE_URL = `${BACKEND_URL}/api/v1`;
 
 // Helper function for managing authentication tokens
 export const getAuthToken = () => localStorage.getItem('token');

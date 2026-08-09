@@ -135,3 +135,35 @@
     transform: translateY(0);
   }
 }
+
+/* ส่วนแสดงผลและปุ่มสลับการมองเห็นรหัสผ่าน */
+.passwordWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.passwordWrapper .inputField {
+  padding-right: 46px; /* เว้นระยะด้านขวาสำหรับวางปุ่มตา */
+}
+
+.passwordToggle {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 6px;
+  transition: var(--transition);
+}
+
+.passwordToggle:hover {
+  color: var(--primary);
+  background-color: #f1f5f9;
+}

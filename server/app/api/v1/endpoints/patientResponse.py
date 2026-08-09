@@ -85,6 +85,12 @@ def get_patients(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    # 1. Access Control: Only ADMIN or NURSE is allowed to see the list of all patients
+    if current_user.role_id not in ["ADMIN", "NURSE"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="ขออภัย เฉพาะบุคลากรทางการแพทย์เท่านั้นที่มีสิทธิ์ดูรายชื่อผู้ป่วยทั้งหมด"
+        )
     patients = db.query(Patient).all()
     return patients
 
@@ -94,6 +100,13 @@ def get_patient_by_hn(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    # 2. Medical Privacy: PATIENT role can only retrieve their own medical profile record
+    if current_user.role_id == "PATIENT" and current_user.username != HN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="ขออภัย คุณไม่มีสิทธิ์เข้าถึงประวัติของผู้ป่วยรายอื่น"
+        )
+
     patient = db.query(Patient).filter(Patient.HN == HN).first()
     if not patient:
         raise HTTPException(

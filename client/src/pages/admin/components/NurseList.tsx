@@ -228,7 +228,7 @@ export default function NurseList({ nursesList, fetchData }: NurseListProps) {
               <div className={styles.formGroup}>
                 <label>รหัสผ่านเข้าใช้งาน *</label>
                 <input
-                  type="password"
+                  type="text"
                   required={!selectedNurse}
                   value={nurseForm.password}
                   onChange={e => setNurseForm({ ...nurseForm, password: e.target.value })}

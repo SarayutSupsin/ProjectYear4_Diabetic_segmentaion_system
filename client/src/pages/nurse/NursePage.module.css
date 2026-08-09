@@ -2812,3 +2812,25 @@
   color: #64748b;
   font-weight: 700;
 }
+
+/* Patient Custom Top Banner responsive style override to prevent mobile crowding */
+.patientTopBanner {
+  background-color: #2563eb;
+  padding: 24px;
+  border-radius: 16px;
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+}
+
+@media (max-width: 768px) {
+  .patientTopBanner {
+    border-radius: 0 !important;
+    margin: -16px -16px 20px -16px !important;
+    padding: 16px 20px !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05) !important;
+  }
+}
