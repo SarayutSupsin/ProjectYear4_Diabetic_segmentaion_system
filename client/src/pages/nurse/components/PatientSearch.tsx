@@ -3,6 +3,7 @@ import styles from '../NursePage.module.css';
 import { api } from '../../../services/api';
 interface PatientSearchProps {
   onViewPatientWounds: (HN: string) => void;
+  activeTab: string;
 }
 
 interface EvaluatedPatient {
@@ -13,7 +14,7 @@ interface EvaluatedPatient {
   status: 'ดีขึ้น' | 'แย่ลง' | 'คงที่';
 }
 
-export default function PatientSearch({ onViewPatientWounds }: PatientSearchProps) {
+export default function PatientSearch({ onViewPatientWounds, activeTab }: PatientSearchProps) {
   const [evaluatedPatients, setEvaluatedPatients] = useState<EvaluatedPatient[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
@@ -38,8 +39,10 @@ export default function PatientSearch({ onViewPatientWounds }: PatientSearchProp
   };
 
   useEffect(() => {
-    fetchAndEvaluatePatients();
-  }, []);
+    if (activeTab === 'search') {
+      fetchAndEvaluatePatients();
+    }
+  }, [activeTab]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
