@@ -1,4 +1,4 @@
-export const BACKEND_URL = 'http://localhost:8000';
+export const BACKEND_URL = '';
 const BASE_URL = `${BACKEND_URL}/api/v1`;
 
 // Helper function for managing authentication tokens
