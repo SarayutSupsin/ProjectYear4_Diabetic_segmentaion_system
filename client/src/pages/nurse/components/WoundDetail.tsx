@@ -399,14 +399,14 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
               <div className={styles.sideButtonsRow}>
                 <button
                   type="button"
-                  className={`${styles.sideSelectBtn} ${styles.leftFoot} ${newSide === 'เท้าซ้าย' ? styles.active : ''}`}
+                  className={`${styles.sideSelectBtn} ${styles.Foot} ${newSide === 'เท้าซ้าย' ? styles.active : ''}`}
                   onClick={() => setNewSide('เท้าซ้าย')}
                 >
                   เท้าซ้าย
                 </button>
                 <button
                   type="button"
-                  className={`${styles.sideSelectBtn} ${styles.rightFoot} ${newSide === 'เท้าขวา' ? styles.active : ''}`}
+                  className={`${styles.sideSelectBtn} ${styles.Foot} ${newSide === 'เท้าขวา' ? styles.active : ''}`}
                   onClick={() => setNewSide('เท้าขวา')}
                 >
                   เท้าขวา
