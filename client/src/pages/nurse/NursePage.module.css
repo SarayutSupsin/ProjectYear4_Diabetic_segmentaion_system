@@ -1066,17 +1066,12 @@
   transition: var(--transition);
 }
 
-.sideSelectBtn.leftFoot.active {
+.sideSelectBtn.Foot.active {
   background-color: #fffbeb;
   color: #d97706;
   border-color: #d97706;
 }
 
-.sideSelectBtn.rightFoot.active {
-  background-color: #eff6ff;
-  color: #2563eb;
-  border-color: #2563eb;
-}
 
 .textareaField {
   width: 100%;
