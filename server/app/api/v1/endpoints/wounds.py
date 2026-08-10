@@ -253,6 +253,7 @@ def get_all_patients_wound_statuses(
             joinedload(Patient.wounds)
             .joinedload(Wound.records)
         )
+        .order_by(Patient.admit_date.desc())
         .all()
     )
     results = []

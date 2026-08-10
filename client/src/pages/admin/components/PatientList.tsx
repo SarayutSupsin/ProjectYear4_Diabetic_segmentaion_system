@@ -237,7 +237,7 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
                 <div className={styles.formGroup}>
                   <label>รหัสผ่านเข้าใช้งาน *</label>
                   <input
-                    type="password"
+                    type="text"
                     required={!selectedPatient}
                     value={patientForm.password}
                     onChange={e => setPatientForm({ ...patientForm, password: e.target.value })}
