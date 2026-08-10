@@ -17,6 +17,7 @@ export default function PatientPage() {
 
   // Sub-tabs navigation for patient view (Fig 4.21 - 4.23)
   const [subTab, setSubTab] = useState<'info' | 'history' | 'graph'>('info');
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -141,7 +142,12 @@ export default function PatientPage() {
           <button onClick={logout} className={styles.bannerLogoutBtn} style={{ display: 'block' }} title="ออกจากระบบ">
             ออกจากระบบ
           </button>
-          <div className={styles.bannerAvatar}>
+          <div 
+            className={styles.bannerAvatar}
+            onClick={() => setShowProfileModal(true)}
+            style={{ cursor: 'pointer' }}
+            title="คลิกเพื่อดูข้อมูลส่วนตัว"
+          >
             {(patient.first_name ? patient.first_name[0] : 'P').toUpperCase()}
           </div>
         </div>
@@ -435,6 +441,56 @@ export default function PatientPage() {
               </>
             );
           })()}
+        </div>
+      )}
+
+      {/* Patient Profile Details Modal Popup */}
+      {showProfileModal && (
+        <div className={styles.modalBackdrop} style={{ zIndex: 3000 }}>
+          <div className={styles.modalCardCompact} style={{ maxWidth: '360px', width: '95%', padding: '24px' }}>
+            <h4 style={{ margin: '0 0 16px 0', fontSize: '16px', color: '#1e293b', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px', textAlign: 'center', fontWeight: 700 }}>
+              ข้อมูลประจำตัวคนไข้
+            </h4>
+            <div style={{ marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <p style={{ margin: 0, fontSize: '13px', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
+                <strong style={{ color: '#64748b', fontWeight: 500 }}>สิทธิ์บัญชีผู้ใช้:</strong> 
+                <span style={{ fontWeight: 600, color: '#0d9488' }}>ผู้ป่วย (Patient)</span>
+              </p>
+              <p style={{ margin: 0, fontSize: '13px', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
+                <strong style={{ color: '#64748b', fontWeight: 500 }}>รหัสผู้ป่วย (HN):</strong> 
+                <span style={{ fontWeight: 600, color: '#0f172a' }}>{patient.HN}</span>
+              </p>
+              <p style={{ margin: 0, fontSize: '13px', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
+                <strong style={{ color: '#64748b', fontWeight: 500 }}>ชื่อ-นามสกุล:</strong> 
+                <span style={{ fontWeight: 600, color: '#0f172a' }}>{patient.first_name} {patient.last_name}</span>
+              </p>
+              <p style={{ margin: 0, fontSize: '13px', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
+                <strong style={{ color: '#64748b', fontWeight: 500 }}>เพศ:</strong> 
+                <span style={{ fontWeight: 600, color: '#0f172a' }}>{patient.gender === 'Male' ? 'ชาย' : patient.gender === 'Female' ? 'หญิง' : patient.gender}</span>
+              </p>
+              <p style={{ margin: 0, fontSize: '13px', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
+                <strong style={{ color: '#64748b', fontWeight: 500 }}>วันเกิด:</strong> 
+                <span style={{ fontWeight: 600, color: '#0f172a' }}>{formatDateTH(patient.birth_date)}</span>
+              </p>
+              <p style={{ margin: 0, fontSize: '13px', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
+                <strong style={{ color: '#64748b', fontWeight: 500 }}>เบอร์โทรศัพท์:</strong> 
+                <span style={{ fontWeight: 600, color: '#0f172a' }}>{patient.phone || '-'}</span>
+              </p>
+              <p style={{ margin: 0, fontSize: '13px', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
+                <strong style={{ color: '#64748b', fontWeight: 500 }}>วันที่เริ่มการรักษา:</strong> 
+                <span style={{ fontWeight: 600, color: '#0f172a' }}>{formatDateTH(patient.admit_date)}</span>
+              </p>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
+              <button 
+                onClick={() => setShowProfileModal(false)} 
+                className={styles.cancelBtn}
+                style={{ width: '100%', padding: '10px', fontSize: '13px', fontWeight: 600 }}
+              >
+                ปิดหน้าต่าง
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
