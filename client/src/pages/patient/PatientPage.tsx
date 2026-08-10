@@ -221,12 +221,12 @@ export default function PatientPage() {
           <div className={styles.sectionCard}>
             <h4 className={styles.sectionTitle}>ข้อมูลแผลของคุณ</h4>
             <div className={styles.woundDataInfoBlock}>
-              <div className={styles.infoMetaRow}>
-                <span className={styles.infoMetaLabel}>ตำแหน่ง</span>
-                <span className={styles.infoMetaVal}>
-                  {activeWound.body_part?.body_part_name} ({activeWound.side})
-                </span>
-              </div>
+                <div className={styles.infoMetaRow}>
+                  <span className={styles.infoMetaLabel}>ตำแหน่ง</span>
+                  <span className={`${styles.infoMetaVal} ${styles.locationVal}`}>
+                    {activeWound.body_part?.body_part_name} ({activeWound.side})
+                  </span>
+                </div>
               <div className={styles.infoMetaRow}>
                 <span className={styles.infoMetaLabel}>ขนาดผิวแผลล่าสุด</span>
                 <span className={styles.infoMetaVal}>
@@ -419,14 +419,14 @@ export default function PatientPage() {
                         color: diff < 0 ? '#15803d' : diff > 0 ? '#b91c1c' : '#475569', 
                         marginTop: '4px' 
                       }}>
-                        {diff < 0 ? `ลดลง ${percentChange}%` : diff > 0 ? `เพิ่มขึ้น ${percentChange}%` : 'คงที่'}
+                        {diff < 0 ? `ดีขึ้น ${percentChange}%` : diff > 0 ? `แย่ลง ${percentChange}%` : 'คงที่'}
                       </div>
                       <div style={{ 
                         fontSize: '9px', 
                         color: diff < 0 ? '#16a34a' : diff > 0 ? '#dc2626' : '#94a3b8', 
                         marginTop: '2px' 
                       }}>
-                        {diff < 0 ? 'ดีขึ้น' : diff > 0 ? 'แย่ลง' : 'ไม่มีการเปลี่ยนแปลง'}
+                        
                       </div>
                     </div>
 
