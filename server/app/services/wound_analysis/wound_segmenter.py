@@ -64,8 +64,8 @@ def segment_wound(img):
         prob_np = prob.squeeze().cpu().numpy()
 
     # Resize probability map back to original size for smooth edges
-    prob_resized = cv2.resize(prob_np, (w, h), interpolation=cv2.INTER_LINEAR)
-    mask = (prob_resized > threshold).astype(np.uint8) * 255
+    prob_resized = cv2.resize(prob_np, (w, h), interpolation=cv2.INTER_LINEAR) 
+    mask = (prob_resized > threshold).astype(np.uint8) * 255 
     pixel_area = int(np.sum(mask > 0))
 
     # 3. Calculate average probability of the predicted wound area (model confidence score)
