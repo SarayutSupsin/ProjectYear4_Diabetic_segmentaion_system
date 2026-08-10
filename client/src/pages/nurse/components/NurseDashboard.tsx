@@ -6,6 +6,7 @@ import type { Patient, Appointment } from '../../../types';
 interface NurseDashboardProps {
   onViewPatientWounds: (HN: string) => void;
   onSwitchTab: (tab: 'dashboard' | 'search' | 'upload' | 'detail') => void;
+  activeTab: string;
 }
 
 interface CalculatedPatientStatus {
@@ -15,14 +16,14 @@ interface CalculatedPatientStatus {
   status: 'ดีขึ้น' | 'แย่ลง' | 'คงที่';
 }
 
-export default function NurseDashboard({ onViewPatientWounds, onSwitchTab }: NurseDashboardProps) {
+export default function NurseDashboard({ onViewPatientWounds, onSwitchTab, activeTab }: NurseDashboardProps) {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [patientStatuses, setPatientStatuses] = useState<CalculatedPatientStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isVigilanceExpanded, setIsVigilanceExpanded] = useState(true);
-  const [isAppointmentsExpanded, setIsAppointmentsExpanded] = useState(true);
+  const [isVigilanceExpanded, setIsVigilanceExpanded] = useState(false);
+  const [isAppointmentsExpanded, setIsAppointmentsExpanded] = useState(false);
 
   // Fetch data dynamically and evaluate patient wound trends in parallel
   const fetchDashboardData = async () => {
@@ -52,8 +53,10 @@ export default function NurseDashboard({ onViewPatientWounds, onSwitchTab }: Nur
   };
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    if (activeTab === 'dashboard') {
+      fetchDashboardData();
+    }
+  }, [activeTab]);
 
   // Safe helper to get local date string (YYYY-MM-DD)
   const getLocalDateString = () => {
@@ -193,7 +196,7 @@ export default function NurseDashboard({ onViewPatientWounds, onSwitchTab }: Nur
       <div className={styles.recentPatientsSection}>
         <h4 className={styles.sectionHeaderTitle}>ผู้ป่วยล่าสุด</h4>
         <div className={styles.recentPatientsList}>
-          {patientStatuses.map(ps => (
+          {patientStatuses.slice(0, 5).map(ps => (
             <div 
               key={ps.HN} 
               className={styles.recentPatientRowCard}

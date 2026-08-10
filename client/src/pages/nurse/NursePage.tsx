@@ -93,12 +93,16 @@ export default function NursePage() {
                         <NurseDashboard
                             onViewPatientWounds={onViewPatientWounds}
                             onSwitchTab={(t) => setTab(t)}
+                            activeTab={tab}
                         />
                     </div>
 
                     {/* ค้นหา */}
                     <div style={{ display: tab === 'search' ? 'block' : 'none' }}>
-                        <PatientSearch onViewPatientWounds={onViewPatientWounds} />
+                        <PatientSearch 
+                            onViewPatientWounds={onViewPatientWounds} 
+                            activeTab={tab}
+                        />
                     </div>
 
                     {/* สแกน/อัปโหลดแผล */}
@@ -116,6 +120,7 @@ export default function NursePage() {
                                 HN={selectedHN}
                                 onBackToSearch={() => setTab('search')}
                                 onSwitchTab={(t) => setTab(t)}
+                                activeTab={tab}
                             />
                         ) : (
                             <div>

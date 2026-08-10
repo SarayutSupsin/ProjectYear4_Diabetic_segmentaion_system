@@ -1,6 +1,6 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import styles from '../NursePage.module.css';
-import { api } from '../../../services/api';
+import { api, BACKEND_URL } from '../../../services/api';
 import type { Patient, Wound, WoundRecord, Appointment } from '../../../types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -8,6 +8,7 @@ interface WoundDetailProps {
   HN: string;
   onBackToSearch: () => void;
   onSwitchTab: (tab: 'dashboard' | 'search' | 'upload' | 'detail') => void;
+  activeTab: string;
 }
 
 interface BodyPartItem {
@@ -15,7 +16,7 @@ interface BodyPartItem {
   body_part_name: string;
 }
 
-export default function WoundDetail({ HN, onBackToSearch, onSwitchTab }: WoundDetailProps) {
+export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab }: WoundDetailProps) {
   const [patient, setPatient] = useState<Patient | null>(null);
   const [wounds, setWounds] = useState<Wound[]>([]);
   const [selectedWoundId, setSelectedWoundId] = useState<string>('');
@@ -133,8 +134,10 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab }: WoundDe
   };
 
   useEffect(() => {
-    fetchPatientAndWoundsData();
-  }, [HN]);
+    if (activeTab === 'detail') {
+      fetchPatientAndWoundsData();
+    }
+  }, [HN, activeTab]);
 
   // Retrieve records for the selected wound from in-memory state
   useEffect(() => {
@@ -568,8 +571,8 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab }: WoundDe
               {records.map(record => {
                 const isMask = showMaskRecordIds.includes(record.record_id);
                 const imageUrl = isMask
-                  ? `http://localhost:8000/${record.image_path.replace('/combined/', '/mask/').replace('_combined.jpg', '_mask.png')}`
-                  : `http://localhost:8000/${record.image_path}`;
+                  ? `${BACKEND_URL}/${record.image_path.replace('/combined/', '/mask/').replace('_combined.jpg', '_mask.png')}`
+                  : `${BACKEND_URL}/${record.image_path}`;
                 return (
                   <div key={record.record_id} className={styles.historyThumbCard}>
                     <div 
@@ -609,7 +612,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab }: WoundDe
                   <div className={styles.thumbMetaInfo}>
                     <span className={styles.thumbAreaSize}>{record.area_cm2} cm²</span>
                     <span className={styles.thumbDate}>{formatDateTH(record.record_date)}</span>
-                    {record.note && <p className={styles.thumbNote}> {record.note}</p>}
+                    {record.note && <p className={styles.thumbNote}>📝 บันทึกอาการ: {record.note}</p>}
                   </div>
                 </div>
               );

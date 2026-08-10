@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { Eye, EyeOff } from 'lucide-react';
 // 1. นำเข้า Object สไตล์เฉพาะหน้าล็อกอิน
 import styles from './LoginPage.module.css';
 
@@ -7,6 +8,7 @@ export default function LoginPage() {
   const { login } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -56,14 +58,25 @@ export default function LoginPage() {
 
           <div className={styles.formGroup}>
             <label>รหัสผ่าน</label>
-            <input
-              type="password"
-              className={styles.inputField}
-              placeholder="กรอกรหัสผ่านเข้าใช้งาน"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
-            />
+            <div className={styles.passwordWrapper}>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                className={styles.inputField}
+                placeholder="กรอกรหัสผ่านเข้าใช้งาน"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
+              />
+              <button
+                type="button"
+                className={styles.passwordToggle}
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+                title={showPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
+              >
+                {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+              </button>
+            </div>
           </div>
 
           {error && <div className={styles.errorMessage}>{error}</div>}

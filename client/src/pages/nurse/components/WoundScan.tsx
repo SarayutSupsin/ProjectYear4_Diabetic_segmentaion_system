@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import styles from '../NursePage.module.css';
-import { api } from '../../../services/api';
+import { api, BACKEND_URL } from '../../../services/api';
 import type { Patient, Wound, WoundRecord } from '../../../types';
 
 interface WoundScanProps {
@@ -451,8 +451,8 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundS
             <div className={styles.resultImageContainer}>
               <img 
                 src={resultTab === 'combined'
-                  ? `http://localhost:8000/${analysisResult.image_path}`
-                  : `http://localhost:8000/${analysisResult.image_path.replace('/combined/', '/mask/').replace('_combined.jpg', '_mask.png')}`
+                  ? `${BACKEND_URL}/${analysisResult.image_path}`
+                  : `${BACKEND_URL}/${analysisResult.image_path.replace('/combined/', '/mask/').replace('_combined.jpg', '_mask.png')}`
                 } 
                 alt="Wound segmentation mask result" 
                 className={styles.resultImage} 
