@@ -465,7 +465,8 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
             <div className={styles.woundDataInfoBlock}>
               <div className={styles.infoMetaRow}>
                 <span className={styles.infoMetaLabel}>ตำแหน่ง</span>
-                <span className={styles.infoMetaVal}>{activeWound.body_part?.body_part_name} ({activeWound.side})</span>
+                <span className={`${styles.infoMetaVal} ${styles.locationVal}`}>
+                  {activeWound.body_part?.body_part_name} ({activeWound.side})</span>
               </div>
               <div className={styles.infoMetaRow}>
                 <span className={styles.infoMetaLabel}>ขนาดล่าสุด</span>

@@ -1636,7 +1636,9 @@
   padding: 2px 8px;
   border-radius: 6px;
   text-align: center;
-  display: inline-block;
+  display: inline-block; 
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .statusGreen {
@@ -1838,7 +1840,9 @@
 .infoMetaRow {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 20px;
+  width: 100%;
   font-size: 13px;
   border-bottom: 1px solid #f1f5f9;
   padding-bottom: 8px;
@@ -1852,12 +1856,33 @@
 .infoMetaLabel {
   color: #64748b;
   font-weight: 600;
+  flex-shrink: 0;
 }
 
 .infoMetaVal {
   color: #0f172a;
-  font-weight: 700;
+  font-weight: 700;  
+  margin-left: auto;
 }
+
+.locationVal {
+  width: 300px;
+  max-width: 70%;
+  margin-left: auto;
+  text-align: right;
+
+}
+
+@media (max-width: 600px) {
+  .locationVal {
+    width: 72%;
+    max-width: 72%;
+    margin-left: auto;
+    text-align: right;
+  }
+}
+
+
 
 /* Active appt details card */
 .currentAppointmentCard {

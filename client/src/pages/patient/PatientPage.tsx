@@ -221,12 +221,12 @@ export default function PatientPage() {
           <div className={styles.sectionCard}>
             <h4 className={styles.sectionTitle}>ข้อมูลแผลของคุณ</h4>
             <div className={styles.woundDataInfoBlock}>
-              <div className={styles.infoMetaRow}>
-                <span className={styles.infoMetaLabel}>ตำแหน่ง</span>
-                <span className={styles.infoMetaVal}>
-                  {activeWound.body_part?.body_part_name} ({activeWound.side})
-                </span>
-              </div>
+                <div className={styles.infoMetaRow}>
+                  <span className={styles.infoMetaLabel}>ตำแหน่ง</span>
+                  <span className={`${styles.infoMetaVal} ${styles.locationVal}`}>
+                    {activeWound.body_part?.body_part_name} ({activeWound.side})
+                  </span>
+                </div>
               <div className={styles.infoMetaRow}>
                 <span className={styles.infoMetaLabel}>ขนาดผิวแผลล่าสุด</span>
                 <span className={styles.infoMetaVal}>
