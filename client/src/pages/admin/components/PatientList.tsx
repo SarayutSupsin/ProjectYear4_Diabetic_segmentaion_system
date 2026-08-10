@@ -231,7 +231,7 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
                     value={patientForm.HN}
                     onChange={e => setPatientForm({ ...patientForm, HN: e.target.value })}
                     className={styles.inputField}
-                    placeholder="เช่น 3-123"
+                    placeholder="เช่น HN0000"
                   />
                 </div>
                 <div className={styles.formGroup}>
