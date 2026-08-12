@@ -38,6 +38,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
   const [newSide, setNewSide] = useState('เท้าซ้าย');
   const [creatingWound, setCreatingWound] = useState(false);
   const [showMaskRecordIds, setShowMaskRecordIds] = useState<number[]>([]);
+  const [showAllAppts, setShowAllAppts] = useState(false);
 
   const [appointmentDate, setAppointmentDate] = useState('');
   const [hourInput, setHourInput] = useState('00');
@@ -240,10 +241,10 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
     const sorted = [...recordsList].sort(
       (a, b) => new Date(a.record_date).getTime() - new Date(b.record_date).getTime()
     );
-    const latest = sorted[sorted.length - 1];
-    const previous = sorted[sorted.length - 2];
-    if (latest.area_cm2 > previous.area_cm2) return 'แย่ลง';
-    if (latest.area_cm2 < previous.area_cm2) return 'ดีขึ้น';
+    const initial = sorted[0]; // First record (baseline)
+    const latest = sorted[sorted.length - 1]; // Newest record
+    if (latest.area_cm2 > initial.area_cm2) return 'แย่ลง';
+    if (latest.area_cm2 < initial.area_cm2) return 'ดีขึ้น';
     return 'คงที่';
   };
 
@@ -251,39 +252,43 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
   const activeWound = wounds.find(w => w.wound_id === selectedWoundId);
 
   // Fetch the next upcoming appointment for this patient (closest to today)
-  const latestAppointment = (() => {
+  const parseApptDateTime = (dateStr: string, timeStr?: string) => {
+    if (!dateStr) return 0;
+    const cleanTime = timeStr ? timeStr.slice(0, 5) : '00:00';
+    const parsed = new Date(`${dateStr}T${cleanTime}`);
+    return isNaN(parsed.getTime()) ? new Date(dateStr).getTime() : parsed.getTime();
+  };
+
+  const upcomingAppointments = (() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Midnight today boundary
 
     const patientAppts = appointments.filter(app => app.HN === HN);
-    if (patientAppts.length === 0) return undefined;
-
-    // Safe parser helper to prevent NaN sort breaks
-    const parseApptDateTime = (dateStr: string, timeStr?: string) => {
-      if (!dateStr) return 0;
-      const cleanTime = timeStr ? timeStr.slice(0, 5) : '00:00';
-      const parsed = new Date(`${dateStr}T${cleanTime}`);
-      return isNaN(parsed.getTime()) ? new Date(dateStr).getTime() : parsed.getTime();
-    };
-
-    const upcomingAppts = patientAppts.filter(app => {
+    const upcoming = patientAppts.filter(app => {
       const apptMs = parseApptDateTime(app.appointment_date, app.appointment_time);
       return apptMs >= today.getTime();
     });
 
-    if (upcomingAppts.length === 0) {
-      // Fallback: Show the most recent past appointment (descending sort)
-      return patientAppts.sort((a, b) => 
-        parseApptDateTime(b.appointment_date, b.appointment_time) - 
-        parseApptDateTime(a.appointment_date, a.appointment_time)
-      )[0];
-    }
+    upcoming.sort((a, b) => {
+      return parseApptDateTime(a.appointment_date, a.appointment_time) - parseApptDateTime(b.appointment_date, b.appointment_time);
+    });
 
-    // Upcoming appointments present: sort ascending to get the closest one
-    return upcomingAppts.sort((a, b) => 
-      parseApptDateTime(a.appointment_date, a.appointment_time) - 
-      parseApptDateTime(b.appointment_date, b.appointment_time)
-    )[0];
+    return upcoming;
+  })();
+
+  const latestAppointment = (() => {
+    if (upcomingAppointments.length > 0) {
+      return upcomingAppointments[0];
+    }
+    const patientAppts = appointments.filter(app => app.HN === HN);
+    if (patientAppts.length === 0) return undefined;
+    
+    // Fallback: Show the most recent past appointment (descending sort)
+    const sortedPast = [...patientAppts].sort((a, b) => 
+      parseApptDateTime(b.appointment_date, b.appointment_time) - 
+      parseApptDateTime(a.appointment_date, a.appointment_time)
+    );
+    return sortedPast[0];
   })();
 
   if (loading) {
@@ -489,7 +494,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
           <div className={styles.sectionCard}>
             <h4 className={styles.sectionTitle}>นัดครั้งถัดไป</h4>
             {latestAppointment && (
-              <div className={styles.currentAppointmentCard}>
+              <div className={styles.currentAppointmentCard} style={{ marginBottom: upcomingAppointments.length > 1 ? '12px' : '0' }}>
                 <span className={styles.apptLabel}>วันนัด</span>
                 <h5 className={styles.apptDetails}>
                   📅 {formatDateTH(latestAppointment.appointment_date)} · ⏱️ {latestAppointment.appointment_time.slice(0, 5)} น.
@@ -497,6 +502,65 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                 {latestAppointment.note && (
                   <p className={styles.apptNote}>{latestAppointment.note}</p>
                 )}
+              </div>
+            )}
+
+            {/* Toggle show all appointments button */}
+            {upcomingAppointments.length > 1 && (
+              <button
+                type="button"
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  fontSize: '12px',
+                  backgroundColor: '#f1f5f9',
+                  color: '#475569',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  marginBottom: '16px',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+                onClick={() => setShowAllAppts(!showAllAppts)}
+              >
+                {showAllAppts ? 'ซ่อนตารางนัดหมาย' : `ดูตารางนัดหมายทั้งหมด (${upcomingAppointments.length})`}
+              </button>
+            )}
+
+            {/* Expanded List of all upcoming appointments */}
+            {showAllAppts && upcomingAppointments.length > 1 && (
+              <div className={styles.queueList} style={{ marginBottom: '20px', animation: 'fadeUp 0.3s' }}>
+                {upcomingAppointments.map((appt, idx) => {
+                  const isClosest = idx === 0;
+                  return (
+                    <div 
+                      key={appt.appointment_id} 
+                      className={styles.queueItem} 
+                      style={{ 
+                        borderLeftColor: isClosest ? '#0d9488' : '#cbd5e1',
+                        backgroundColor: isClosest ? '#f0fdfa' : '#f8fafc'
+                      }}
+                    >
+                      <div className={styles.queueTime}>
+                        {isClosest ? '⏱️ ' : ''}เวลา: {appt.appointment_time.slice(0, 5)} น.
+                      </div>
+                      <div className={styles.queuePatient}>
+                        <span className={styles.boldText} style={{ display: 'block', fontSize: '13px', fontWeight: isClosest ? 600 : 500, color: '#1e293b' }}>
+                          {isClosest ? '📅 ' : ''}วันที่นัด: {formatDateTH(appt.appointment_date)}
+                        </span>
+                        {appt.note && (
+                          <p className={styles.queueNote} style={{ marginTop: '4px', fontSize: '12px', color: '#475569' }}>
+                            หมายเหตุ: {appt.note}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
 
@@ -613,7 +677,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                   <div className={styles.thumbMetaInfo}>
                     <span className={styles.thumbAreaSize}>{record.area_cm2} cm²</span>
                     <span className={styles.thumbDate}>{formatDateTH(record.record_date)}</span>
-                    {record.note && <p className={styles.thumbNote}>📝 บันทึกอาการ: {record.note}</p>}
+                    {record.note && <p className={styles.thumbNote}>บันทึกอาการ: {record.note}</p>}
                   </div>
                 </div>
               );
@@ -651,6 +715,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                 shortDate = `${dd}/${mm}/${yy}`;
               }
               return {
+                id: r.record_id,
                 dateStr: shortDate,
                 fullDateStr: formatDateTH(r.record_date),
                 size: r.area_cm2
@@ -664,7 +729,11 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                     <LineChart data={chartCoordinates} margin={{ top: 15, right: 20, left: 10, bottom: 25 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                       <XAxis 
-                        dataKey="dateStr" 
+                        dataKey="id" 
+                        tickFormatter={(value) => {
+                          const coord = chartCoordinates.find(c => c.id === value);
+                          return coord ? coord.dateStr : '';
+                        }}
                         tick={{ fontSize: 10, fill: '#64748b' }} 
                         angle={-45} 
                         textAnchor="end" 
@@ -676,7 +745,10 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                         label={{ value: 'ขนาด (cm²)', angle: -90, position: 'insideLeft', offset: 0, style: { textAnchor: 'middle', fill: '#64748b', fontSize: 11 } }}
                       />
                       <Tooltip 
-                        labelFormatter={(label, items) => items[0]?.payload?.fullDateStr || label} 
+                        labelFormatter={(label, items) => {
+                          const item = items[0]?.payload;
+                          return item ? item.fullDateStr : label;
+                        }}
                         contentStyle={{ fontSize: 12, borderRadius: 8 }} 
                       />
                       <Line

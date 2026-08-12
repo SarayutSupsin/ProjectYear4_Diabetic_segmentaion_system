@@ -39,6 +39,18 @@ def create_wound(
             detail=f"ไม่พบข้อมูลผู้ป่วยรหัส HN {wound_in.HN}"
         )
 
+    # Check if a wound at the same location and side already exists for this patient
+    existing_wound = db.query(Wound).filter(
+        Wound.HN == wound_in.HN,
+        Wound.body_part_id == wound_in.body_part_id,
+        Wound.side == wound_in.side
+    ).first()
+    if existing_wound:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="ตรวจพบเคสแผลในระบบแล้ว: ผู้ป่วยรายนี้มีประวัติลงทะเบียนแผลในตำแหน่งและข้างดังกล่าวแล้ว กรุณาเลือกเคสแผลเดิมเพื่อบันทึกรูปเพิ่มเติม"
+        )
+
     last_wound = db.query(Wound).order_by(Wound.wound_id.desc()).first()
     if last_wound and last_wound.wound_id.startswith("W"):
         try:

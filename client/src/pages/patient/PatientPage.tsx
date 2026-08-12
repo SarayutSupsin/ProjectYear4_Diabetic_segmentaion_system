@@ -88,13 +88,12 @@ export default function PatientPage() {
     const sorted = [...recordsList].sort(
       (a, b) => new Date(a.record_date).getTime() - new Date(b.record_date).getTime()
     );
-    const latest = sorted[sorted.length - 1];
-    const previous = sorted[sorted.length - 2];
-    if (latest.area_cm2 > previous.area_cm2) return 'แย่ลง';
-    if (latest.area_cm2 < previous.area_cm2) return 'ดีขึ้น';
+    const initial = sorted[0]; // First record (baseline)
+    const latest = sorted[sorted.length - 1]; // Newest record
+    if (latest.area_cm2 > initial.area_cm2) return 'แย่ลง';
+    if (latest.area_cm2 < initial.area_cm2) return 'ดีขึ้น';
     return 'คงที่';
   };
-
   const activeWound = wounds.find(w => w.wound_id === selectedWoundId);
 
 
@@ -247,26 +246,38 @@ export default function PatientPage() {
           </div>
 
           <div className={styles.sectionCard}>
-            <h4 className={styles.sectionTitle}>🗓️ ตารางการนัดหมายติดตามผล</h4>
+            <h4 className={styles.sectionTitle}>ตารางการนัดหมายติดตามผล</h4>
             {myAppointments.length === 0 ? (
               <p className={styles.emptyText}>คุณไม่มีข้อมูลการนัดหมายในช่วงนี้</p>
             ) : (
               <div className={styles.queueList}>
-                {myAppointments.map(appt => (
-                  <div key={appt.appointment_id} className={styles.queueItem} style={{ borderLeftColor: '#0d9488' }}>
-                    <div className={styles.queueTime}>⏱️ {appt.appointment_time.slice(0, 5)} น.</div>
-                    <div className={styles.queuePatient}>
-                      <span className={styles.boldText} style={{ display: 'block', fontSize: '13px' }}>
-                        📅 วันที่นัด: {formatDateTH(appt.appointment_date)}
-                      </span>
-                      {appt.note && (
-                        <p className={styles.queueNote} style={{ marginTop: '4px' }}>
-                          🏥 รายละเอียดนัด: {appt.note}
-                        </p>
-                      )}
+                {myAppointments.map((appt, idx) => {
+                  const isClosest = idx === 0;
+                  return (
+                    <div 
+                      key={appt.appointment_id} 
+                      className={styles.queueItem} 
+                      style={{ 
+                        borderLeftColor: isClosest ? '#0d9488' : '#cbd5e1',
+                        backgroundColor: isClosest ? '#f0fdfa' : '#f8fafc'
+                      }}
+                    >
+                      <div className={styles.queueTime}>
+                        {isClosest ? '⏱️ ' : ''}เวลา: {appt.appointment_time.slice(0, 5)} น.
+                      </div>
+                      <div className={styles.queuePatient}>
+                        <span className={styles.boldText} style={{ display: 'block', fontSize: '13px', fontWeight: isClosest ? 600 : 500 }}>
+                          {isClosest ? '📅 ' : ''}วันที่นัด: {formatDateTH(appt.appointment_date)}
+                        </span>
+                        {appt.note && (
+                          <p className={styles.queueNote} style={{ marginTop: '4px', fontSize: '12px', color: '#475569' }}>
+                            หมายเหตุ: {appt.note}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -301,7 +312,7 @@ export default function PatientPage() {
                     <div className={styles.thumbMetaInfo}>
                       <span className={styles.thumbAreaSize}>{record.area_cm2} cm²</span>
                       <span className={styles.thumbDate}>{formatDateTH(record.record_date)}</span>
-                      {record.note && <p className={styles.thumbNote}>💡 บันทึกแพทย์: {record.note}</p>}
+                      {record.note && <p className={styles.thumbNote}>บันทึกอาการ: {record.note}</p>}
                     </div>
                   </div>
                 );
@@ -337,6 +348,7 @@ export default function PatientPage() {
                 shortDate = `${dd}/${mm}/${yy}`;
               }
               return {
+                id: r.record_id,
                 dateStr: shortDate,
                 fullDateStr: formatDateTH(r.record_date),
                 size: r.area_cm2
@@ -350,7 +362,11 @@ export default function PatientPage() {
                     <LineChart data={chartCoordinates} margin={{ top: 15, right: 20, left: 10, bottom: 25 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                       <XAxis 
-                        dataKey="dateStr" 
+                        dataKey="id" 
+                        tickFormatter={(value) => {
+                          const coord = chartCoordinates.find(c => c.id === value);
+                          return coord ? coord.dateStr : '';
+                        }}
                         tick={{ fontSize: 10, fill: '#64748b' }} 
                         angle={-45} 
                         textAnchor="end" 
@@ -362,7 +378,10 @@ export default function PatientPage() {
                         label={{ value: 'ขนาด (cm²)', angle: -90, position: 'insideLeft', offset: 0, style: { textAnchor: 'middle', fill: '#64748b', fontSize: 11 } }}
                       />
                       <Tooltip 
-                        labelFormatter={(label, items) => items[0]?.payload?.fullDateStr || label} 
+                        labelFormatter={(label, items) => {
+                          const item = items[0]?.payload;
+                          return item ? item.fullDateStr : label;
+                        }}
                         contentStyle={{ fontSize: 12, borderRadius: 8 }} 
                       />
                       <Line
