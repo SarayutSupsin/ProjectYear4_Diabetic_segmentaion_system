@@ -86,11 +86,17 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundS
     }
   };
 
-  // Filter patients list inside custom dropdown based on typing
-  const filteredPatients = patients.filter(p => 
-    p.HN.toLowerCase().includes(patientSearchTerm.toLowerCase()) ||
-    `${p.first_name} ${p.last_name}`.toLowerCase().includes(patientSearchTerm.toLowerCase())
-  );
+  // Filter and sort patients list inside custom dropdown alphabetically based on Thai collation
+  const filteredPatients = patients
+    .filter(p => 
+      p.HN.toLowerCase().includes(patientSearchTerm.toLowerCase()) ||
+      `${p.first_name} ${p.last_name}`.toLowerCase().includes(patientSearchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      const nameA = `${a.first_name} ${a.last_name}`;
+      const nameB = `${b.first_name} ${b.last_name}`;
+      return nameA.localeCompare(nameB, 'th');
+    });
 
   useEffect(() => {
     fetchInitialData();
@@ -121,12 +127,30 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundS
       // If nurse selected '+ เพิ่มแผลใหม่' (Fig 4.18), create wound first
       if (isNewWound) {
         const sideString = newSide === 'เท้าซ้าย' ? 'เท้าซ้าย' : 'เท้าขวา';
+
+        // Check if there is already a wound at this location and side for the patient to prevent duplicates
+        const alreadyExists = wounds.some(
+          w => w.body_part_id === newBodyPartId && w.side === sideString
+        );
+        if (alreadyExists) {
+          throw new Error('ตำแหน่งแผลนี้ได้รับการลงทะเบียนรักษาไว้แล้วในระบบ กรุณาเลือกบันทึกรูปเพิ่มในแผลเดิม');
+        }
+
         const newWound = await api.post<Wound>('/wounds/', {
           HN: selectedHN,
           body_part_id: newBodyPartId,
           side: sideString
         });
         woundId = newWound.wound_id;
+
+        // Immediately lock this created wound case to prevent duplicate openings if uploading fails later
+        setSelectedWoundId(woundId);
+        setIsNewWound(false);
+
+        // Fetch patient wounds list in background so the dropdown has it immediately
+        api.get<Wound[]>(`/wounds/patient/${selectedHN}`).then(woundsList => {
+          setWounds(woundsList);
+        }).catch(err => console.error(err));
       }
 
       // Upload image to backend for QR & UNet assessment
@@ -140,6 +164,10 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundS
       setAnalysisResult(result);
       setResultTab('combined');
       setShowResultModal(true);
+
+      // Clear the uploaded file and note fields for future uploads
+      setFile(null);
+      setNote('');
     } catch (err: any) {
       setErrorMessage(err.message || 'วิเคราะห์แผลไม่สำเร็จ กรุณาตรวจสอบคุณภาพรูปถ่ายและคิวอาร์โค้ด');
     } finally {
