@@ -2,10 +2,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100vw;
+  width: 100%;
+  max-width: 100%;
   min-height: 100vh;
   background: var(--bg-gradient);
   padding: 20px;
+  overflow: hidden;
 }
 
 .loginCard {
@@ -130,6 +132,7 @@
     opacity: 0;
     transform: translateY(12px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -143,7 +146,8 @@
 }
 
 .passwordWrapper .inputField {
-  padding-right: 46px; /* เว้นระยะด้านขวาสำหรับวางปุ่มตา */
+  padding-right: 46px;
+  /* เว้นระยะด้านขวาสำหรับวางปุ่มตา */
 }
 
 .passwordToggle {

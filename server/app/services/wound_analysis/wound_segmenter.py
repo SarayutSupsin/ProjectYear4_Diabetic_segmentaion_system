@@ -77,3 +77,5 @@ def segment_wound(img):
         "mask": mask,
         "confidence": confidence
     }
+
+    

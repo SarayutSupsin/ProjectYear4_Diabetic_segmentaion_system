@@ -241,10 +241,10 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
     const sorted = [...recordsList].sort(
       (a, b) => new Date(a.record_date).getTime() - new Date(b.record_date).getTime()
     );
-    const initial = sorted[0]; // First record (baseline)
+    const previous = sorted[sorted.length - 2]; // Second newest record
     const latest = sorted[sorted.length - 1]; // Newest record
-    if (latest.area_cm2 > initial.area_cm2) return 'แย่ลง';
-    if (latest.area_cm2 < initial.area_cm2) return 'ดีขึ้น';
+    if (latest.area_cm2 > previous.area_cm2) return 'แย่ลง';
+    if (latest.area_cm2 < previous.area_cm2) return 'ดีขึ้น';
     return 'คงที่';
   };
 
@@ -435,6 +435,20 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
             <div className={styles.woundsGridSelector}>
               {wounds.map(w => {
                 const statusOfWound = getWoundStatus(w.records || []);
+                const recs = w.records || [];
+                let overallText = 'คงที่';
+                if (recs.length >= 2) {
+                  const sorted = [...recs].sort((a, b) => new Date(a.record_date).getTime() - new Date(b.record_date).getTime());
+                  const initial = sorted[0];
+                  const latest = sorted[sorted.length - 1];
+                  const diff = latest.area_cm2 - initial.area_cm2;
+                  const pct = initial.area_cm2 > 0 
+                    ? ((Math.abs(diff) / initial.area_cm2) * 100).toFixed(1)
+                    : '0.0';
+                  if (diff < -0.001) overallText = `ลดลง ${pct}%`;
+                  else if (diff > 0.001) overallText = `เพิ่มขึ้น ${pct}%`;
+                  else overallText = 'คงที่';
+                }
                 return (
                   <div
                     key={w.wound_id}
@@ -445,6 +459,14 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                       <span className={styles.woundSelectLoc}>{w.body_part?.body_part_name || 'ไม่ระบุตำแหน่ง'} {w.side}</span>
                       <span className={styles.woundSelectCase} style={{ fontSize: '11px', marginTop: '2px', color: '#64748b' }}>
                         ขนาดล่าสุด: {woundsLatestSizes[w.wound_id] || 'กำลังโหลด...'}
+                      </span>
+                      <span style={{ 
+                        fontSize: '10px', 
+                        marginTop: '2px', 
+                        fontWeight: 600,
+                        color: overallText.includes('ลดลง') ? '#16a34a' : overallText.includes('เพิ่มขึ้น') ? '#dc2626' : '#64748b'
+                      }}>
+                        ผลรวม: {overallText}
                       </span>
                     </div>
                     <span className={`${styles.statusBadgeRow} ${statusOfWound === 'ดีขึ้น' ? styles.statusGreen :
@@ -677,7 +699,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                   <div className={styles.thumbMetaInfo}>
                     <span className={styles.thumbAreaSize}>{record.area_cm2} cm²</span>
                     <span className={styles.thumbDate}>{formatDateTH(record.record_date)}</span>
-                    {record.note && <p className={styles.thumbNote}>บันทึกอาการ: {record.note}</p>}
+                    {record.note && <p className={styles.thumbNote}>บันทึกการดูแล: {record.note}</p>}
                   </div>
                 </div>
               );
@@ -822,6 +844,32 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                       </div>
                     </div>
 
+                  </div>
+
+                  {/* แถบหลอดความคืบหน้าการฟื้นตัวสะสม (Wound Healing Progress Bar) */}
+                  <div style={{ marginTop: '12px', padding: '12px 12px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#475569' }}>
+                        อัตราการสมานแผลสะสม
+                      </span>
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: diff < 0 ? '#16a34a' : diff > 0 ? '#dc2626' : '#64748b' }}>
+                        {diff < 0 ? `หดตัวลดลง ${percentChange}%` : diff > 0 ? `ขยายตัวเพิ่มขึ้น ${percentChange}%` : 'คงที่'}
+                      </span>
+                    </div>
+                    <div style={{ width: '100%', height: '8px', backgroundColor: '#e2e8f0', borderRadius: '9999px', overflow: 'hidden' }}>
+                      <div style={{ 
+                        width: diff < 0 ? `${Math.min(100, parseFloat(percentChange))}%` : '0%', 
+                        height: '100%', 
+                        backgroundColor: '#10b981', 
+                        borderRadius: '9999px',
+                        transition: 'width 0.5s ease-in-out'
+                      }} />
+                    </div>
+                    {diff > 0 && (
+                      <div style={{ fontSize: '9px', color: '#dc2626', marginTop: '4px', fontWeight: 500 }}>
+                        * ขนาดแผลขยายตัวใหญ่กว่าวันแรกที่ลงทะเบียนตรวจรักษา
+                      </div>
+                    )}
                   </div>
                 </div>
               </>
