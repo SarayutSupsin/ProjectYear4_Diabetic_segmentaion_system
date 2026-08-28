@@ -14,18 +14,18 @@
   --primary-hover: #1d4ed8;
   --primary-light: #eff6ff;
   --primary-border: #bfdbfe;
-  
+
   --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
   --card-bg: #ffffff;
-  
+
   --text-dark: #0f172a;
   --text-muted: #64748b;
   --text-light: #94a3b8;
-  
+
   --error: #ef4444;
   --error-bg: #fee2e2;
   --error-border: #fca5a5;
-  
+
   --sans: 'Outfit', 'Sarabun', system-ui, -apple-system, sans-serif;
   --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }

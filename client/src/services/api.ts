@@ -57,3 +57,5 @@ export const api = {
   delete: <T>(endpoint: string, options?: RequestInit) =>
     request<T>(endpoint, { ...options, method: 'DELETE' }),
 };
+
+
