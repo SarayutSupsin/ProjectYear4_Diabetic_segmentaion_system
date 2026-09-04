@@ -34,7 +34,7 @@ class Settings(BaseSettings):
 
     #Database models
     model_config = SettingsConfigDict(
-        env_file=BASE_DIR / ".env",
+        env_file=[BASE_DIR / ".env", BASE_DIR.parent / ".env"],
         env_file_encoding="utf-8",
         extra="ignore"
     )

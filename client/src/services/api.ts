@@ -37,24 +37,31 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
 // Commands for sending requests using various methods (GET, POST, PUT, DELETE)
 export const api = {
-  get: <T>(endpoint: string, options?: RequestInit) =>
+  get: <T = any>(endpoint: string, options?: RequestInit) =>
     request<T>(endpoint, { ...options, method: 'GET' }),
     
-  post: <T>(endpoint: string, body: any, options?: RequestInit) =>
+  post: <T = any>(endpoint: string, body?: any, options?: RequestInit) =>
     request<T>(endpoint, {
       ...options,
       method: 'POST',
       body: body instanceof FormData ? body : JSON.stringify(body),
     }),
     
-  put: <T>(endpoint: string, body: any, options?: RequestInit) =>
+  put: <T = any>(endpoint: string, body?: any, options?: RequestInit) =>
     request<T>(endpoint, {
       ...options,
       method: 'PUT',
       body: body instanceof FormData ? body : JSON.stringify(body),
     }),
-    
-  delete: <T>(endpoint: string, options?: RequestInit) =>
+
+  patch: <T = any>(endpoint: string, body?: any, options?: RequestInit) =>
+    request<T>(endpoint, {
+      ...options,
+      method: 'PATCH',
+      body: body instanceof FormData ? body : JSON.stringify(body),
+    }),
+
+  delete: <T = any>(endpoint: string, options?: RequestInit) =>
     request<T>(endpoint, { ...options, method: 'DELETE' }),
 };
 

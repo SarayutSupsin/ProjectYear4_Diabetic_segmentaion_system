@@ -49,6 +49,16 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
   const [appointmentNote, setAppointmentNote] = useState('');
   const [bookingStatus, setBookingStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
+  // Close wound case modal form states
+  const [showCloseWoundModal, setShowCloseWoundModal] = useState(false);
+  const [closeReasonChoice, setCloseReasonChoice] = useState('แผลรักษาหายดีแล้ว');
+  const [customCloseReason, setCustomCloseReason] = useState('');
+  const [closingWound, setClosingWound] = useState(false);
+
+  // Reopen wound case modal form states
+  const [showReopenWoundModal, setShowReopenWoundModal] = useState(false);
+  const [reopeningWound, setReopeningWound] = useState(false);
+
   // Derived appointmentTime format string (eliminates redundant state & sync useEffect)
   const appointmentTime = `${hourInput}:${minuteInput}`;
 
@@ -64,7 +74,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
     const month = currentCalendarMonth.getMonth();
     const firstDayIndex = new Date(year, month, 1).getDay();
     const totalDays = new Date(year, month + 1, 0).getDate();
-    
+
     const daysArr: (number | null)[] = [];
     for (let i = 0; i < firstDayIndex; i++) {
       daysArr.push(null);
@@ -131,6 +141,40 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
       setError(err.message || 'Failed to load patient wound details');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleConfirmCloseWound = async () => {
+    if (!selectedWoundId) return;
+    const finalReason = closeReasonChoice === 'อื่นๆ' ? customCloseReason : closeReasonChoice;
+    if (!finalReason.trim()) {
+      alert('กรุณาระบุหมายเหตุการปิดเคส');
+      return;
+    }
+    try {
+      setClosingWound(true);
+      await api.patch<any>(`/wounds/${selectedWoundId}/close`, { close_reason: finalReason });
+      setShowCloseWoundModal(false);
+      setCustomCloseReason('');
+      await fetchPatientAndWoundsData();
+    } catch (err: any) {
+      alert(err.message || 'เกิดข้อผิดพลาดในการปิดเคส');
+    } finally {
+      setClosingWound(false);
+    }
+  };
+
+  const handleConfirmReopenWound = async () => {
+    if (!selectedWoundId) return;
+    try {
+      setReopeningWound(true);
+      await api.patch<any>(`/wounds/${selectedWoundId}/reopen`);
+      setShowReopenWoundModal(false);
+      await fetchPatientAndWoundsData();
+    } catch (err: any) {
+      alert(err.message || 'เกิดข้อผิดพลาดในการเปิดเคสใหม่');
+    } finally {
+      setReopeningWound(false);
     }
   };
 
@@ -282,10 +326,10 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
     }
     const patientAppts = appointments.filter(app => app.HN === HN);
     if (patientAppts.length === 0) return undefined;
-    
+
     // Fallback: Show the most recent past appointment (descending sort)
-    const sortedPast = [...patientAppts].sort((a, b) => 
-      parseApptDateTime(b.appointment_date, b.appointment_time) - 
+    const sortedPast = [...patientAppts].sort((a, b) =>
+      parseApptDateTime(b.appointment_date, b.appointment_time) -
       parseApptDateTime(a.appointment_date, a.appointment_time)
     );
     return sortedPast[0];
@@ -381,11 +425,11 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
               <div className={styles.pillsContainer}>
                 {bodyParts.map(bp => {
                   const thName = bp.body_part_name.split(' (')[0];
-                  const enName = bp.body_part_name.includes(' (') 
-                    ? bp.body_part_name.split(' (')[1].replace(')', '') 
+                  const enName = bp.body_part_name.includes(' (')
+                    ? bp.body_part_name.split(' (')[1].replace(')', '')
                     : '';
                   return (
-                    <button 
+                    <button
                       key={bp.body_part_id}
                       type="button"
                       className={`${styles.pillBtn} ${newBodyPartId === bp.body_part_id ? styles.active : ''}`}
@@ -442,7 +486,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                   const initial = sorted[0];
                   const latest = sorted[sorted.length - 1];
                   const diff = latest.area_cm2 - initial.area_cm2;
-                  const pct = initial.area_cm2 > 0 
+                  const pct = initial.area_cm2 > 0
                     ? ((Math.abs(diff) / initial.area_cm2) * 100).toFixed(1)
                     : '0.0';
                   if (diff < -0.001) overallText = `ลดลง ${pct}%`;
@@ -460,9 +504,9 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                       <span className={styles.woundSelectCase} style={{ fontSize: '11px', marginTop: '2px', color: '#64748b' }}>
                         ขนาดล่าสุด: {woundsLatestSizes[w.wound_id] || 'กำลังโหลด...'}
                       </span>
-                      <span style={{ 
-                        fontSize: '10px', 
-                        marginTop: '2px', 
+                      <span style={{
+                        fontSize: '10px',
+                        marginTop: '2px',
                         fontWeight: 600,
                         color: overallText.includes('ลดลง') ? '#16a34a' : overallText.includes('เพิ่มขึ้น') ? '#dc2626' : '#64748b'
                       }}>
@@ -488,8 +532,55 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
         <>
           {/* Wound info summary */}
           <div className={styles.sectionCard}>
-            <h4 className={styles.sectionTitle}>ข้อมูลแผล</h4>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h4 className={styles.sectionTitle} style={{ margin: 0 }}>ข้อมูลแผล</h4>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {activeWound.is_active !== false ? (
+                  <>
+                    <span className={styles.badgeActive}>🟢 กำลังรักษา</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowCloseWoundModal(true)}
+                      className={styles.btnCloseCase}
+                    >
+                      🔒 ปิดเคสแผลนี้
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <span className={styles.badgeClosed}>⚪ ปิดเคสแล้ว</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowReopenWoundModal(true)}
+                      className={styles.btnReopenCase}
+                    >
+                      🔓 เปิดเคสรักษาแผลนี้อีกครั้ง
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
             <div className={styles.woundDataInfoBlock}>
+              <div className={styles.infoMetaRow}>
+                <span className={styles.infoMetaLabel}>สถานะเคส</span>
+                <span className={styles.infoMetaVal}>
+                  {activeWound.is_active !== false ? 'กำลังติดตามการรักษา' : 'ปิดเคสรักษาแล้ว'}
+                </span>
+              </div>
+              {activeWound.is_active === false && (
+                <>
+                  <div className={styles.infoMetaRow}>
+                    <span className={styles.infoMetaLabel}>วันที่ปิดเคส</span>
+                    <span className={styles.infoMetaVal}>
+                      {activeWound.closed_at ? formatDateTH(activeWound.closed_at) : '-'}
+                    </span>
+                  </div>
+                  <div className={styles.infoMetaRow}>
+                    <span className={styles.infoMetaLabel}>หมายเหตุปิดเคส</span>
+                    <span className={styles.infoMetaVal}>{activeWound.close_reason || '-'}</span>
+                  </div>
+                </>
+              )}
               <div className={styles.infoMetaRow}>
                 <span className={styles.infoMetaLabel}>ตำแหน่ง</span>
                 <span className={`${styles.infoMetaVal} ${styles.locationVal}`}>
@@ -559,10 +650,10 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                 {upcomingAppointments.map((appt, idx) => {
                   const isClosest = idx === 0;
                   return (
-                    <div 
-                      key={appt.appointment_id} 
-                      className={styles.queueItem} 
-                      style={{ 
+                    <div
+                      key={appt.appointment_id}
+                      className={styles.queueItem}
+                      style={{
                         borderLeftColor: isClosest ? '#0d9488' : '#cbd5e1',
                         backgroundColor: isClosest ? '#f0fdfa' : '#f8fafc'
                       }}
@@ -662,12 +753,12 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                   : `${BACKEND_URL}/${record.image_path}`;
                 return (
                   <div key={record.record_id} className={styles.historyThumbCard}>
-                    <div 
+                    <div
                       className={styles.thumbImageWrapper}
                       onClick={() => {
-                        setShowMaskRecordIds(prev => 
-                          prev.includes(record.record_id) 
-                            ? prev.filter(id => id !== record.record_id) 
+                        setShowMaskRecordIds(prev =>
+                          prev.includes(record.record_id)
+                            ? prev.filter(id => id !== record.record_id)
                             : [...prev, record.record_id]
                         );
                       }}
@@ -696,14 +787,14 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                         {isMask ? 'Mask' : 'ภาพวิเคราะห์'}
                       </span>
                     </div>
-                  <div className={styles.thumbMetaInfo}>
-                    <span className={styles.thumbAreaSize}>{record.area_cm2} cm²</span>
-                    <span className={styles.thumbDate}>{formatDateTH(record.record_date)}</span>
-                    {record.note && <p className={styles.thumbNote}>บันทึกการดูแล: {record.note}</p>}
+                    <div className={styles.thumbMetaInfo}>
+                      <span className={styles.thumbAreaSize}>{record.area_cm2} cm²</span>
+                      <span className={styles.thumbDate}>{formatDateTH(record.record_date)}</span>
+                      {record.note && <p className={styles.thumbNote}>บันทึกการดูแล: {record.note}</p>}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
             </div>
           )}
         </div>
@@ -722,8 +813,8 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
             const initialRec = chronologicalRecords[0];
             const latestRec = chronologicalRecords[chronologicalRecords.length - 1];
             const diff = latestRec.area_cm2 - initialRec.area_cm2;
-            const percentChange = initialRec.area_cm2 > 0 
-              ? ((Math.abs(diff) / initialRec.area_cm2) * 100).toFixed(1) 
+            const percentChange = initialRec.area_cm2 > 0
+              ? ((Math.abs(diff) / initialRec.area_cm2) * 100).toFixed(1)
               : '0.0';
 
             const chartCoordinates = chronologicalRecords.map(r => {
@@ -750,28 +841,28 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                   <ResponsiveContainer width="100%" height={280}>
                     <LineChart data={chartCoordinates} margin={{ top: 15, right: 20, left: 10, bottom: 25 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                      <XAxis 
-                        dataKey="id" 
+                      <XAxis
+                        dataKey="id"
                         tickFormatter={(value) => {
                           const coord = chartCoordinates.find(c => c.id === value);
                           return coord ? coord.dateStr : '';
                         }}
-                        tick={{ fontSize: 10, fill: '#64748b' }} 
-                        angle={-45} 
-                        textAnchor="end" 
+                        tick={{ fontSize: 10, fill: '#64748b' }}
+                        angle={-45}
+                        textAnchor="end"
                         height={60}
                         interval="preserveStartEnd"
                       />
-                      <YAxis 
-                        tick={{ fontSize: 10, fill: '#64748b' }} 
+                      <YAxis
+                        tick={{ fontSize: 10, fill: '#64748b' }}
                         label={{ value: 'ขนาด (cm²)', angle: -90, position: 'insideLeft', offset: 0, style: { textAnchor: 'middle', fill: '#64748b', fontSize: 11 } }}
                       />
-                      <Tooltip 
+                      <Tooltip
                         labelFormatter={(label, items) => {
                           const item = items[0]?.payload;
                           return item ? item.fullDateStr : label;
                         }}
-                        contentStyle={{ fontSize: 12, borderRadius: 8 }} 
+                        contentStyle={{ fontSize: 12, borderRadius: 8 }}
                       />
                       <Line
                         type="monotone"
@@ -790,7 +881,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                     สรุปประเมินพัฒนาการของแผล
                   </h5>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-                    
+
                     {/* บล็อกที่ 1: ขนาดแผลแรกเริ่ม */}
                     <div style={{ padding: '10px 8px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                       <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 600 }}>ขนาดแผลแรกเริ่ม</div>
@@ -801,7 +892,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                         {formatDateTH(initialRec.record_date)}
                       </div>
                     </div>
-                    
+
                     {/* บล็อกที่ 2: ขนาดแผลล่าสุด */}
                     <div style={{ padding: '10px 8px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                       <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 600 }}>ขนาดแผลล่าสุด</div>
@@ -814,33 +905,33 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                     </div>
 
                     {/* บล็อกที่ 3: แนวโน้มการรักษา */}
-                    <div style={{ 
-                      padding: '10px 8px', 
-                      backgroundColor: diff < 0 ? '#f0fdf4' : diff > 0 ? '#fef2f2' : '#f8fafc', 
-                      borderRadius: '8px', 
+                    <div style={{
+                      padding: '10px 8px',
+                      backgroundColor: diff < 0 ? '#f0fdf4' : diff > 0 ? '#fef2f2' : '#f8fafc',
+                      borderRadius: '8px',
                       border: diff < 0 ? '1px solid #bbf7d0' : diff > 0 ? '1px solid #fecaca' : '1px solid #e2e8f0'
                     }}>
-                      <div style={{ 
-                        fontSize: '10px', 
-                        color: diff < 0 ? '#16a34a' : diff > 0 ? '#dc2626' : '#64748b', 
-                        fontWeight: 600 
+                      <div style={{
+                        fontSize: '10px',
+                        color: diff < 0 ? '#16a34a' : diff > 0 ? '#dc2626' : '#64748b',
+                        fontWeight: 600
                       }}>
                         แนวโน้มการรักษา
                       </div>
-                      <div style={{ 
-                        fontSize: '14px', 
-                        fontWeight: 700, 
-                        color: diff < 0 ? '#15803d' : diff > 0 ? '#b91c1c' : '#475569', 
-                        marginTop: '4px' 
+                      <div style={{
+                        fontSize: '14px',
+                        fontWeight: 700,
+                        color: diff < 0 ? '#15803d' : diff > 0 ? '#b91c1c' : '#475569',
+                        marginTop: '4px'
                       }}>
                         {diff < 0 ? `ดีขึ้น ${percentChange}%` : diff > 0 ? `แย่ลง ${percentChange}%` : 'คงที่'}
                       </div>
-                      <div style={{ 
-                        fontSize: '9px', 
-                        color: diff < 0 ? '#16a34a' : diff > 0 ? '#dc2626' : '#94a3b8', 
-                        marginTop: '2px' 
+                      <div style={{
+                        fontSize: '9px',
+                        color: diff < 0 ? '#16a34a' : diff > 0 ? '#dc2626' : '#94a3b8',
+                        marginTop: '2px'
                       }}>
-                        
+
                       </div>
                     </div>
 
@@ -857,10 +948,10 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                       </span>
                     </div>
                     <div style={{ width: '100%', height: '8px', backgroundColor: '#e2e8f0', borderRadius: '9999px', overflow: 'hidden' }}>
-                      <div style={{ 
-                        width: diff < 0 ? `${Math.min(100, parseFloat(percentChange))}%` : '0%', 
-                        height: '100%', 
-                        backgroundColor: '#10b981', 
+                      <div style={{
+                        width: diff < 0 ? `${Math.min(100, parseFloat(percentChange))}%` : '0%',
+                        height: '100%',
+                        backgroundColor: '#10b981',
                         borderRadius: '9999px',
                         transition: 'width 0.5s ease-in-out'
                       }} />
@@ -882,7 +973,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
         <div className={styles.customTimePickerOverlay}>
           <div className={styles.customTimePickerModalCard}>
             <h4>เลือกเวลานัดหมาย</h4>
-            
+
             <div className={styles.customTimePickerColumns}>
               {/* Hour Column */}
               <div className={styles.customTimePickerColumn}>
@@ -950,7 +1041,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
               </span>
               <button type="button" onClick={handleNextMonth} className={styles.calendarNavBtn}>▶</button>
             </div>
-            
+
             <div className={styles.calendarWeekdaysGrid}>
               {['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'].map((day, idx) => (
                 <div key={idx} className={styles.weekdayLabel} style={{ color: idx === 0 ? '#ef4444' : '#64748b' }}>
@@ -964,10 +1055,10 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                 if (day === null) {
                   return <div key={`empty-${index}`} className={styles.emptyDayCell} />;
                 }
-                
+
                 const formattedDate = `${currentCalendarMonth.getFullYear()}-${String(currentCalendarMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const isSelected = appointmentDate === formattedDate;
-                
+
                 return (
                   <button
                     key={`day-${day}`}
@@ -988,6 +1079,109 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
             >
               ปิดหน้าต่าง
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Close Wound Case Modal */}
+      {showCloseWoundModal && activeWound && (
+        <div className={styles.modalBackdrop}>
+          <div className={styles.modalCardCompact}>
+            <h4 className={styles.modalTitleError} style={{ color: '#0f172a' }}>⚠️ ยืนยันการปิดเคสแผล</h4>
+            <p className={styles.modalDescCompactCenter} style={{ marginBottom: '16px' }}>
+              คุณต้องการปิดเคสแผลตำแหน่ง <strong>{activeWound.body_part?.body_part_name} ({activeWound.side})</strong> ใช่หรือไม่?
+              <br />
+              <span style={{ fontSize: '12px', color: '#64748b' }}>(เมื่อปิดเคสแล้ว แผลนี้จะไม่ปรากฏในรายการเลือกสแกนใหม่)</span>
+            </p>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
+                ระบุเหตุผลการปิดเคส:
+              </label>
+              {[
+                'แผลรักษาหายดีแล้ว',
+                'สามารถดูแลแผลต่อที่บ้านได้',
+                'ส่งตัวรักษาต่อที่โรงพยาบาลอื่น',
+                'คนไข้ปฏิเสธการรักษา/ขาดการติดต่อ',
+                'อื่นๆ'
+              ].map((reason) => (
+                <label key={reason} className={styles.reasonOption}>
+                  <input
+                    type="radio"
+                    name="closeReason"
+                    value={reason}
+                    checked={closeReasonChoice === reason}
+                    onChange={(e) => setCloseReasonChoice(e.target.value)}
+                  />
+                  <span>{reason}</span>
+                </label>
+              ))}
+
+              {closeReasonChoice === 'อื่นๆ' && (
+                <input
+                  type="text"
+                  placeholder="ระบุหมายเหตุเพิ่มเติม..."
+                  value={customCloseReason}
+                  onChange={(e) => setCustomCloseReason(e.target.value)}
+                  className={styles.dropdownSearchInput}
+                  style={{ marginTop: '8px' }}
+                />
+              )}
+            </div>
+
+            <div className={styles.modalActions}>
+              <button
+                type="button"
+                onClick={() => setShowCloseWoundModal(false)}
+                className={styles.cancelBtn}
+                disabled={closingWound}
+              >
+                ย้อนกลับ
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmCloseWound}
+                className={`${styles.confirmBtn} ${styles.btnDangerSolid}`}
+                disabled={closingWound}
+              >
+                {closingWound ? 'กำลังบันทึก...' : 'ยืนยันปิดเคส'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reopen Wound Case Modal */}
+      {showReopenWoundModal && activeWound && (
+        <div className={styles.modalBackdrop}>
+          <div className={styles.modalCardCompact}>
+            <h4 className={styles.modalTitle} style={{ color: '#047857' }}>🔓 ยืนยันการเปิดเคสรักษาแผลอีกครั้ง</h4>
+            <p className={styles.modalDescCompactCenter} style={{ marginBottom: '20px' }}>
+              คุณต้องการเปลี่ยนสถานะแผลตำแหน่ง <strong>{activeWound.body_part?.body_part_name} ({activeWound.side})</strong><br />
+              กลับมาเป็น <strong>"🟢 กำลังรักษา"</strong> ใช่หรือไม่?
+              <br />
+              <span style={{ fontSize: '12px', color: '#64748b' }}>(เมื่อเปิดเคสอีกครั้งแล้ว แผลนี้จะกลับมาแสดงในรายการสแกนแผลตามเดิม)</span>
+            </p>
+
+            <div className={styles.modalActions}>
+              <button
+                type="button"
+                onClick={() => setShowReopenWoundModal(false)}
+                className={styles.cancelBtn}
+                disabled={reopeningWound}
+              >
+                ย้อนกลับ
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmReopenWound}
+                className={styles.confirmBtn}
+                style={{ backgroundColor: '#059669', borderColor: '#059669' }}
+                disabled={reopeningWound}
+              >
+                {reopeningWound ? 'กำลังบันทึก...' : 'ยืนยันเปิดเคสอีกครั้ง'}
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -17,6 +17,9 @@ class WoundBase(BaseModel):
 class WoundCreate(WoundBase):
     pass
 
+class WoundClose(BaseModel):
+    close_reason: str = Field(..., description="หมายเหตุการปิดเคสแผล")
+
 class WoundRecordResponse(BaseModel):
     record_id: int
     wound_id: str
@@ -36,7 +39,11 @@ class WoundResponse(BaseModel):
     body_part_id: str
     side: str
     created_at: datetime
-    
+
+    is_active: bool = True
+    close_reason: Optional[str] = None
+    closed_at: Optional[datetime] = None
+
     body_part: Optional[BodyPartResponse] = None
     records: List[WoundRecordResponse] = []
 

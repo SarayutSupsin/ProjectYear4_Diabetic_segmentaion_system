@@ -33,6 +33,9 @@ export interface Wound {
   body_part_id: string;
   side: string;
   created_at?: string;
+  is_active?: boolean;
+  close_reason?: string;
+  closed_at?: string;
   body_part?: {
     body_part_id: string;
     body_part_name: string;

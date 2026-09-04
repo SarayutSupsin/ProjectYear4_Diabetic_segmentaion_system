@@ -32,7 +32,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# *static
+*static
 
 # Dependencies
 node_modules/

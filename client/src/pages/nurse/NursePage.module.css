@@ -260,7 +260,8 @@
   background-color: #ffffff;
   border-bottom: 1px solid #e2e8f0;
   padding: 20px 40px;
-  margin: -40px -40px 24px -40px; /* Cancel desktop main padding */
+  margin: -40px -40px 24px -40px;
+  /* Cancel desktop main padding */
 }
 
 .pageHeader h2 {
@@ -1200,6 +1201,73 @@
   background-color: #0f766e;
 }
 
+.btnWarningSoft {
+  background-color: #fee2e2 !important;
+  color: #dc2626 !important;
+}
+
+.btnWarningSoft:hover {
+  background-color: #fecaca !important;
+}
+
+.btnDangerSolid {
+  background-color: #dc2626 !important;
+  color: #ffffff !important;
+}
+
+.btnDangerSolid:hover {
+  background-color: #b91c1c !important;
+}
+
+/* Error/Warning custom modal utility classes */
+.modalBackdropError {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10100;
+  padding: 20px;
+}
+
+.modalCardError {
+  border-top: 4px solid #dc2626;
+}
+
+.modalTitleError {
+  color: #dc2626;
+  font-weight: 700;
+  font-size: 15px;
+  margin: 0 0 10px 0;
+  text-align: center;
+}
+
+.modalDescCompact {
+  font-size: 13px;
+  color: #475569;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.modalDescCompactCenter {
+  font-size: 13px;
+  color: #475569;
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.textWarning {
+  color: #ef4444;
+}
+
 /* Result outputs styling */
 .resultImageContainer {
   width: 100%;
@@ -1631,7 +1699,7 @@
   padding: 2px 8px;
   border-radius: 6px;
   text-align: center;
-  display: inline-block; 
+  display: inline-block;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -1856,7 +1924,7 @@
 
 .infoMetaVal {
   color: #0f172a;
-  font-weight: 700;  
+  font-weight: 700;
   margin-left: auto;
 }
 
@@ -2589,6 +2657,25 @@
   padding: 20px;
 }
 
+.modalBackdropSub {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.45); /* สีดำสลัวๆ เพื่อกดแสงการ์ดใบหลังลง */
+  backdrop-filter: none;                /* ไม่เบลอภาพซ้ำซ้อน */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10002;
+  padding: 20px;
+}
+
+.warningCard {
+  max-width: 320px;
+}
+
 .modalCardCompact {
   background-color: #ffffff;
   border-radius: 16px;
@@ -2599,6 +2686,8 @@
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  max-height: calc(100vh - 130px);
+  overflow-y: auto;
 }
 
 .modalCardCompact h4 {
@@ -2833,6 +2922,10 @@
   font-weight: 700;
 }
 
+.hidden {
+  display: none !important;
+}
+
 /* Patient Custom Top Banner responsive style override to prevent mobile crowding */
 .patientTopBanner {
   background-color: #2563eb;
@@ -2853,4 +2946,86 @@
     padding: 16px 20px !important;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05) !important;
   }
+}
+
+/* 🌟 สไตล์ระบบปิดเคสรักษาบาดแผล (Close Wound Case Styles) */
+.badgeActive {
+  background-color: #dcfce7;
+  color: #15803d;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badgeClosed {
+  background-color: #f1f5f9;
+  color: #64748b;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btnCloseCase {
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnCloseCase:hover {
+  background-color: #fee2e2;
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+.reasonOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #334155;
+  transition: background 0.15s ease;
+}
+
+.reasonOption:hover {
+  background-color: #f8fafc;
+}
+
+.btnReopenCase {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnReopenCase:hover {
+  background-color: #d1fae5;
+  color: #065f46;
+  border-color: #6ee7b7;
 }
