@@ -1,5 +1,5 @@
 import datetime
-from sqlalchemy import Column, String, DateTime, ForeignKey
+from sqlalchemy import Column, String, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from app.db.base_class import Base
 
@@ -10,6 +10,9 @@ class Wound(Base):
     body_part_id = Column(String(5), ForeignKey("body_parts.body_part_id"), nullable=False)
     side = Column(String(10), nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
+    is_active = Column(Boolean, default=True)
+    close_reason = Column(String(255), nullable=True)
+    closed_at = Column(DateTime, nullable=True)
 
     patient = relationship("Patient", back_populates="wounds")
     body_part = relationship("BodyPart", back_populates="wounds")

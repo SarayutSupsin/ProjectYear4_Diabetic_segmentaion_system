@@ -17,28 +17,29 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundS
   const [patients, setPatients] = useState<Patient[]>([]);
   const [bodyParts, setBodyParts] = useState<BodyPartItem[]>([]);
   const [wounds, setWounds] = useState<Wound[]>([]);
-  
+
   // Selection states
   const [selectedHN, setSelectedHN] = useState<string>('');
   const [selectedWoundId, setSelectedWoundId] = useState<string>('');
-  
+
   // Custom styled dropdown controls (prevents native phone overlay popups)
   const [showPatientDropdown, setShowPatientDropdown] = useState(false);
   const [showWoundDropdown, setShowWoundDropdown] = useState(false);
   const [patientSearchTerm, setPatientSearchTerm] = useState('');
-  
+
   // New wound case creation inside scanner view (Fig 4.18)
   const [isNewWound, setIsNewWound] = useState(false);
   const [newBodyPartId, setNewBodyPartId] = useState('');
   const [newSide, setNewSide] = useState<'เท้าซ้าย' | 'เท้าขวา'>('เท้าซ้าย');
-  
+
   // Image file upload states
   const [file, setFile] = useState<File | null>(null);
   const [note, setNote] = useState('');
-  
+
   // Modal flow controls (Fig 4.19 - 4.20)
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<WoundRecord | null>(null);
   const [resultTab, setResultTab] = useState<'combined' | 'mask'>('combined');
@@ -61,7 +62,7 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundS
       if (preselectedHN) {
         setSelectedHN(preselectedHN);
       } else if (patientsData.length > 0) {
-        setSelectedHN(patientsData[0].HN);
+        setSelectedHN('');
       }
     } catch (err) {
       console.error('Failed to load initial scanner data:', err);
@@ -88,7 +89,7 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundS
 
   // Filter and sort patients list inside custom dropdown alphabetically based on Thai collation
   const filteredPatients = patients
-    .filter(p => 
+    .filter(p =>
       p.HN.toLowerCase().includes(patientSearchTerm.toLowerCase()) ||
       `${p.first_name} ${p.last_name}`.toLowerCase().includes(patientSearchTerm.toLowerCase())
     )
@@ -115,15 +116,31 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundS
   };
 
   // Submit flow to start segmentation process
+  const handleDiscardResult = async () => {
+    if (!analysisResult) return;
+    try {
+      setLoading(true);
+      await api.delete(`/wounds/records/${analysisResult.record_id}`);
+      setShowDiscardConfirm(false);
+      setShowResultModal(false);
+      setAnalysisResult(null);
+      setFile(null); // ล้างรูปภาพใบเก่าออกจากหน้าสแกน
+    } catch (err: any) {
+      alert('ไม่สามารถลบผลการประเมินได้: ' + (err.message || 'โปรดลองใหม่'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const triggerAnalysis = async () => {
     if (!file || !selectedHN) return;
-    
+
     try {
       setLoading(true);
       setShowConfirmModal(false);
-      
+
       let woundId = selectedWoundId;
-      
+
       // If nurse selected '+ เพิ่มแผลใหม่' (Fig 4.18), create wound first
       if (isNewWound) {
         const sideString = newSide === 'เท้าซ้าย' ? 'เท้าซ้าย' : 'เท้าขวา';
@@ -201,9 +218,9 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundS
         {/* Step 1: Image Upload Box */}
         <div className={styles.uploadBoxWrapper}>
           <label className={styles.uploadAreaLabel}>
-            <input 
-              type="file" 
-              accept="image/png, image/jpeg" 
+            <input
+              type="file"
+              accept="image/png, image/jpeg"
               onChange={handleFileChange}
               className={styles.hiddenFileInput}
             />
@@ -226,7 +243,7 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundS
         {/* Step 2: Patient and Wound Selection Forms */}
         <div className={styles.sectionCard}>
           <h4 className={styles.sectionTitle}>📋 ข้อมูลการบันทึก</h4>
-          
+
           <div className={styles.formGroupCompact} style={{ marginBottom: '16px', position: 'relative', zIndex: showPatientDropdown ? 1001 : 1 }}>
             <label>ผู้ป่วย</label>
             <div className={styles.customDropdownWrapper}>
@@ -241,7 +258,7 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundS
                 {selectedHN ? `${selectedHN} - ${patientDisplayName}` : 'เลือกผู้ป่วย...'}
                 <span className={styles.dropdownArrow}>▼</span>
               </button>
-              
+
               {showPatientDropdown && (
                 <div className={styles.customDropdownList}>
                   <input
@@ -253,7 +270,11 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundS
                     onChange={e => setPatientSearchTerm(e.target.value)}
                   />
                   <div className={styles.dropdownItemsScroll}>
-                    {filteredPatients.length === 0 ? (
+                    {patientSearchTerm.trim().length < 2 ? (
+                      <div className={styles.dropdownItem} style={{ color: '#94a3b8', fontStyle: 'italic', textAlign: 'center', padding: '12px' }}>
+                        🔍 พิมพ์รหัส HN หรือชื่อเพื่อค้นหา...
+                      </div>
+                    ) : filteredPatients.length === 0 ? (
                       <div className={styles.dropdownItem} style={{ color: '#94a3b8', fontStyle: 'italic' }}>ไม่พบข้อมูลคนไข้</div>
                     ) : (
                       filteredPatients.map(p => (
@@ -294,7 +315,7 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundS
               {showWoundDropdown && (
                 <div className={styles.customDropdownList}>
                   <div className={styles.dropdownItemsScroll}>
-                    {wounds.map(w => (
+                    {wounds.filter(w => w.is_active !== false).map(w => (
                       <div
                         key={w.wound_id}
                         className={`${styles.dropdownItem} ${(!isNewWound && selectedWoundId === w.wound_id) ? styles.active : ''}`}
@@ -330,11 +351,11 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundS
                 <div className={styles.pillsContainer}>
                   {bodyParts.map(bp => {
                     const thName = bp.body_part_name.split(' (')[0];
-                    const enName = bp.body_part_name.includes(' (') 
-                      ? bp.body_part_name.split(' (')[1].replace(')', '') 
+                    const enName = bp.body_part_name.includes(' (')
+                      ? bp.body_part_name.split(' (')[1].replace(')', '')
                       : '';
                     return (
-                      <button 
+                      <button
                         key={bp.body_part_id}
                         type="button"
                         className={`${styles.pillBtn} ${newBodyPartId === bp.body_part_id ? styles.active : ''}`}
@@ -383,8 +404,8 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundS
         </div>
 
         {/* Start Analysis trigger button */}
-        <button 
-          onClick={() => setShowConfirmModal(true)} 
+        <button
+          onClick={() => setShowConfirmModal(true)}
           disabled={!file || !selectedHN}
           className={styles.submitBookingBtn}
           style={{ backgroundColor: '#0d9488', marginTop: '16px' }}
@@ -405,8 +426,8 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundS
 
       {/* Transparent Click-away backdrop overlay to dismiss open dropdown lists */}
       {(showPatientDropdown || showWoundDropdown) && (
-        <div 
-          className={styles.dropdownBackdrop} 
+        <div
+          className={styles.dropdownBackdrop}
           onClick={() => {
             setShowPatientDropdown(false);
             setShowWoundDropdown(false);
@@ -421,10 +442,10 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundS
             <h4>ยืนยันการวิเคราะห์</h4>
             <div className={styles.confirmModalDetails}>
               {file && (
-                <img 
-                  src={URL.createObjectURL(file)} 
-                  alt="Wound thumbnail" 
-                  className={styles.confirmThumbnail} 
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt="Wound thumbnail"
+                  className={styles.confirmThumbnail}
                 />
               )}
               <div className={styles.confirmMeta}>
@@ -434,14 +455,14 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundS
               </div>
             </div>
             <div className={styles.modalActions}>
-              <button 
-                onClick={() => setShowConfirmModal(false)} 
+              <button
+                onClick={() => setShowConfirmModal(false)}
                 className={styles.cancelBtn}
               >
                 ยกเลิก
               </button>
-              <button 
-                onClick={triggerAnalysis} 
+              <button
+                onClick={triggerAnalysis}
                 className={styles.confirmBtn}
               >
                 ยืนยัน วิเคราะห์เลย
@@ -458,7 +479,7 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundS
             <h4>ผลการวิเคราะห์</h4>
             <p className={styles.modalSubtitle}>วิเคราะห์เสร็จสิ้น · AI Segmentation</p>
             <div className={styles.segmentedTabsBar} style={{ marginBottom: '16px', marginTop: '12px', padding: '3px', borderRadius: '8px', height: 'auto' }}>
-              <button 
+              <button
                 type="button"
                 className={`${styles.segmentTabBtn} ${resultTab === 'combined' ? styles.active : ''}`}
                 style={{ padding: '6px 10px', fontSize: '11px', borderRadius: '6px', minHeight: 'unset' }}
@@ -466,7 +487,7 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundS
               >
                 ภาพวิเคราะห์
               </button>
-              <button 
+              <button
                 type="button"
                 className={`${styles.segmentTabBtn} ${resultTab === 'mask' ? styles.active : ''}`}
                 style={{ padding: '6px 10px', fontSize: '11px', borderRadius: '6px', minHeight: 'unset' }}
@@ -475,54 +496,105 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundS
                 Segmentation Mask
               </button>
             </div>
-            
+
             <div className={styles.resultImageContainer}>
-              <img 
+              <img
                 src={resultTab === 'combined'
                   ? `${BACKEND_URL}/${analysisResult.image_path}`
                   : `${BACKEND_URL}/${analysisResult.image_path.replace('/combined/', '/mask/').replace('_combined.jpg', '_mask.png')}`
-                } 
-                alt="Wound segmentation mask result" 
-                className={styles.resultImage} 
+                }
+                alt="Wound segmentation mask result"
+                className={styles.resultImage}
               />
             </div>
-            
+
             <div className={styles.resultMetricsRow}>
-               <div className={styles.resultMetricBlock}>
-                 <span className={styles.resultMetricVal}>{analysisResult.area_pixel.toLocaleString()} px</span>
-                 <span className={styles.resultMetricLabel}>พื้นที่แผล</span>
-               </div>
-               <div className={styles.resultMetricBlock}>
-                 <span className={styles.resultMetricVal}>{analysisResult.area_cm2} cm²</span>
-                 <span className={styles.resultMetricLabel}>พื้นที่แผลจริง</span>
-               </div>
+              <div className={styles.resultMetricBlock}>
+                <span className={styles.resultMetricVal}>{analysisResult.area_pixel.toLocaleString()} px</span>
+                <span className={styles.resultMetricLabel}>พื้นที่แผล</span>
+              </div>
+              <div className={styles.resultMetricBlock}>
+                <span className={styles.resultMetricVal}>{analysisResult.area_cm2} cm²</span>
+                <span className={styles.resultMetricLabel}>พื้นที่แผลจริง</span>
+              </div>
             </div>
 
-            <button 
-              onClick={() => {
-                setShowResultModal(false);
-                onViewPatientWounds(selectedHN); // Redirect to history graph view
-              }} 
-              className={styles.closeResultBtn}
-            >
-              ปิด
-            </button>
+            <div className={styles.modalActions}>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.getSelection()?.removeAllRanges();
+                  setShowDiscardConfirm(true);
+                }}
+                className={`${styles.cancelBtn} ${styles.btnWarningSoft}`}
+                disabled={loading}
+              >
+                ยกเลิก
+              </button>
+              <button
+                onClick={() => {
+                  setShowResultModal(false);
+                  onViewPatientWounds(selectedHN);
+                }}
+                className={styles.confirmBtn}
+                disabled={loading}
+              >
+                ยืนยันบันทึกข้อมูล
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* Discard confirmation warning modal */}
+      {showDiscardConfirm && (
+        <div className={styles.modalBackdropSub}>
+          <div className={`${styles.modalCardCompact} ${styles.warningCard}`}>
+            <h4 className={styles.modalTitleError}>⚠️ ยืนยันการยกเลิก</h4>
+            <p className={styles.modalDescCompactCenter}>
+              คุณต้องการยกเลิกผลประเมินนี้เพื่อถ่ายภาพใหม่ใช่หรือไม่?<br />
+              <strong className={styles.textWarning}>(ผลการวิเคราะห์รอบนี้จะไม่ถูกบันทึกเข้าระบบ)</strong>
+            </p>
+            <div className={styles.modalActions}>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.getSelection()?.removeAllRanges();
+                  setShowDiscardConfirm(false);
+                }}
+                className={styles.cancelBtn}
+                disabled={loading}
+              >
+                ย้อนกลับ
+              </button>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.getSelection()?.removeAllRanges();
+                  handleDiscardResult();
+                }}
+                className={`${styles.confirmBtn} ${styles.btnDangerSolid}`}
+                disabled={loading}
+              >
+                ยืนยันยกเลิก
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {/* Custom Error Message Alert Modal */}
       {errorMessage && (
-        <div className={styles.modalBackdrop} style={{ zIndex: 1010 }}>
-          <div className={styles.modalCardCompact} style={{ borderTop: '4px solid #dc2626' }}>
-            <h4 style={{ color: '#dc2626', fontWeight: 700, fontSize: '15px' }}>ข้อผิดพลาดในการวิเคราะห์</h4>
-            <p style={{ fontSize: '13px', color: '#475569', marginTop: '10px', marginBottom: '20px', lineHeight: '1.6' }}>
+        <div className={styles.modalBackdropError}>
+          <div className={`${styles.modalCardCompact} ${styles.modalCardError}`}>
+            <h4 className={styles.modalTitleError}>ข้อผิดพลาดในการวิเคราะห์</h4>
+            <p className={styles.modalDescCompact}>
               {errorMessage}
             </p>
-            <button 
-              onClick={() => setErrorMessage(null)} 
-              className={styles.closeResultBtn}
-              style={{ backgroundColor: '#dc2626', color: '#ffffff' }}
+            <button
+              onClick={() => setErrorMessage(null)}
+              className={`${styles.closeResultBtn} ${styles.btnDangerSolid}`}
             >
               ตกลง
             </button>

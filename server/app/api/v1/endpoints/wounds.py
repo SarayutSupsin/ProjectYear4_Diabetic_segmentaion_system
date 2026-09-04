@@ -1,3 +1,5 @@
+from app.schemas.wound import WoundClose
+from starlette import responses
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
@@ -306,9 +308,109 @@ def get_all_patients_wound_statuses(
         
     return results
 
+@router.delete("/records/{record_id}", status_code=status.HTTP_200_OK)
+def delete_wound_record(
+    record_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role_id not in ["NURSE", "ADMIN"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="ขออภัย เฉพาะพยาบาลเท่านั้นที่มีสิทธิ์ยกเลิกหรือลบผลการบันทึก"
+        )
+
+    record = db.query(WoundRecord).filter(WoundRecord.record_id == record_id).first()
+    if not record:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="ไม่พบประวัติผลบันทึกที่ระบุ"
+        )
+
+    # Clean up physical image files from disk in static folders
+    try:
+        filename = os.path.basename(record.image_path)
+        filename_base = filename.replace("_combined.jpg", "")
+        
+        paths_to_delete = [
+            os.path.join(settings.STATIC_DIR, "original", f"{filename_base}_original.jpg"),
+            os.path.join(settings.STATIC_DIR, "mask", f"{filename_base}_mask.png"),
+            os.path.join(settings.STATIC_DIR, "combined", f"{filename_base}_combined.jpg"),
+            os.path.join(settings.STATIC_DIR, "warped", f"{filename_base}_warped.jpg"),
+        ]
+        for p in paths_to_delete:
+            if os.path.exists(p):
+                os.remove(p)
+    except Exception as e:
+        print(f"Error cleaning up files for record {record_id}: {e}")
+    
+    # Delete the database record entry
+    db.delete(record)
+    db.commit()
+    return {"message": "ลบผลบันทึกและรูปภาพประวัติเรียบร้อยแล้ว"}
+
 @router.get("/body-parts", response_model=List[BodyPartResponse])
 def get_body_parts(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     return db.query(BodyPart).all()
+
+@router.patch("/{wound_id}/close", response_model=WoundResponse)
+def close_wound(
+    wound_id: str,
+    close_in: WoundClose,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role_id not in ["NURSE", "ADMIN"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="ขออภัย เฉพาะพยาบาลเท่านั้นที่มีสิทธิ์จัดการเคสแผล"
+        )
+    wound = db.query(Wound).filter(Wound.wound_id == wound_id).first()
+    if not wound:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="ไม่พบเคสแผลที่ระบุ"
+        )
+        
+    if not wound.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="เคสแผลนี้ถูกปิดการรักษาเรียบร้อยแล้ว"
+        )
+
+    wound.is_active = False
+    wound.close_reason = close_in.close_reason
+    wound.closed_at = datetime.now()
+    db.commit()
+    db.refresh(wound)
+    
+    return wound
+
+@router.patch("/{wound_id}/reopen", response_model=WoundResponse)
+def reopen_wound(
+    wound_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role_id not in ["NURSE", "ADMIN"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="ขออภัย เฉพาะพยาบาลเท่านั้นที่มีสิทธิ์จัดการเคสแผล"
+        )
+    wound = db.query(Wound).filter(Wound.wound_id == wound_id).first()
+    if not wound:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="ไม่พบเคสแผลที่ระบุ"
+        )
+
+    wound.is_active = True
+    wound.close_reason = None
+    wound.closed_at = None
+    db.commit()
+    db.refresh(wound)
+    
+    return wound

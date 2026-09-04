@@ -231,11 +231,12 @@ export default function PatientPage() {
                     </span>
                   </div>
                   <span className={`${styles.statusBadgeRow} ${
+                    w.is_active === false ? styles.statusGray :
                     woundStatus === 'ดีขึ้น' ? styles.statusGreen : 
                     woundStatus === 'แย่ลง' ? styles.statusRed : 
                     styles.statusGray
                   }`}>
-                    {woundStatus}
+                    {w.is_active === false ? '⚪ ปิดเคสแล้ว' : woundStatus}
                   </span>
                 </div>
               );
