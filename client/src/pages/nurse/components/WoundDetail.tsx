@@ -153,9 +153,14 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
     }
     try {
       setClosingWound(true);
-      await api.patch<any>(`/wounds/${selectedWoundId}/close`, { close_reason: finalReason });
+      const res = await api.patch<any>(`/wounds/${selectedWoundId}/close`, { close_reason: finalReason });
       setShowCloseWoundModal(false);
       setCustomCloseReason('');
+      setWounds(prev => prev.map(w =>
+        w.wound_id === selectedWoundId
+          ? { ...w, is_active: false, close_reason: finalReason, closed_at: res?.closed_at || new Date().toISOString() }
+          : w
+      ));
       await fetchPatientAndWoundsData();
     } catch (err: any) {
       alert(err.message || 'เกิดข้อผิดพลาดในการปิดเคส');
@@ -170,6 +175,11 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
       setReopeningWound(true);
       await api.patch<any>(`/wounds/${selectedWoundId}/reopen`);
       setShowReopenWoundModal(false);
+      setWounds(prev => prev.map(w =>
+        w.wound_id === selectedWoundId
+          ? { ...w, is_active: true, close_reason: undefined, closed_at: undefined }
+          : w
+      ));
       await fetchPatientAndWoundsData();
     } catch (err: any) {
       alert(err.message || 'เกิดข้อผิดพลาดในการเปิดเคสใหม่');
@@ -324,15 +334,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
     if (upcomingAppointments.length > 0) {
       return upcomingAppointments[0];
     }
-    const patientAppts = appointments.filter(app => app.HN === HN);
-    if (patientAppts.length === 0) return undefined;
-
-    // Fallback: Show the most recent past appointment (descending sort)
-    const sortedPast = [...patientAppts].sort((a, b) =>
-      parseApptDateTime(b.appointment_date, b.appointment_time) -
-      parseApptDateTime(a.appointment_date, a.appointment_time)
-    );
-    return sortedPast[0];
+    return undefined;
   })();
 
   if (loading) {
@@ -513,11 +515,14 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                         ผลรวม: {overallText}
                       </span>
                     </div>
-                    <span className={`${styles.statusBadgeRow} ${statusOfWound === 'ดีขึ้น' ? styles.statusGreen :
-                      statusOfWound === 'แย่ลง' ? styles.statusRed :
-                        styles.statusGray
-                      }`}>
-                      {statusOfWound}
+                    <span className={`${styles.statusBadgeRow} ${
+                      w.is_active === false
+                        ? styles.statusGray
+                        : statusOfWound === 'ดีขึ้น' ? styles.statusGreen :
+                          statusOfWound === 'แย่ลง' ? styles.statusRed :
+                            styles.statusGray
+                    }`}>
+                      {w.is_active === false ? 'ปิดเคสแล้ว' : statusOfWound}
                     </span>
                   </div>
                 );
@@ -543,18 +548,18 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                       onClick={() => setShowCloseWoundModal(true)}
                       className={styles.btnCloseCase}
                     >
-                      🔒 ปิดเคสแผลนี้
+                      ปิดเคสแผล
                     </button>
                   </>
                 ) : (
                   <>
-                    <span className={styles.badgeClosed}>⚪ ปิดเคสแล้ว</span>
+                    <span className={styles.badgeClosed}>ปิดเคสแล้ว</span>
                     <button
                       type="button"
                       onClick={() => setShowReopenWoundModal(true)}
                       className={styles.btnReopenCase}
                     >
-                      🔓 เปิดเคสรักษาแผลนี้อีกครั้ง
+                      เปิดเคสรักษาต่อ
                     </button>
                   </>
                 )}
@@ -606,7 +611,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
           {/* Next Appointment section */}
           <div className={styles.sectionCard}>
             <h4 className={styles.sectionTitle}>นัดครั้งถัดไป</h4>
-            {latestAppointment && (
+            {latestAppointment ? (
               <div className={styles.currentAppointmentCard} style={{ marginBottom: upcomingAppointments.length > 1 ? '12px' : '0' }}>
                 <span className={styles.apptLabel}>วันนัด</span>
                 <h5 className={styles.apptDetails}>
@@ -616,6 +621,10 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                   <p className={styles.apptNote}>{latestAppointment.note}</p>
                 )}
               </div>
+            ) : (
+              <p className={styles.emptyText} style={{ margin: '8px 0 16px 0', color: '#64748b', fontSize: '13px' }}>
+                ยังไม่มีรายการนัดหมายครั้งถัดไป
+              </p>
             )}
 
             {/* Toggle show all appointments button */}
@@ -659,11 +668,11 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                       }}
                     >
                       <div className={styles.queueTime}>
-                        {isClosest ? '⏱️ ' : ''}เวลา: {appt.appointment_time.slice(0, 5)} น.
+                        {isClosest ? ' ' : ''}เวลา: {appt.appointment_time.slice(0, 5)} น.
                       </div>
                       <div className={styles.queuePatient}>
                         <span className={styles.boldText} style={{ display: 'block', fontSize: '13px', fontWeight: isClosest ? 600 : 500, color: '#1e293b' }}>
-                          {isClosest ? '📅 ' : ''}วันที่นัด: {formatDateTH(appt.appointment_date)}
+                          {isClosest ? ' ' : ''}วันที่นัด: {formatDateTH(appt.appointment_date)}
                         </span>
                         {appt.note && (
                           <p className={styles.queueNote} style={{ marginTop: '4px', fontSize: '12px', color: '#475569' }}>
@@ -1155,7 +1164,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
       {showReopenWoundModal && activeWound && (
         <div className={styles.modalBackdrop}>
           <div className={styles.modalCardCompact}>
-            <h4 className={styles.modalTitle} style={{ color: '#047857' }}>🔓 ยืนยันการเปิดเคสรักษาแผลอีกครั้ง</h4>
+            <h4 className={styles.modalTitle} style={{ color: '#047857' }}>ยืนยันการเปิดเคสรักษาแผลอีกครั้ง</h4>
             <p className={styles.modalDescCompactCenter} style={{ marginBottom: '20px' }}>
               คุณต้องการเปลี่ยนสถานะแผลตำแหน่ง <strong>{activeWound.body_part?.body_part_name} ({activeWound.side})</strong><br />
               กลับมาเป็น <strong>"🟢 กำลังรักษา"</strong> ใช่หรือไม่?

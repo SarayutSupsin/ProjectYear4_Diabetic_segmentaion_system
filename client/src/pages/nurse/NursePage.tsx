@@ -132,6 +132,7 @@ export default function NursePage() {
                         <WoundScan
                             preselectedHN={selectedHN}
                             onViewPatientWounds={onViewPatientWounds}
+                            activeTab={tab}
                         />
                     </div>
 

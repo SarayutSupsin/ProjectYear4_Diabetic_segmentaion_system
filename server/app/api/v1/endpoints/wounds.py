@@ -119,6 +119,11 @@ async def upload_wound_image_and_evaluate(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"ไม่พบข้อมูลแผลหลักรหัส {wound_id} ในระบบ"
         )
+    if not wound.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"เคสแผลนี้ถูกปิดการรักษาเรียบร้อยแล้ว ไม่สามารถสแกนหรือเพิ่มประวัติแผลได้ กรุณาเปิดเคสรักษาแผลนี้อีกครั้ง"
+        )
 
     # 2. Read the uploaded file and convert it into an OpenCV image (NumPy array) in RAM.
     contents = await file.read()
@@ -273,7 +278,7 @@ def get_all_patients_wound_statuses(
     results = []
     
     for p in patients:
-        patient_wounds = p.wounds
+        active_wounds = [w for w in p.wounds if w.is_active != False]
         status = 'คงที่'
         
         # Calculate patient age
@@ -283,26 +288,29 @@ def get_all_patients_wound_statuses(
             birth_date = p.birth_date
             age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
         
-        for w in patient_wounds:
-            records = w.records
-            if len(records) >= 2:
-                sorted_records = sorted(
-                    records,
-                    key=lambda r: r.record_date if r.record_date else datetime.min,
-                    reverse=True
-                )
-                latest = sorted_records[0]
-                previous = sorted_records[1]
-                if latest.area_cm2 > previous.area_cm2:
-                    status = 'แย่ลง'
-                elif latest.area_cm2 < previous.area_cm2 and status != 'แย่ลง':
-                    status = 'ดีขึ้น'
+        if len(p.wounds) > 0 and len(active_wounds) == 0:
+            status = "ปิดเคสแล้ว"
+        else: 
+            for w in active_wounds:
+                records = w.records
+                if len(records) >= 2:
+                    sorted_records = sorted(
+                        records,
+                        key=lambda r: r.record_date if r.record_date else datetime.min,
+                        reverse=True
+                    )
+                    latest = sorted_records[0]
+                    previous = sorted_records[1]
+                    if latest.area_cm2 > previous.area_cm2:
+                        status = 'แย่ลง'
+                    elif latest.area_cm2 < previous.area_cm2 and status != 'แย่ลง':
+                        status = 'ดีขึ้น'
                     
         results.append({
             "HN": p.HN,
             "name": f"{p.first_name} {p.last_name}",
             "age": age,
-            "woundsCount": len(patient_wounds),
+            "woundsCount": len(active_wounds),
             "status": status
         })
         
