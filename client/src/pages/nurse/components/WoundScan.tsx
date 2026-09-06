@@ -6,6 +6,7 @@ import type { Patient, Wound, WoundRecord } from '../../../types';
 interface WoundScanProps {
   preselectedHN: string | null;
   onViewPatientWounds: (HN: string) => void;
+  activeTab?: string;
 }
 
 interface BodyPartItem {
@@ -13,7 +14,7 @@ interface BodyPartItem {
   body_part_name: string;
 }
 
-export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundScanProps) {
+export default function WoundScan({ preselectedHN, onViewPatientWounds, activeTab }: WoundScanProps) {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [bodyParts, setBodyParts] = useState<BodyPartItem[]>([]);
   const [wounds, setWounds] = useState<Wound[]>([]);
@@ -75,8 +76,10 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundS
     try {
       const woundsList = await api.get<Wound[]>(`/wounds/patient/${HN}`);
       setWounds(woundsList);
-      if (woundsList.length > 0) {
-        setSelectedWoundId(woundsList[0].wound_id);
+
+      const activeWounds = woundsList.filter(w => w.is_active !== false);
+      if (activeWounds.length > 0) {
+        setSelectedWoundId(activeWounds[0].wound_id);
         setIsNewWound(false);
       } else {
         setSelectedWoundId('');
@@ -100,14 +103,13 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds }: WoundS
     });
 
   useEffect(() => {
-    fetchInitialData();
-  }, [preselectedHN]);
-
-  useEffect(() => {
-    if (selectedHN) {
-      fetchPatientWounds(selectedHN);
+    if (activeTab === 'upload') {
+      fetchInitialData();
+      if (selectedHN) {
+        fetchPatientWounds(selectedHN);
+      }
     }
-  }, [selectedHN]);
+  }, [preselectedHN, activeTab, selectedHN]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
