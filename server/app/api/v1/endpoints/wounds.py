@@ -45,7 +45,8 @@ def create_wound(
     existing_wound = db.query(Wound).filter(
         Wound.HN == wound_in.HN,
         Wound.body_part_id == wound_in.body_part_id,
-        Wound.side == wound_in.side
+        Wound.side == wound_in.side,
+        Wound.is_active != False
     ).first()
     if existing_wound:
         raise HTTPException(
