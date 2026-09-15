@@ -457,14 +457,18 @@
 .recentList {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0;
 }
 
 .recentItem {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding-bottom: 12px;
+  gap: 16px;
+
+  height: 86px;
+  padding: 12px 0;
+
+  box-sizing: border-box;
   border-bottom: 1px solid #f1f5f9;
 }
 
@@ -473,12 +477,16 @@
 }
 
 .itemAvatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+
+  border-radius: 10px;
   background-color: var(--primary-light);
   color: var(--primary);
+
   font-weight: 700;
+
   display: flex;
   align-items: center;
   justify-content: center;
