@@ -6,6 +6,8 @@ import PatientSearch from './components/PatientSearch';
 import WoundDetail from './components/WoundDetail';
 import WoundScan from './components/WoundScan';
 
+import { Search, LayoutDashboard, camera} from 'lucide-react';
+
 export default function NursePage() {
     const { user, logout } = useAuth();
     // State to manage current tab selection

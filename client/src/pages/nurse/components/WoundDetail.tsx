@@ -31,6 +31,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
   // Loading & error states
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [alertModalMessage, setAlertModalMessage] = useState<string | null>(null);
 
   // New wound case modal form states
   const [showCreateWound, setShowCreateWound] = useState(false);
@@ -148,7 +149,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
     if (!selectedWoundId) return;
     const finalReason = closeReasonChoice === 'อื่นๆ' ? customCloseReason : closeReasonChoice;
     if (!finalReason.trim()) {
-      alert('กรุณาระบุหมายเหตุการปิดเคส');
+      setAlertModalMessage('กรุณาระบุหมายเหตุการปิดเคส');
       return;
     }
     try {
@@ -163,7 +164,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
       ));
       await fetchPatientAndWoundsData();
     } catch (err: any) {
-      alert(err.message || 'เกิดข้อผิดพลาดในการปิดเคส');
+      setAlertModalMessage(err.message || 'เกิดข้อผิดพลาดในการปิดเคส');
     } finally {
       setClosingWound(false);
     }
@@ -182,7 +183,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
       ));
       await fetchPatientAndWoundsData();
     } catch (err: any) {
-      alert(err.message || 'เกิดข้อผิดพลาดในการเปิดเคสใหม่');
+      setAlertModalMessage(err.message || 'เกิดข้อผิดพลาดในการเปิดเคสใหม่');
     } finally {
       setReopeningWound(false);
     }
@@ -229,7 +230,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
       setSelectedWoundId(newWound.wound_id);
       setShowCreateWound(false);
     } catch (err: any) {
-      alert(err.message || 'ไม่สามารถเปิดเคสแผลใหม่ได้');
+      setAlertModalMessage(err.message || 'ไม่สามารถเปิดเคสแผลใหม่ได้');
     } finally {
       setCreatingWound(false);
     }
@@ -239,7 +240,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
   const handleBookAppointment = async (e: FormEvent) => {
     e.preventDefault();
     if (!appointmentDate || !appointmentTime) {
-      alert('กรุณากรอกวันที่และเวลานัดหมาย');
+      setAlertModalMessage('กรุณากรอกวันที่และเวลานัดหมาย');
       return;
     }
 
@@ -1191,6 +1192,25 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                 {reopeningWound ? 'กำลังบันทึก...' : 'ยืนยันเปิดเคสอีกครั้ง'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Alert / Error Message Modal */}
+      {alertModalMessage && (
+        <div className={styles.modalBackdropError}>
+          <div className={`${styles.modalCardCompact} ${styles.modalCardError}`}>
+            <h4 className={styles.modalTitleError}>ข้อความแจ้งเตือน</h4>
+            <p className={styles.modalDescCompact} style={{ textAlign: 'center' }}>
+              {alertModalMessage}
+            </p>
+            <button
+              onClick={() => setAlertModalMessage(null)}
+              className={`${styles.closeResultBtn} ${styles.btnDangerSolid}`}
+              style={{ width: '100%' }}
+            >
+              ตกลง
+            </button>
           </div>
         </div>
       )}
