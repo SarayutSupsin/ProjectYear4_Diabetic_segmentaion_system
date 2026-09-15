@@ -128,7 +128,7 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds, activeTa
       setAnalysisResult(null);
       setFile(null); // ล้างรูปภาพใบเก่าออกจากหน้าสแกน
     } catch (err: any) {
-      alert('ไม่สามารถลบผลการประเมินได้: ' + (err.message || 'โปรดลองใหม่'));
+      setErrorMessage('ไม่สามารถลบผลการประเมินได้: ' + (err.message || 'โปรดลองใหม่'));
     } finally {
       setLoading(false);
     }
