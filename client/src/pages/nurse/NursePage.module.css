@@ -2722,8 +2722,10 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.45); /* สีดำสลัวๆ เพื่อกดแสงการ์ดใบหลังลง */
-  backdrop-filter: none;                /* ไม่เบลอภาพซ้ำซ้อน */
+  background-color: rgba(0, 0, 0, 0.45);
+  /* สีดำสลัวๆ เพื่อกดแสงการ์ดใบหลังลง */
+  backdrop-filter: none;
+  /* ไม่เบลอภาพซ้ำซ้อน */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3094,28 +3096,24 @@
    ========================================================= */
 
 .patientPage {
-  width: min(1180px, calc(100% - 48px));
+  width: min(1140px, calc(100% - 48px));
   margin: 0 auto;
-  padding: 32px 0 80px;
+  padding: 24px 0 80px;
 }
 
 
-/* =========================
-   Header
-   ========================= */
-
+/* Header Banner - Sleek Rounded Card */
 .patientPage .patientTopBanner {
   width: 100%;
   margin: 0 0 24px 0;
-  padding: 24px 28px;
-  border-radius: 18px;
-
+  padding: 22px 28px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #3b82f6 100%);
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  box-shadow:
-    0 10px 30px rgba(37, 99, 235, 0.12);
+  box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.25);
 }
 
 
@@ -3152,9 +3150,9 @@
    ========================= */
 
 .patientPage .woundsGridSelector {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
   margin-top: 14px;
   width: 100%;
 }
@@ -3182,8 +3180,7 @@
   display: grid;
 
   grid-template-columns:
-    minmax(0, 1fr)
-    minmax(0, 1fr);
+    minmax(0, 1fr) minmax(0, 1fr);
 
   gap: 24px;
 
@@ -3191,7 +3188,7 @@
 }
 
 
-.patientInfoGrid > .sectionCard {
+.patientInfoGrid>.sectionCard {
   margin-bottom: 0;
   height: 100%;
 }
@@ -3303,7 +3300,7 @@
   }
 
 
-  .patientInfoGrid > .sectionCard {
+  .patientInfoGrid>.sectionCard {
     margin-bottom: 20px;
   }
 
