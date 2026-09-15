@@ -129,10 +129,10 @@ export default function PatientPage() {
 
 
   return (
-    <div className={styles.fadeUp} style={{ padding: '16px', maxWidth: '600px', margin: '0 auto', paddingBottom: '80px' }}>
+    <div className={`${styles.fadeUp} ${styles.patientPage}`}> 
       
       {/* Hospital Top Banner for Patient (Clean minimal header) */}
-      <div className={styles.patientTopBanner} style={{ margin: '-16px -16px 24px -16px', borderRadius: 0, padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className={styles.patientTopBanner}> 
         <div>
           <h2 className={styles.nurseProfileName} style={{ fontSize: '18px', margin: 0 }}>คุณ{patient.first_name} {patient.last_name}</h2>
           <span style={{ fontSize: '12px', opacity: 0.9, marginTop: '2px', display: 'block' }}>HN: {patient.HN}</span>
@@ -247,7 +247,7 @@ export default function PatientPage() {
 
       {/* --- TAB 1: ข้อมูลแผล & ตารางนัดหมาย --- */}
       {subTab === 'info' && selectedWoundId && activeWound && (
-        <>
+        <div className={styles.patientInfoGrid}> 
           <div className={styles.sectionCard}>
             <h4 className={styles.sectionTitle}>ข้อมูลแผลของคุณ</h4>
             <div className={styles.woundDataInfoBlock}>
@@ -306,7 +306,7 @@ export default function PatientPage() {
               </div>
             )}
           </div>
-        </>
+        </div>
       )}
 
       {/* --- TAB 2: แกลเลอรีประวัติแผล --- */}
