@@ -149,7 +149,7 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds, activeTa
 
         // Check if there is already a wound at this location and side for the patient to prevent duplicates
         const alreadyExists = wounds.some(
-          w => w.body_part_id === newBodyPartId && w.side === sideString
+          w => w.body_part_id === newBodyPartId && w.side === sideString && w.is_active !== false
         );
         if (alreadyExists) {
           throw new Error('ตำแหน่งแผลนี้ได้รับการลงทะเบียนรักษาไว้แล้วในระบบ กรุณาเลือกบันทึกรูปเพิ่มในแผลเดิม');

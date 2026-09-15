@@ -236,7 +236,7 @@ export default function PatientPage() {
                     woundStatus === 'แย่ลง' ? styles.statusRed : 
                     styles.statusGray
                   }`}>
-                    {w.is_active === false ? '⚪ ปิดเคสแล้ว' : woundStatus}
+                    {w.is_active === false ? 'ปิดเคสแล้ว' : woundStatus}
                   </span>
                 </div>
               );
