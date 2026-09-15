@@ -3088,3 +3088,249 @@
   color: #047857;
   border-color: #a7f3d0;
 }
+
+/* =========================================================
+   PATIENT PAGE - RESPONSIVE PC / TABLET / MOBILE
+   ========================================================= */
+
+.patientPage {
+  width: min(1180px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 32px 0 80px;
+}
+
+
+/* =========================
+   Header
+   ========================= */
+
+.patientPage .patientTopBanner {
+  width: 100%;
+  margin: 0 0 24px 0;
+  padding: 24px 28px;
+  border-radius: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  box-shadow:
+    0 10px 30px rgba(37, 99, 235, 0.12);
+}
+
+
+/* =========================
+   Tabs
+   ========================= */
+
+.patientPage .segmentedTabsBar {
+  width: 100%;
+  margin-bottom: 24px;
+
+  padding: 5px;
+  border-radius: 14px;
+}
+
+
+/* =========================
+   Cards
+   ========================= */
+
+.patientPage .sectionCard {
+  padding: 26px 28px;
+  border-radius: 18px;
+
+  border: 1px solid #eef2f7;
+
+  box-shadow:
+    0 4px 15px rgba(15, 23, 42, 0.05);
+}
+
+
+/* =========================
+   Wound selector
+   ========================= */
+
+.patientPage .woundsGridSelector {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+  width: 100%;
+}
+
+.patientPage .woundSelectItemCard {
+  width: 100%;
+  min-height: 96px;
+  padding: 16px 20px;
+
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border-radius: 14px;
+}
+
+
+/* =========================
+   ข้อมูลแผล + นัดหมาย
+   ========================= */
+
+.patientInfoGrid {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1fr);
+
+  gap: 24px;
+
+  align-items: stretch;
+}
+
+
+.patientInfoGrid > .sectionCard {
+  margin-bottom: 0;
+  height: 100%;
+}
+
+
+/* =========================
+   ข้อมูลแผล
+   ========================= */
+
+.patientPage .infoMetaRow {
+  min-height: 44px;
+
+  display: flex;
+  align-items: center;
+
+  padding-bottom: 10px;
+}
+
+
+.patientPage .locationVal {
+  width: auto;
+  max-width: 65%;
+  text-align: right;
+}
+
+
+/* =========================
+   Appointment
+   ========================= */
+
+.patientPage .queueItem {
+  padding: 16px 18px;
+}
+
+
+/* =========================
+   History - PC
+   ========================= */
+
+.patientPage .woundHistoryImagesScrollRow {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 18px;
+
+  overflow: visible;
+}
+
+
+.patientPage .historyThumbCard {
+  width: 100%;
+  min-width: 0;
+}
+
+
+.patientPage .thumbImageWrapper {
+  height: 180px;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+  .patientPage {
+    width: 100%;
+    padding: 16px;
+    padding-bottom: 80px;
+  }
+
+
+  /* Header กลับมาเป็นแบบเต็มขอบมือถือ */
+  .patientPage .patientTopBanner {
+    margin: -16px -16px 20px -16px;
+    width: calc(100% + 32px);
+
+    border-radius: 0;
+
+    padding: 16px 20px;
+  }
+
+
+  .patientPage .sectionCard {
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+
+
+  /* ปุ่มเลือกแผลมือถือเรียง 1 แถว */
+  .patientPage .woundsGridSelector {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+
+  .patientPage .woundSelectItemCard:only-child {
+    grid-column: auto;
+  }
+
+
+  /* ข้อมูล + นัดหมาย กลับมาเรียงบนลงล่าง */
+  .patientInfoGrid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+
+  .patientInfoGrid > .sectionCard {
+    margin-bottom: 20px;
+  }
+
+
+  .patientPage .locationVal {
+    max-width: 70%;
+  }
+
+
+  /* History มือถือกลับมาเลื่อนซ้ายขวา */
+  .patientPage .woundHistoryImagesScrollRow {
+    display: flex;
+
+    gap: 12px;
+
+    overflow-x: auto;
+  }
+
+
+  .patientPage .historyThumbCard {
+    width: 130px;
+    flex-shrink: 0;
+  }
+
+
+  .patientPage .thumbImageWrapper {
+    height: 110px;
+  }
+
+}
