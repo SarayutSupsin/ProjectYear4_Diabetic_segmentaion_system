@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import styles from '../NursePage.module.css';
 import { api, BACKEND_URL } from '../../../services/api';
 import type { Patient, Wound, WoundRecord } from '../../../types';
+import { AlertTriangle, Search, Camera, ClipboardList, Plus, Info, Check } from 'lucide-react';
+import { TbPhotoPlus } from 'react-icons/tb';
+import { FaCaretLeft, FaCaretDown } from 'react-icons/fa';
 
 interface WoundScanProps {
   preselectedHN: string | null;
@@ -62,8 +65,6 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds, activeTa
       // Pre-select patient if provided from detail view
       if (preselectedHN) {
         setSelectedHN(preselectedHN);
-      } else if (patientsData.length > 0) {
-        setSelectedHN('');
       }
     } catch (err) {
       console.error('Failed to load initial scanner data:', err);
@@ -105,11 +106,17 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds, activeTa
   useEffect(() => {
     if (activeTab === 'upload') {
       fetchInitialData();
-      if (selectedHN) {
-        fetchPatientWounds(selectedHN);
-      }
     }
-  }, [preselectedHN, activeTab, selectedHN]);
+  }, [preselectedHN, activeTab]);
+
+  useEffect(() => {
+    if (selectedHN) {
+      fetchPatientWounds(selectedHN);
+    } else {
+      setWounds([]);
+      setSelectedWoundId('');
+    }
+  }, [selectedHN]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -212,7 +219,7 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds, activeTa
     <div className={styles.fadeUp}>
       {/* Page Header */}
       <header className={styles.pageHeader}>
-        <h2>วิเคราะห์ภาพแผล</h2>
+        <h2>สแกนวิเคราะห์แผล</h2>
         <p>อัปโหลดภาพถ่ายบาดแผลพร้อม QR Code เพื่อคำนวณพื้นที่แผล</p>
       </header>
 
@@ -228,13 +235,17 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds, activeTa
             />
             {file ? (
               <div className={styles.uploadedFileState}>
-                <span className={styles.checkmarkIcon}>✔</span>
+                <span className={styles.checkmarkIcon} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                  <Check size={18} />
+                </span>
                 <span className={styles.fileNameText}>{file.name}</span>
                 <span className={styles.changeFileLink}>แตะเพื่อเปลี่ยนไฟล์</span>
               </div>
             ) : (
               <div className={styles.emptyUploadState}>
-                <span className={styles.cameraIconBig}>📷</span>
+                <span className={styles.cameraIconBig} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <TbPhotoPlus size={36} style={{ color: '#2563eb' }} />
+                </span>
                 <span className={styles.uploadMainText}>แตะเพื่อเลือกภาพแผล</span>
                 <span className={styles.uploadSubText}>PNG, JPG · ขนาดไม่เกิน 10MB</span>
               </div>
@@ -244,7 +255,9 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds, activeTa
 
         {/* Step 2: Patient and Wound Selection Forms */}
         <div className={styles.sectionCard}>
-          <h4 className={styles.sectionTitle}>📋 ข้อมูลการบันทึก</h4>
+          <h4 className={styles.sectionTitle} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <ClipboardList size={18} style={{ color: '#2563eb' }} /> ข้อมูลการบันทึก
+          </h4>
 
           <div className={styles.formGroupCompact} style={{ marginBottom: '16px', position: 'relative', zIndex: showPatientDropdown ? 1001 : 1 }}>
             <label>ผู้ป่วย</label>
@@ -258,23 +271,29 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds, activeTa
                 }}
               >
                 {selectedHN ? `${selectedHN} - ${patientDisplayName}` : 'เลือกผู้ป่วย...'}
-                <span className={styles.dropdownArrow}>▼</span>
+                <span className={styles.dropdownArrow} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                  {showPatientDropdown ? <FaCaretDown size={14} /> : <FaCaretLeft size={14} />}
+                </span>
               </button>
 
               {showPatientDropdown && (
                 <div className={styles.customDropdownList}>
-                  <input
-                    type="text"
-                    placeholder="🔍 ค้นหา HN หรือชื่อ..."
-                    value={patientSearchTerm}
-                    className={styles.dropdownSearchInput}
-                    onClick={e => e.stopPropagation()} // Stop click propagation to backdrop
-                    onChange={e => setPatientSearchTerm(e.target.value)}
-                  />
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <Search size={16} style={{ position: 'absolute', left: '20px', color: '#94a3b8', pointerEvents: 'none' }} />
+                    <input
+                      type="text"
+                      placeholder="ค้นหา HN หรือชื่อ..."
+                      value={patientSearchTerm}
+                      className={styles.dropdownSearchInput}
+                      style={{ paddingLeft: '34px' }}
+                      onClick={e => e.stopPropagation()} // Stop click propagation to backdrop
+                      onChange={e => setPatientSearchTerm(e.target.value)}
+                    />
+                  </div>
                   <div className={styles.dropdownItemsScroll}>
                     {patientSearchTerm.trim().length < 2 ? (
                       <div className={styles.dropdownItem} style={{ color: '#94a3b8', fontStyle: 'italic', textAlign: 'center', padding: '12px' }}>
-                        🔍 พิมพ์รหัส HN หรือชื่อเพื่อค้นหา...
+                        พิมพ์รหัส HN หรือชื่อเพื่อค้นหา...
                       </div>
                     ) : filteredPatients.length === 0 ? (
                       <div className={styles.dropdownItem} style={{ color: '#94a3b8', fontStyle: 'italic' }}>ไม่พบข้อมูลคนไข้</div>
@@ -311,7 +330,9 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds, activeTa
                 }}
               >
                 {woundDisplayName || 'เลือกเคสแผล...'}
-                <span className={styles.dropdownArrow}>▼</span>
+                <span className={styles.dropdownArrow} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                  {showWoundDropdown ? <FaCaretDown size={14} /> : <FaCaretLeft size={14} />}
+                </span>
               </button>
 
               {showWoundDropdown && (
@@ -336,8 +357,9 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds, activeTa
                         setIsNewWound(true);
                         setShowWoundDropdown(false);
                       }}
+                      style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                     >
-                      ➕ เพิ่มแผลใหม่
+                      <Plus size={16} /> เพิ่มแผลใหม่
                     </div>
                   </div>
                 </div>
@@ -410,14 +432,16 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds, activeTa
           onClick={() => setShowConfirmModal(true)}
           disabled={!file || !selectedHN}
           className={styles.submitBookingBtn}
-          style={{ backgroundColor: '#0d9488', marginTop: '16px' }}
+          style={{ backgroundColor: '#2563eb', marginTop: '16px' }}
         >
           เริ่มวิเคราะห์ภาพแผล
         </button>
 
         {/* Shoot instructions card */}
         <div className={styles.shootInstructionsCard}>
-          <h5>ℹ️ คำแนะนำการถ่ายภาพ</h5>
+          <h5 style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Info size={18} style={{ color: '#2563eb' }} /> คำแนะนำการถ่ายภาพ
+          </h5>
           <ul>
             <li>วาง QR Code ข้างแผลทุกครั้งเพื่อใช้เทียบขนาด</li>
             <li>ถ่ายในที่มีแสงสว่างเพียงพอ</li>
@@ -466,6 +490,7 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds, activeTa
               <button
                 onClick={triggerAnalysis}
                 className={styles.confirmBtn}
+                style={{ backgroundColor: '#2563eb' }}
               >
                 ยืนยัน วิเคราะห์เลย
               </button>
@@ -553,7 +578,9 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds, activeTa
       {showDiscardConfirm && (
         <div className={styles.modalBackdropSub}>
           <div className={`${styles.modalCardCompact} ${styles.warningCard}`}>
-            <h4 className={styles.modalTitleError}>⚠️ ยืนยันการยกเลิก</h4>
+            <h4 className={styles.modalTitleError} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+              <AlertTriangle size={18} style={{ color: '#d97706' }} /> ยืนยันการยกเลิก
+            </h4>
             <p className={styles.modalDescCompactCenter}>
               คุณต้องการยกเลิกผลประเมินนี้เพื่อถ่ายภาพใหม่ใช่หรือไม่?<br />
               <strong className={styles.textWarning}>(ผลการวิเคราะห์รอบนี้จะไม่ถูกบันทึกเข้าระบบ)</strong>

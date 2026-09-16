@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'; // ใช้ type คลุม FormEvent อย่างถูกต้อง
 import styles from '../AdminPage.module.css';
 import { api } from '../../../services/api';
+import { Search, UserPlus, AlertTriangle } from 'lucide-react';
 
 interface NurseListItem {
   user_id: string;
@@ -101,19 +102,23 @@ export default function NurseList({ nursesList, fetchData }: NurseListProps) {
       </div>
 
       <div className={styles.filterBar}>
-        <input
-          type="text"
-          placeholder="ค้นหาชื่อพยาบาล หรือ Username..."
-          value={searchNurse}
-          onChange={e => {
-            setSearchNurse(e.target.value);
-            setCurrentPage(1);
-          }}
-          className={styles.searchInput}
-        />
-        <button onClick={openAddNurse} className={styles.addBtn}>
-          <span className={styles.desktopBtnText}>+ เพิ่มพยาบาลใหม่</span>
-          <span className={styles.mobileBtnText}>+ เพิ่มบัญชี</span>
+        <div className={styles.searchBoxWrapperAdmin}>
+          <Search size={18} className={styles.searchIconAdmin} />
+          <input
+            type="text"
+            placeholder="ค้นหาชื่อพยาบาล หรือ Username..."
+            value={searchNurse}
+            onChange={e => {
+              setSearchNurse(e.target.value);
+              setCurrentPage(1);
+            }}
+            className={styles.searchInputFullAdmin}
+          />
+        </div>
+        <button onClick={openAddNurse} className={styles.addBtn} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          <UserPlus size={16} />
+          <span className={styles.desktopBtnText}>เพิ่มพยาบาลใหม่</span>
+          <span className={styles.mobileBtnText}>เพิ่มบัญชี</span>
         </button>
       </div>
 
@@ -153,7 +158,7 @@ export default function NurseList({ nursesList, fetchData }: NurseListProps) {
           currentNurses.map(n => (
             <div key={n.user_id} className={styles.mobileItemCard}>
               <div className={styles.cardInfoRow}>
-                <div className={styles.itemAvatar} style={{ backgroundColor: '#e2e8f0', color: '#475569' }}>
+                <div className={styles.itemAvatar} style={{ backgroundColor: '#f0fdf4', color: '#0f766e' }}>
                   {(n.first_name ? n.first_name[0] : n.username[0]).toUpperCase()}
                 </div>
                 <div className={styles.cardMetaHeader}>
@@ -285,7 +290,9 @@ export default function NurseList({ nursesList, fetchData }: NurseListProps) {
       {nurseToDelete && (
         <div className={styles.modalBackdrop}>
           <div className={`${styles.modalCard} ${styles.deleteCard}`}>
-            <span className={styles.warnIcon}>⚠️</span>
+            <span className={styles.warnIcon} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <AlertTriangle size={32} style={{ color: '#dc2626' }} />
+            </span>
             <h3>ลบบัญชีพยาบาล</h3>
             <p>คุณต้องการลบบัญชีพยาบาลของ <b>{nurseToDelete.first_name} {nurseToDelete.last_name}</b> (Username: {nurseToDelete.username}) ออกจากระบบใช่หรือไม่?</p>
             <div className={styles.modalActions}>

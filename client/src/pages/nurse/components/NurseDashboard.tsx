@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import styles from '../NursePage.module.css';
 import { api } from '../../../services/api';
 import type { Patient, Appointment } from '../../../types';
+import { ShieldAlert, AlertTriangle, Calendar, Clock, Scan, ChevronRight, ChevronDown } from 'lucide-react';
+import { FaCaretLeft, FaCaretDown } from 'react-icons/fa';
 
 interface NurseDashboardProps {
   onViewPatientWounds: (HN: string) => void;
@@ -117,9 +119,11 @@ export default function NurseDashboard({ onViewPatientWounds, onSwitchTab, activ
             onClick={() => setIsVigilanceExpanded(!isVigilanceExpanded)}
             style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', userSelect: 'none' }}
           >
-            <span>🚨 ต้องเฝ้าระวัง ({vigilanceList.length})</span>
-            <span style={{ fontSize: '11px', transition: 'transform 0.2s', transform: isVigilanceExpanded ? 'rotate(0deg)' : 'rotate(-90deg)', display: 'inline-block' }}>
-              ▼
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <ShieldAlert size={18} style={{ color: '#dc2626' }} /> ต้องเฝ้าระวัง ({vigilanceList.length})
+            </span>
+            <span style={{ fontSize: '12px', display: 'inline-flex', alignItems: 'center' }}>
+              {isVigilanceExpanded ? <FaCaretDown size={14} /> : <FaCaretLeft size={14} />}
             </span>
           </h4>
           {isVigilanceExpanded && vigilanceList.map(vigilance => (
@@ -129,10 +133,14 @@ export default function NurseDashboard({ onViewPatientWounds, onSwitchTab, activ
               onClick={() => onViewPatientWounds(vigilance.HN)}
             >
               <div className={styles.alertContent}>
-                <span className={styles.alertWarningSymbol}>⚠️</span>
+                <span className={styles.alertWarningSymbol} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                  <AlertTriangle size={16} style={{ color: '#d97706' }} />
+                </span>
                 <span>{vigilance.name} - แผลแย่ลง</span>
               </div>
-              <span className={styles.alertArrow}>➔</span>
+              <span className={styles.alertArrow} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                <ChevronRight size={16} />
+              </span>
             </div>
           ))}
         </div>
@@ -146,9 +154,11 @@ export default function NurseDashboard({ onViewPatientWounds, onSwitchTab, activ
             onClick={() => setIsAppointmentsExpanded(!isAppointmentsExpanded)}
             style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', userSelect: 'none' }}
           >
-            <span>📅 รายชื่อผู้นัดหมายวันนี้ ({todayAppointments.length}) </span>
-            <span style={{ fontSize: '11px', transition: 'transform 0.2s', transform: isAppointmentsExpanded ? 'rotate(0deg)' : 'rotate(-90deg)', display: 'inline-block' }}>
-              ▼
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Calendar size={18} style={{ color: '#2563eb' }} /> รายชื่อผู้นัดหมายวันนี้ ({todayAppointments.length})
+            </span>
+            <span style={{ fontSize: '12px', display: 'inline-flex', alignItems: 'center' }}>
+              {isAppointmentsExpanded ? <FaCaretDown size={14} /> : <FaCaretLeft size={14} />}
             </span>
           </h4>
           {isAppointmentsExpanded && todayAppointments.map(appt => {
@@ -162,7 +172,9 @@ export default function NurseDashboard({ onViewPatientWounds, onSwitchTab, activ
                 onClick={() => onViewPatientWounds(appt.HN)}
               >
                 <div className={styles.alertContent} style={{ color: '#1e40af' }}>
-                  <span className={styles.alertWarningSymbol} style={{ color: '#2563eb' }}>⏱️</span>
+                  <span className={styles.alertWarningSymbol} style={{ color: '#2563eb', display: 'inline-flex', alignItems: 'center' }}>
+                    <Clock size={16} />
+                  </span>
                   <div>
                     <span style={{ fontWeight: 600, color: '#0f172a' }}>{ptName}</span>
                     <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
@@ -170,7 +182,9 @@ export default function NurseDashboard({ onViewPatientWounds, onSwitchTab, activ
                     </div>
                   </div>
                 </div>
-                <span className={styles.appointmentArrow}>➔</span>
+                <span className={styles.appointmentArrow} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                  <ChevronRight size={16} />
+                </span>
               </div>
             );
           })}
@@ -183,13 +197,17 @@ export default function NurseDashboard({ onViewPatientWounds, onSwitchTab, activ
         onClick={() => onSwitchTab('upload')}
       >
         <div className={styles.quickCardBody}>
-          <span className={styles.quickCardIcon}>📸</span>
+          <span className={styles.quickCardIcon} style={{ display: 'inline-flex', alignItems: 'center' }}>
+            <Scan size={22} style={{ color: '#2563eb' }} />
+          </span>
           <div>
-            <h4>วิเคราะห์ภาพแผล</h4>
-            <p>อัปโหลดภาพแผลใหม่พร้อม QR Code</p>
+            <h4>สแกนวิเคราะห์แผล</h4>
+            <p>อัปโหลดภาพถ่ายบาดแผลพร้อม QR Code</p>
           </div>
         </div>
-        <span className={styles.quickCardArrow}>➔</span>
+        <span className={styles.quickCardArrow} style={{ display: 'inline-flex', alignItems: 'center' }}>
+          <ChevronRight size={18} />
+        </span>
       </div>
 
       {/* Recent Patients List Section */}

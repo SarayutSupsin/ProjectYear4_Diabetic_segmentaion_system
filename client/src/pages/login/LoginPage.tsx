@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Eye, EyeOff } from 'lucide-react';
-// 1. นำเข้า Object สไตล์เฉพาะหน้าล็อกอิน
+import { Eye, EyeOff, LogIn } from 'lucide-react';
+// Import CSS module styles
 import styles from './LoginPage.module.css';
 
 export default function LoginPage() {
@@ -9,28 +9,45 @@ export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ username?: string; password?: string }>({});
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username || !password) {
-      setError('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
+    const errors: { username?: string; password?: string } = {};
+
+    if (!username.trim()) {
+      errors.username = 'กรุณากรอกชื่อผู้ใช้งาน';
+    }
+    if (!password) {
+      errors.password = 'กรุณากรอกรหัสผ่าน';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
+
     try {
-      setError(null);
+      setFieldErrors({});
       setLoading(true);
       await login(username, password);
     } catch (err: any) {
-      setError(err.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+      const msg = err.message || '';
+      if (msg.includes('ชื่อผู้ใช้') || msg.includes('ผู้ใช้')) {
+        setFieldErrors({ username: 'ชื่อผู้ใช้ไม่ถูกต้อง' });
+      } else if (msg.includes('รหัสผ่าน')) {
+        setFieldErrors({ password: 'รหัสผ่านไม่ถูกต้อง' });
+      } else {
+        setFieldErrors({ username: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    // 2. เรียกใช้คลาสผ่านตัวแปร styles.className
+    // Apply CSS module container style
     <div className={styles.loginContainer}>
       <div className={`${styles.loginCard} ${styles.fadeUp}`}>
         <div className={styles.loginHeader}>
@@ -48,12 +65,18 @@ export default function LoginPage() {
             <label>ชื่อผู้ใช้งาน (HN / Username)</label>
             <input
               type="text"
-              className={styles.inputField}
+              className={`${styles.inputField} ${fieldErrors.username ? styles.inputError : ''}`}
               placeholder="กรอกชื่อผู้ใช้ หรือ รหัส HN"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => {
+                setUsername(e.target.value);
+                if (fieldErrors.username) setFieldErrors((prev) => ({ ...prev, username: undefined }));
+              }}
               disabled={loading}
             />
+            {fieldErrors.username && (
+              <span className={styles.fieldErrorText}>{fieldErrors.username}</span>
+            )}
           </div>
 
           <div className={styles.formGroup}>
@@ -61,10 +84,13 @@ export default function LoginPage() {
             <div className={styles.passwordWrapper}>
               <input
                 type={showPassword ? 'text' : 'password'}
-                className={styles.inputField}
+                className={`${styles.inputField} ${fieldErrors.password ? styles.inputError : ''}`}
                 placeholder="กรอกรหัสผ่านเข้าใช้งาน"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: undefined }));
+                }}
                 disabled={loading}
               />
               <button
@@ -77,12 +103,18 @@ export default function LoginPage() {
                 {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
               </button>
             </div>
+            {fieldErrors.password && (
+              <span className={styles.fieldErrorText}>{fieldErrors.password}</span>
+            )}
           </div>
 
-          {error && <div className={styles.errorMessage}>{error}</div>}
-
-          <button type="submit" className={styles.loginBtn} disabled={loading}>
-            {loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
+          <button 
+            type="submit" 
+            className={styles.loginBtn} 
+            disabled={loading} 
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+          >
+            {loading ? 'กำลังเข้าสู่ระบบ...' : <><span>เข้าสู่ระบบ</span> <LogIn size={18} /></>}
           </button>
         </form>
       </div>

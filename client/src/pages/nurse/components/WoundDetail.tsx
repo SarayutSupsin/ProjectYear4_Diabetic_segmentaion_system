@@ -3,6 +3,8 @@ import styles from '../NursePage.module.css';
 import { api, BACKEND_URL } from '../../../services/api';
 import type { Patient, Wound, WoundRecord, Appointment } from '../../../types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Calendar, Clock, AlertTriangle, Plus, X, Save, CheckCircle, XCircle, ChevronLeft, Maximize2 } from 'lucide-react';
+import { TbBandage } from 'react-icons/tb';
 
 interface WoundDetailProps {
   HN: string;
@@ -39,6 +41,8 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
   const [newSide, setNewSide] = useState('เท้าซ้าย');
   const [creatingWound, setCreatingWound] = useState(false);
   const [showMaskRecordIds, setShowMaskRecordIds] = useState<number[]>([]);
+  const [previewRecord, setPreviewRecord] = useState<WoundRecord | null>(null);
+  const [previewTab, setPreviewTab] = useState<'combined' | 'mask'>('combined');
   const [showAllAppts, setShowAllAppts] = useState(false);
 
   const [appointmentDate, setAppointmentDate] = useState('');
@@ -362,8 +366,8 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
   return (
     <div className={styles.fadeUp}>
       {/* Return button and Patient header */}
-      <button onClick={onBackToSearch} className={styles.backBtn}>
-        ← ย้อนกลับ
+      <button onClick={onBackToSearch} className={styles.backBtn} style={{ display: 'inline-flex', alignItems: 'center' }}>
+        <ChevronLeft size={18} style={{ marginRight: '4px' }} /> ย้อนกลับ
       </button>
 
       {/* Blue Header Card containing Patient profile (Fig 4.12 Mockup) */}
@@ -416,8 +420,9 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
           <button
             onClick={() => setShowCreateWound(!showCreateWound)}
             className={styles.addWoundBtn}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
           >
-            {showCreateWound ? '✖️ ยกเลิก' : '➕ เปิดเคสแผลใหม่'}
+            {showCreateWound ? <><X size={16} /> ยกเลิก</> : <><Plus size={16} /> เปิดเคสแผลใหม่</>}
           </button>
         </div>
 
@@ -469,8 +474,9 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
               type="submit"
               disabled={creatingWound || bodyParts.length === 0}
               className={styles.submitWoundBtn}
+              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
             >
-              {creatingWound ? 'กำลังบันทึก...' : '💾 บันทึกเปิดเคสรักษา'}
+              {creatingWound ? 'กำลังบันทึก...' : <><Save size={16} /> บันทึกเปิดเคสรักษา</>}
             </button>
           </form>
         )}
@@ -516,13 +522,12 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                         ผลรวม: {overallText}
                       </span>
                     </div>
-                    <span className={`${styles.statusBadgeRow} ${
-                      w.is_active === false
+                    <span className={`${styles.statusBadgeRow} ${w.is_active === false
                         ? styles.statusGray
                         : statusOfWound === 'ดีขึ้น' ? styles.statusGreen :
                           statusOfWound === 'แย่ลง' ? styles.statusRed :
                             styles.statusGray
-                    }`}>
+                      }`}>
                       {w.is_active === false ? 'ปิดเคสแล้ว' : statusOfWound}
                     </span>
                   </div>
@@ -539,11 +544,15 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
           {/* Wound info summary */}
           <div className={styles.sectionCard}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h4 className={styles.sectionTitle} style={{ margin: 0 }}>ข้อมูลแผล</h4>
+              <h4 className={styles.sectionTitle} style={{ margin: 0 }}>
+                ข้อมูลแผล
+              </h4>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 {activeWound.is_active !== false ? (
                   <>
-                    <span className={styles.badgeActive}>🟢 กำลังรักษา</span>
+                    <span className={styles.badgeActive} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#16a34a', display: 'inline-block' }}></span> กำลังรักษา
+                    </span>
                     <button
                       type="button"
                       onClick={() => setShowCloseWoundModal(true)}
@@ -615,8 +624,8 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
             {latestAppointment ? (
               <div className={styles.currentAppointmentCard} style={{ marginBottom: upcomingAppointments.length > 1 ? '12px' : '0' }}>
                 <span className={styles.apptLabel}>วันนัด</span>
-                <h5 className={styles.apptDetails}>
-                  📅 {formatDateTH(latestAppointment.appointment_date)} · ⏱️ {latestAppointment.appointment_time.slice(0, 5)} น.
+                <h5 className={styles.apptDetails} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Calendar size={15} style={{ color: '#2563eb' }} /> {formatDateTH(latestAppointment.appointment_date)} · <Clock size={15} style={{ color: '#2563eb' }} /> {latestAppointment.appointment_time.slice(0, 5)} น.
                 </h5>
                 {latestAppointment.note && (
                   <p className={styles.apptNote}>{latestAppointment.note}</p>
@@ -695,8 +704,9 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                     type="button"
                     onClick={() => setShowDatePickerModal(true)}
                     className={styles.datePickerButtonDisplay}
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                   >
-                    📅 {appointmentDate ? formatDateTH(appointmentDate) : 'เลือกวันที่...'}
+                    <Calendar size={15} style={{ color: '#2563eb' }} /> {appointmentDate ? formatDateTH(appointmentDate) : 'เลือกวันที่...'}
                   </button>
                 </div>
                 <div className={styles.formGroupCompact}>
@@ -705,8 +715,9 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                     type="button"
                     onClick={() => setShowTimePickerModal(true)}
                     className={styles.timePickerButtonDisplay}
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                   >
-                    ⏱️ {hourInput}:{minuteInput} น.
+                    <Clock size={15} style={{ color: '#2563eb' }} /> {hourInput}:{minuteInput} น.
                   </button>
                 </div>
               </div>
@@ -730,10 +741,14 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
               </button>
 
               {bookingStatus === 'success' && (
-                <p className={styles.successMessage}>✅ บันทึกนัดหมายสำเร็จ!</p>
+                <p className={styles.successMessage} style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
+                  <CheckCircle size={16} /> บันทึกนัดหมายสำเร็จ!
+                </p>
               )}
               {bookingStatus === 'error' && (
-                <p className={styles.errorMessage}>❌ ไม่สามารถบันทึกนัดหมายได้</p>
+                <p className={styles.errorMessage} style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
+                  <XCircle size={16} /> ไม่สามารถบันทึกนัดหมายได้
+                </p>
               )}
             </form>
           </div>
@@ -766,35 +781,22 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
                     <div
                       className={styles.thumbImageWrapper}
                       onClick={() => {
-                        setShowMaskRecordIds(prev =>
-                          prev.includes(record.record_id)
-                            ? prev.filter(id => id !== record.record_id)
-                            : [...prev, record.record_id]
-                        );
+                        setPreviewRecord(record);
+                        setPreviewTab('combined');
                       }}
                       style={{ cursor: 'pointer', position: 'relative' }}
+                      title="คลิกเพื่อขยายดูภาพใหญ่"
                     >
                       <img
-                        src={imageUrl}
+                        src={`${BACKEND_URL}/${record.image_path}`}
                         alt="Wound treatment track history"
                         className={styles.thumbImg}
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = 'https://placehold.co/180x180?text=No+Wound+Image';
                         }}
                       />
-                      <span style={{
-                        position: 'absolute',
-                        bottom: '4px',
-                        right: '4px',
-                        backgroundColor: 'rgba(15, 23, 42, 0.75)',
-                        color: '#ffffff',
-                        fontSize: '8px',
-                        fontWeight: 700,
-                        padding: '2px 6px',
-                        borderRadius: '4px',
-                        pointerEvents: 'none'
-                      }}>
-                        {isMask ? 'Mask' : 'ภาพวิเคราะห์'}
+                      <span className={styles.zoomOverlayBadge}>
+                        <Maximize2 size={13} />
                       </span>
                     </div>
                     <div className={styles.thumbMetaInfo}>
@@ -1097,7 +1099,9 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
       {showCloseWoundModal && activeWound && (
         <div className={styles.modalBackdrop}>
           <div className={styles.modalCardCompact}>
-            <h4 className={styles.modalTitleError} style={{ color: '#0f172a' }}>⚠️ ยืนยันการปิดเคสแผล</h4>
+            <h4 className={styles.modalTitleError} style={{ color: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+              <AlertTriangle size={18} style={{ color: '#d97706' }} /> ยืนยันการปิดเคสแผล
+            </h4>
             <p className={styles.modalDescCompactCenter} style={{ marginBottom: '16px' }}>
               คุณต้องการปิดเคสแผลตำแหน่ง <strong>{activeWound.body_part?.body_part_name} ({activeWound.side})</strong> ใช่หรือไม่?
               <br />
@@ -1168,7 +1172,7 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
             <h4 className={styles.modalTitle} style={{ color: '#047857' }}>ยืนยันการเปิดเคสรักษาแผลอีกครั้ง</h4>
             <p className={styles.modalDescCompactCenter} style={{ marginBottom: '20px' }}>
               คุณต้องการเปลี่ยนสถานะแผลตำแหน่ง <strong>{activeWound.body_part?.body_part_name} ({activeWound.side})</strong><br />
-              กลับมาเป็น <strong>"🟢 กำลังรักษา"</strong> ใช่หรือไม่?
+              กลับมาเป็น <strong style={{ color: '#16a34a' }}>"กำลังรักษา"</strong> ใช่หรือไม่?
               <br />
               <span style={{ fontSize: '12px', color: '#64748b' }}>(เมื่อเปิดเคสอีกครั้งแล้ว แผลนี้จะกลับมาแสดงในรายการสแกนแผลตามเดิม)</span>
             </p>
@@ -1211,6 +1215,99 @@ export default function WoundDetail({ HN, onBackToSearch, onSwitchTab, activeTab
             >
               ตกลง
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Full-Screen Image Lightbox Modal Pop-Up */}
+      {previewRecord && (
+        <div
+          className={styles.modalBackdrop}
+          style={{ zIndex: 4000 }}
+          onClick={() => setPreviewRecord(null)}
+        >
+          <div
+            className={styles.lightboxModalCard}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.lightboxHeader}>
+              <div>
+                <h4>รายละเอียดภาพถ่ายแผล</h4>
+                <span style={{ fontSize: '11px', color: '#64748b' }}>
+                  วันที่บันทึก: {formatDateTH(previewRecord.record_date)}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewRecord(null)}
+                className={styles.lightboxCloseBtn}
+                title="ปิดหน้าต่าง"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Segmented Tab Switcher inside Lightbox */}
+            <div className={styles.segmentedTabsBar} style={{ padding: '3px', borderRadius: '8px', height: 'auto' }}>
+              <button
+                type="button"
+                className={`${styles.segmentTabBtn} ${previewTab === 'combined' ? styles.active : ''}`}
+                style={{ padding: '6px 12px', fontSize: '12px', borderRadius: '6px', minHeight: 'unset' }}
+                onClick={() => setPreviewTab('combined')}
+              >
+                ภาพวิเคราะห์แผล
+              </button>
+              <button
+                type="button"
+                className={`${styles.segmentTabBtn} ${previewTab === 'mask' ? styles.active : ''}`}
+                style={{ padding: '6px 12px', fontSize: '12px', borderRadius: '6px', minHeight: 'unset' }}
+                onClick={() => setPreviewTab('mask')}
+              >
+                Segmentation Mask
+              </button>
+            </div>
+
+            {/* Large Enlarged Image View */}
+            <div className={styles.lightboxImageWrapper}>
+              <img
+                src={previewTab === 'combined'
+                  ? `${BACKEND_URL}/${previewRecord.image_path}`
+                  : `${BACKEND_URL}/${previewRecord.image_path.replace('/combined/', '/mask/').replace('_combined.jpg', '_mask.png')}`
+                }
+                alt="Enlarged wound inspection preview"
+                className={styles.lightboxImg}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=No+Wound+Image';
+                }}
+              />
+            </div>
+
+            {/* Detailed Metrics Grid */}
+            <div className={styles.lightboxMetaGrid}>
+              <div className={styles.lightboxMetaBlock}>
+                <span className={styles.lightboxMetaLabel}>ขนาดพื้นที่แผลจริง</span>
+                <span className={styles.lightboxMetaValue} style={{ color: '#0d9488' }}>
+                  {previewRecord.area_cm2} cm²
+                </span>
+              </div>
+              <div className={styles.lightboxMetaBlock}>
+                <span className={styles.lightboxMetaLabel}>ขนาดในพิกเซล</span>
+                <span className={styles.lightboxMetaValue}>
+                  {previewRecord.area_pixel ? previewRecord.area_pixel.toLocaleString() : '-'} px
+                </span>
+              </div>
+            </div>
+
+            {previewRecord.note && (
+              <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '2px' }}>
+                  บันทึกการดูแลรักษา:
+                </span>
+                <p style={{ margin: 0, fontSize: '13px', color: '#1e293b' }}>
+                  {previewRecord.note}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}

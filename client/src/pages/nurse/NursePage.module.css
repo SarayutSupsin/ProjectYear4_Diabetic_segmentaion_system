@@ -72,14 +72,14 @@
 }
 
 .activeBtn {
-  color: #0d9488 !important;
-  /* Clinical Teal active color highlight */
+  color: #2563eb !important;
+  /* Medical Blue active color highlight */
 }
 
 .activeBtn .icon {
   display: inline-block;
   transform: scale(1.15);
-  filter: drop-shadow(0 2px 6px rgba(13, 148, 136, 0.4));
+  filter: drop-shadow(0 2px 6px rgba(37, 99, 235, 0.4));
   transition: var(--transition);
 }
 
@@ -921,8 +921,8 @@
 }
 
 .uploadBoxWrapper:hover {
-  border-color: #0d9488;
-  background-color: #f0fdfa;
+  border-color: #2563eb;
+  background-color: #eff6ff;
 }
 
 .hiddenFileInput {
@@ -962,7 +962,7 @@
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  color: #0d9488;
+  color: #2563eb;
 }
 
 .checkmarkIcon {
@@ -970,11 +970,11 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background-color: #f0fdfa;
+  background-color: #eff6ff;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #0d9488;
+  border: 2px solid #2563eb;
 }
 
 .fileNameText {
@@ -1146,7 +1146,7 @@
 }
 
 .textareaField:focus {
-  border-color: #0d9488;
+  border-color: #2563eb;
 }
 
 .shootInstructionsCard {
@@ -1413,7 +1413,7 @@
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #0d9488;
+  border-top: 4px solid #2563eb;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -1779,9 +1779,23 @@
 }
 
 /* Patient Search elements */
+.searchBoxWrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.searchIconInside {
+  position: absolute;
+  left: 14px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
 .searchInputFull {
   width: 100%;
-  padding: 12px 16px;
+  padding: 12px 16px 12px 40px;
   font-size: 13px;
   border: 1.5px solid #cbd5e1;
   border-radius: 12px;
@@ -2938,7 +2952,7 @@
   width: 40px;
   height: 40px;
   border: 4px solid #f1f5f9;
-  border-top-color: #0d9488;
+  border-top-color: #2563eb;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -3194,19 +3208,13 @@
 }
 
 
-/* =========================
-   ข้อมูลแผล
-   ========================= */
-
+/* --- Wound Information --- */
 .patientPage .infoMetaRow {
   min-height: 44px;
-
   display: flex;
   align-items: center;
-
   padding-bottom: 10px;
 }
-
 
 .patientPage .locationVal {
   width: auto;
@@ -3214,47 +3222,29 @@
   text-align: right;
 }
 
-
-/* =========================
-   Appointment
-   ========================= */
-
+/* --- Appointment --- */
 .patientPage .queueItem {
   padding: 16px 18px;
 }
 
-
-/* =========================
-   History - PC
-   ========================= */
-
+/* --- Patient Wound History (Desktop View) --- */
 .patientPage .woundHistoryImagesScrollRow {
   display: grid;
-
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr));
-
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
-
   overflow: visible;
 }
-
 
 .patientPage .historyThumbCard {
   width: 100%;
   min-width: 0;
 }
 
-
 .patientPage .thumbImageWrapper {
   height: 180px;
 }
 
-
-/* =========================================================
-   MOBILE
-   ========================================================= */
-
+/* --- Responsive Mobile Views (@media max-width: 768px) (Mobile View) --- */
 @media (max-width: 768px) {
 
   .patientPage {
@@ -3263,59 +3253,47 @@
     padding-bottom: 80px;
   }
 
-
-  /* Header กลับมาเป็นแบบเต็มขอบมือถือ */
+  /* Full-width header banner (Mobile View) */
   .patientPage .patientTopBanner {
     margin: -16px -16px 20px -16px;
     width: calc(100% + 32px);
-
     border-radius: 0;
-
     padding: 16px 20px;
   }
-
 
   .patientPage .sectionCard {
     padding: 20px 16px;
     border-radius: 16px;
   }
 
-
-  /* ปุ่มเลือกแผลมือถือเรียง 1 แถว */
+  /* Wound selector grid (Mobile View) */
   .patientPage .woundsGridSelector {
     grid-template-columns: 1fr;
     gap: 10px;
   }
 
-
   .patientPage .woundSelectItemCard:only-child {
     grid-column: auto;
   }
 
-
-  /* ข้อมูล + นัดหมาย กลับมาเรียงบนลงล่าง */
+  /* Patient info & appointment grid layout (Mobile View) */
   .patientInfoGrid {
     grid-template-columns: 1fr;
     gap: 0;
   }
 
-
   .patientInfoGrid>.sectionCard {
     margin-bottom: 20px;
   }
-
 
   .patientPage .locationVal {
     max-width: 70%;
   }
 
-
-  /* History มือถือกลับมาเลื่อนซ้ายขวา */
+  /* Wound history horizontal scroll (Mobile View) */
   .patientPage .woundHistoryImagesScrollRow {
     display: flex;
-
     gap: 12px;
-
     overflow-x: auto;
   }
 
@@ -3329,5 +3307,173 @@
   .patientPage .thumbImageWrapper {
     height: 110px;
   }
+}
 
+/* --- Image Lightbox Modal & Zoom Badge Styles --- */
+.zoomOverlayBadge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background-color: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(2px);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.lightboxModalCard {
+  background-color: #ffffff;
+  border-radius: 20px;
+  width: 95%;
+  max-width: 640px;
+  padding: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.lightboxHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 12px;
+}
+
+.lightboxHeader h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.lightboxCloseBtn {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.lightboxCloseBtn:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.lightboxImageWrapper {
+  width: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-height: 400px;
+}
+
+.lightboxImg {
+  max-width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.lightboxMetaGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  background-color: #f8fafc;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.lightboxMetaBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lightboxMetaLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.lightboxMetaValue {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* Mobile Media Query Overrides (Placed at end of file to take highest CSS cascade priority) */
+@media (max-width: 768px) {
+  .modalBackdrop,
+  .modalBackdropError,
+  .modalBackdropSub {
+    padding: 16px 16px 74px 16px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lightboxModalCard {
+    padding: 16px;
+    border-radius: 18px;
+    gap: 12px;
+    width: 92%;
+    max-width: 440px;
+    max-height: 80vh;
+    overflow-y: auto;
+    margin: auto;
+  }
+
+  .lightboxHeader {
+    padding-bottom: 8px;
+  }
+
+  .lightboxHeader h4 {
+    font-size: 15px;
+  }
+
+  .lightboxImageWrapper {
+    width: 100%;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    max-height: 280px !important;
+  }
+
+  .lightboxImg {
+    max-width: 100% !important;
+    max-height: 280px !important;
+    object-fit: contain !important;
+    border-radius: 10px;
+  }
+
+  .lightboxMetaGrid {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .lightboxMetaLabel {
+    font-size: 11px;
+  }
+
+  .lightboxMetaValue {
+    font-size: 13px;
+  }
 }

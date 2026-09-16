@@ -6,7 +6,8 @@ import PatientSearch from './components/PatientSearch';
 import WoundDetail from './components/WoundDetail';
 import WoundScan from './components/WoundScan';
 
-//import { Search, LayoutDashboard, Camera } from 'lucide-react';
+import { LayoutDashboard, Search, Scan } from 'lucide-react';
+import { TbNurse } from 'react-icons/tb';
 
 export default function NursePage() {
     const { user, logout } = useAuth();
@@ -32,13 +33,13 @@ export default function NursePage() {
         setSelectedHN(HN);
         setTab('detail');
     };
-
+    
     return (
         <div className={styles.nurseLayout}>
             {/* Sidebar Navigation for Desktop view */}
             <aside className={styles.nurseSidebar}>
                 <div className={styles.sidebarBrand}>
-                    <div className={styles.brandLogo}>🩺</div>
+                    <div className={styles.brandLogo} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><TbNurse size={24} color="#0d9488" /></div>
                     <h3>ระบบพยาบาล</h3>
                 </div>
                 <nav className={styles.sidebarNav}>
@@ -46,19 +47,19 @@ export default function NursePage() {
                         className={`${styles.navItem} ${tab === 'dashboard' ? styles.activeNavItem : ''}`}
                         onClick={() => setTab('dashboard')}
                     >
-                        <span>📊</span> ภาพรวมระบบ
+                        <span><LayoutDashboard size={18} /></span> ภาพรวมระบบ
                     </button>
                     <button
-                        className={`${styles.navItem} ${tab === 'search' ? styles.activeNavItem : ''}`}
-                        onClick={() => setTab('search')}
+                        className={`${styles.navItem} ${(tab === 'search' || tab === 'detail') ? styles.activeNavItem : ''}`}
+                        onClick={() => setTab(selectedHN ? 'detail' : 'search')}
                     >
-                        <span>🔍</span> ค้นหาผู้ป่วย
+                        <span><Search size={18} /></span> {selectedHN ? 'รายละเอียดผู้ป่วย' : 'ค้นหาผู้ป่วย'}
                     </button>
                     <button
                         className={`${styles.navItem} ${tab === 'upload' ? styles.activeNavItem : ''}`}
                         onClick={() => setTab('upload')}
                     >
-                        <span>📸</span> สแกนวิเคราะห์แผล
+                        <span><Scan size={18} /></span> สแกนวิเคราะห์แผล
                     </button>
                 </nav>
                 <div className={styles.sidebarFooter}>
@@ -143,7 +144,10 @@ export default function NursePage() {
                         {selectedHN ? (
                             <WoundDetail
                                 HN={selectedHN}
-                                onBackToSearch={() => setTab('search')}
+                                onBackToSearch={() => {
+                                    setSelectedHN(null);
+                                    setTab('search');
+                                }}
                                 onSwitchTab={(t) => setTab(t)}
                                 activeTab={tab}
                             />
@@ -163,22 +167,22 @@ export default function NursePage() {
                     onClick={() => setTab('dashboard')}
                     className={`${styles.navBtnMobile} ${tab === 'dashboard' ? styles.activeBtn : ''}`}
                 >
-                    <span className={styles.icon}>📊</span>
+                    <span className={styles.icon}><LayoutDashboard size={18} /></span>
                     <span>ภาพรวม</span>
                 </button>
                 <button
-                    onClick={() => setTab('search')}
-                    className={`${styles.navBtnMobile} ${tab === 'search' ? styles.activeBtn : ''}`}
+                    onClick={() => setTab(selectedHN ? 'detail' : 'search')}
+                    className={`${styles.navBtnMobile} ${(tab === 'search' || tab === 'detail') ? styles.activeBtn : ''}`}
                 >
-                    <span className={styles.icon}>🔍</span>
-                    <span>ค้นหา</span>
+                    <span className={styles.icon}><Search size={18} /></span>
+                    <span>{selectedHN ? 'รายละเอียด' : 'ค้นหา'}</span>
                 </button>
                 <button
                     onClick={() => setTab('upload')}
                     className={`${styles.navBtnMobile} ${tab === 'upload' ? styles.activeBtn : ''}`}
                 >
-                    <span className={styles.icon}>📸</span>
-                    <span>สแกนแผล</span>
+                    <span className={styles.icon}><Scan size={18} /></span>
+                    <span>สแกนวิเคราะห์แผล</span>
                 </button>
             </div>
 
