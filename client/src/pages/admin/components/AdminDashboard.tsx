@@ -1,6 +1,7 @@
-// นำเข้าสไตล์จากระดับโฟลเดอร์แม่มาใช้งานร่วมกัน
 import styles from '../AdminPage.module.css';
 import type { Patient } from '../../../types';
+import { Users, ChevronRight } from 'lucide-react';
+import { TbNurse } from 'react-icons/tb';
 
 interface NurseListItem {
   user_id: string;
@@ -38,20 +39,24 @@ export default function AdminDashboard({ patientsList, nursesList, formatDateTH,
     <div className={`${styles.tabContent} ${styles.fadeUp}`}>
       <header className={styles.pageHeader}>
         <h2>ภาพรวมระบบติดตามแผลเบาหวาน DFU</h2>
-        <p>ข้อมูลรายงานสถิติตัวแปรหลักภายในระบบ</p>
+        <p>สรุปข้อมูลภาพรวมการใช้งานและผู้ป่วยในระบบ</p>
       </header>
 
       {/* Metric Cards (Total Patients & Total Nurses) */}
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
-          <div className={styles.icon}>👥</div>
+          <div className={styles.icon} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Users size={24} style={{ color: '#2563eb' }} />
+          </div>
           <div className={styles.info}>
             <span className={styles.value}>{patientsList.length}</span>
             <span className={styles.label}>ผู้ป่วยทั้งหมด</span>
           </div>
         </div>
         <div className={styles.statCard}>
-          <div className={styles.icon}>👩‍⚕️</div>
+          <div className={styles.icon} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f0fdf4' }}>
+            <TbNurse size={26} style={{ color: '#0f766e' }} />
+          </div>
           <div className={styles.info}>
             <span className={styles.value}>{nursesList.length}</span>
             <span className={styles.label}>พยาบาลทั้งหมด</span>
@@ -69,8 +74,9 @@ export default function AdminDashboard({ patientsList, nursesList, formatDateTH,
             <span
               onClick={() => onSwitchTab('patients')}
               className={styles.viewAllLink}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}
             >
-              ดูทั้งหมด →
+              ดูทั้งหมด <ChevronRight size={14} />
             </span>
           </div>
           <div className={styles.recentList}>
@@ -105,8 +111,9 @@ export default function AdminDashboard({ patientsList, nursesList, formatDateTH,
             <span
               onClick={() => onSwitchTab('nurses')}
               className={styles.viewAllLink}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}
             >
-              ดูทั้งหมด →
+              ดูทั้งหมด <ChevronRight size={14} />
             </span>
           </div>
           <div className={styles.recentList}>
@@ -115,7 +122,7 @@ export default function AdminDashboard({ patientsList, nursesList, formatDateTH,
             ) : (
               nursesList.slice(-5).reverse().map(n => (
                 <div key={n.user_id} className={styles.recentItem}>
-                  <div className={styles.itemAvatar} style={{ backgroundColor: '#e2e8f0', color: '#475569' }}>
+                  <div className={styles.itemAvatar} style={{ backgroundColor: '#f0fdf4', color: '#0f766e' }}>
                     {(n.first_name ? n.first_name[0] : n.username[0]).toUpperCase()}
                   </div>
                   <div className={styles.itemMetaInfo}>

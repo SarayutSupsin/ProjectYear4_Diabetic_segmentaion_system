@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import styles from '../NursePage.module.css';
 import { api } from '../../../services/api';
+import { ChevronRight, Search } from 'lucide-react';
 interface PatientSearchProps {
   onViewPatientWounds: (HN: string) => void;
   activeTab: string;
@@ -86,16 +87,19 @@ export default function PatientSearch({ onViewPatientWounds, activeTab }: Patien
 
       {/* Search Input matching Fig 4.11 */}
       <div className={styles.filterBar}>
-        <input
-          type="text"
-          placeholder="ค้นหาชื่อ, HN..."
-          value={searchTerm}
-          onChange={e => {
-            setSearchTerm(e.target.value);
-            setCurrentPage(1);
-          }}
-          className={styles.searchInputFull}
-        />
+        <div className={styles.searchBoxWrapper}>
+          <Search size={18} className={styles.searchIconInside} />
+          <input
+            type="text"
+            placeholder="ค้นหาชื่อ, HN..."
+            value={searchTerm}
+            onChange={e => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            className={styles.searchInputFull}
+          />
+        </div>
       </div>
 
       {/* Patient rows matching Fig 4.11 */}
@@ -127,7 +131,9 @@ export default function PatientSearch({ onViewPatientWounds, activeTab }: Patien
                   }`}>
                   {p.status}
                 </span>
-                <span className={styles.rowArrowIcon}>➔</span>
+                <span className={styles.rowArrowIcon} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                  <ChevronRight size={18} color="#94a3b8" />
+                </span>
               </div>
             </div>
           ))

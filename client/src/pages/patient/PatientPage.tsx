@@ -4,6 +4,7 @@ import styles from '../nurse/NursePage.module.css'; // Re-use consistent layout 
 import { api, BACKEND_URL } from '../../services/api';
 import type { Patient, Wound, WoundRecord, Appointment } from '../../types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Maximize2, X } from 'lucide-react';
 
 export default function PatientPage() {
   const { user, logout } = useAuth();
@@ -18,6 +19,8 @@ export default function PatientPage() {
   // Sub-tabs navigation for patient view (Fig 4.21 - 4.23)
   const [subTab, setSubTab] = useState<'info' | 'history' | 'graph'>('info');
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [previewRecord, setPreviewRecord] = useState<WoundRecord | null>(null);
+  const [previewTab, setPreviewTab] = useState<'combined' | 'mask'>('combined');
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -280,7 +283,12 @@ export default function PatientPage() {
                 <div key={record.record_id} className={styles.historyThumbCard}>
                   <div
                     className={styles.thumbImageWrapper}
-                    style={{ position: 'relative' }}
+                    onClick={() => {
+                      setPreviewRecord(record);
+                      setPreviewTab('combined');
+                    }}
+                    style={{ cursor: 'pointer', position: 'relative' }}
+                    title="คลิกเพื่อขยายดูภาพใหญ่"
                   >
                     <img
                       src={imageUrl}
@@ -290,6 +298,9 @@ export default function PatientPage() {
                         (e.target as HTMLImageElement).src = 'https://placehold.co/180x180?text=No+Wound+Image';
                       }}
                     />
+                    <span className={styles.zoomOverlayBadge}>
+                      <Maximize2 size={13} />
+                    </span>
                   </div>
                   <div className={styles.thumbMetaInfo}>
                     <span className={styles.thumbAreaSize}>{record.area_cm2} cm²</span>
@@ -574,6 +585,100 @@ export default function PatientPage() {
           </div>
         </div>
       )}
+
+      {/* Full-Screen Image Lightbox Modal Pop-Up */}
+      {previewRecord && (
+        <div
+          className={styles.modalBackdrop}
+          style={{ zIndex: 4000 }}
+          onClick={() => setPreviewRecord(null)}
+        >
+          <div
+            className={styles.lightboxModalCard}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.lightboxHeader}>
+              <div>
+                <h4>รายละเอียดภาพถ่ายแผล</h4>
+                <span style={{ fontSize: '11px', color: '#64748b' }}>
+                  วันที่บันทึก: {formatDateTH(previewRecord.record_date)}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewRecord(null)}
+                className={styles.lightboxCloseBtn}
+                title="ปิดหน้าต่าง"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Segmented Tab Switcher inside Lightbox */}
+            <div className={styles.segmentedTabsBar} style={{ padding: '3px', borderRadius: '8px', height: 'auto' }}>
+              <button
+                type="button"
+                className={`${styles.segmentTabBtn} ${previewTab === 'combined' ? styles.active : ''}`}
+                style={{ padding: '6px 12px', fontSize: '12px', borderRadius: '6px', minHeight: 'unset' }}
+                onClick={() => setPreviewTab('combined')}
+              >
+                ภาพวิเคราะห์แผล
+              </button>
+              <button
+                type="button"
+                className={`${styles.segmentTabBtn} ${previewTab === 'mask' ? styles.active : ''}`}
+                style={{ padding: '6px 12px', fontSize: '12px', borderRadius: '6px', minHeight: 'unset' }}
+                onClick={() => setPreviewTab('mask')}
+              >
+                Segmentation Mask
+              </button>
+            </div>
+
+            {/* Large Enlarged Image View */}
+            <div className={styles.lightboxImageWrapper}>
+              <img
+                src={previewTab === 'combined'
+                  ? `${BACKEND_URL}/${previewRecord.image_path}`
+                  : `${BACKEND_URL}/${previewRecord.image_path.replace('/combined/', '/mask/').replace('_combined.jpg', '_mask.png')}`
+                }
+                alt="Enlarged wound inspection preview"
+                className={styles.lightboxImg}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=No+Wound+Image';
+                }}
+              />
+            </div>
+
+            {/* Detailed Metrics Grid */}
+            <div className={styles.lightboxMetaGrid}>
+              <div className={styles.lightboxMetaBlock}>
+                <span className={styles.lightboxMetaLabel}>ขนาดพื้นที่แผลจริง</span>
+                <span className={styles.lightboxMetaValue} style={{ color: '#0d9488' }}>
+                  {previewRecord.area_cm2} cm²
+                </span>
+              </div>
+              <div className={styles.lightboxMetaBlock}>
+                <span className={styles.lightboxMetaLabel}>ขนาดในพิกเซล</span>
+                <span className={styles.lightboxMetaValue}>
+                  {previewRecord.area_pixel ? previewRecord.area_pixel.toLocaleString() : '-'} px
+                </span>
+              </div>
+            </div>
+
+            {previewRecord.note && (
+              <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '2px' }}>
+                  บันทึกการดูแลรักษา:
+                </span>
+                <p style={{ margin: 0, fontSize: '13px', color: '#1e293b' }}>
+                  {previewRecord.note}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

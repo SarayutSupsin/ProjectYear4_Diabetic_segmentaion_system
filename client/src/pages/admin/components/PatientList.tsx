@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import styles from '../AdminPage.module.css';
 import { api } from '../../../services/api';
 import type { Patient } from '../../../types';
+import { Search, UserPlus, AlertTriangle } from 'lucide-react';
 
 interface PatientListProps {
   patientsList: Patient[];
@@ -99,19 +100,23 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
       </div>
 
       <div className={styles.filterBar}>
-        <input
-          type="text"
-          placeholder="ค้นหาด้วยชื่อ-นามสกุล หรือ รหัส HN..."
-          value={searchPatient}
-          onChange={e => {
-            setSearchPatient(e.target.value);
-            setCurrentPage(1);
-          }}
-          className={styles.searchInput}
-        />
-        <button onClick={openAddPatient} className={styles.addBtn}>
-          <span className={styles.desktopBtnText}>+ ลงทะเบียนผู้ป่วยใหม่</span>
-          <span className={styles.mobileBtnText}>+ ลงทะเบียน</span>
+        <div className={styles.searchBoxWrapperAdmin}>
+          <Search size={18} className={styles.searchIconAdmin} />
+          <input
+            type="text"
+            placeholder="ค้นหาด้วยชื่อ-นามสกุล หรือ รหัส HN..."
+            value={searchPatient}
+            onChange={e => {
+              setSearchPatient(e.target.value);
+              setCurrentPage(1);
+            }}
+            className={styles.searchInputFullAdmin}
+          />
+        </div>
+        <button onClick={openAddPatient} className={styles.addBtn} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          <UserPlus size={16} />
+          <span className={styles.desktopBtnText}>ลงทะเบียนผู้ป่วยใหม่</span>
+          <span className={styles.mobileBtnText}>ลงทะเบียน</span>
         </button>
       </div>
 
@@ -327,7 +332,9 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
       {patientToDelete && (
         <div className={styles.modalBackdrop}>
           <div className={`${styles.modalCard} ${styles.deleteCard}`}>
-            <span className={styles.warnIcon}>⚠️</span>
+            <span className={styles.warnIcon} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <AlertTriangle size={32} style={{ color: '#dc2626' }} />
+            </span>
             <h3>ลบประวัติผู้ป่วย</h3>
             <p>คุณต้องการลบข้อมูลผู้ป่วยรหัส HN: <b>{patientToDelete.HN}</b> ({patientToDelete.first_name} {patientToDelete.last_name}) ออกจากระบบใช่หรือไม่?</p>
             <p className={styles.dangerNotice}>การกระทำนี้จะลบบัญชีและประวัติแผลทั้งหมด ซึ่งไม่สามารถกู้คืนได้</p>

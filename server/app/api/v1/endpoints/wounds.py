@@ -311,7 +311,7 @@ def get_all_patients_wound_statuses(
             "HN": p.HN,
             "name": f"{p.first_name} {p.last_name}",
             "age": age,
-            "woundsCount": len(active_wounds),
+            "woundsCount": len(p.wounds),
             "status": status
         })
         

@@ -6,6 +6,8 @@ import styles from './AdminPage.module.css';
 import AdminDashboard from './components/AdminDashboard';
 import PatientList from './components/PatientList';
 import NurseList from './components/NurseList';
+import { Shield, LayoutDashboard, Users } from 'lucide-react';
+import { TbNurse } from 'react-icons/tb';
 
 interface NurseListItem {
   user_id: string;
@@ -65,18 +67,20 @@ export default function AdminPage() {
     <div className={styles.adminLayout}>
       <aside className={styles.adminSidebar}>
         <div className={styles.sidebarBrand}>
-          <div className={styles.brandLogo}>🔧</div>
+          <div className={styles.brandLogo} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Shield size={24} />
+          </div>
           <h3>Admin Panel</h3>
         </div>
         <nav className={styles.sidebarNav}>
           <button className={`${styles.navItem} ${tab === 'dashboard' ? styles.activeNavItem : ''}`} onClick={() => setTab('dashboard')}>
-            <span>📊</span> ภาพรวมระบบ
+            <span style={{ display: 'inline-flex', alignItems: 'center' }}><LayoutDashboard size={18} /></span> ภาพรวมระบบ
           </button>
           <button className={`${styles.navItem} ${tab === 'patients' ? styles.activeNavItem : ''}`} onClick={() => setTab('patients')}>
-            <span>👥</span> รายชื่อผู้ป่วย
+            <span style={{ display: 'inline-flex', alignItems: 'center' }}><Users size={18} /></span> รายชื่อผู้ป่วย
           </button>
           <button className={`${styles.navItem} ${tab === 'nurses' ? styles.activeNavItem : ''}`} onClick={() => setTab('nurses')}>
-            <span>👩‍⚕️</span> บัญชีพยาบาล
+            <span style={{ display: 'inline-flex', alignItems: 'center' }}><TbNurse size={20} /></span> บัญชีพยาบาล
           </button>
         </nav>
         <div className={styles.sidebarFooter}>
@@ -159,15 +163,15 @@ export default function AdminPage() {
 
       <div className={styles.adminBottomNav}>
         <button onClick={() => setTab('dashboard')} className={`${styles.navBtnMobile} ${tab === 'dashboard' ? styles.activeBtn : ''}`}>
-          <span className={styles.icon}>📊</span>
+          <span className={styles.icon} style={{ display: 'inline-flex', alignItems: 'center' }}><LayoutDashboard size={20} /></span>
           <span>ภาพรวม</span>
         </button>
         <button onClick={() => setTab('patients')} className={`${styles.navBtnMobile} ${tab === 'patients' ? styles.activeBtn : ''}`}>
-          <span className={styles.icon}>👥</span>
+          <span className={styles.icon} style={{ display: 'inline-flex', alignItems: 'center' }}><Users size={20} /></span>
           <span>ผู้ป่วย</span>
         </button>
         <button onClick={() => setTab('nurses')} className={`${styles.navBtnMobile} ${tab === 'nurses' ? styles.activeBtn : ''}`}>
-          <span className={styles.icon}>👩‍⚕️</span>
+          <span className={styles.icon} style={{ display: 'inline-flex', alignItems: 'center' }}><TbNurse size={22} /></span>
           <span>พยาบาล</span>
         </button>
       </div>
