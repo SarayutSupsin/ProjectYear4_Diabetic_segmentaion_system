@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List 
 
 from app.db.session import get_db
-from app.models import Patient, User, Wound, Appointment, BodyPart
+from app.models import Patient, User, Wound, Appointment, BodyPart, WoundRecord
 from sqlalchemy.orm import joinedload
 from app.schemas.patient import PatientCreate, PatientUpdate, PatientResponse
 from app.core.security import get_current_user, get_password_hash
@@ -40,15 +40,16 @@ def create_patient(
         )
 
     # 3. Generate new incremental user_id starting with 'U'
-    last_user = db.query(User).filter(User.user_id.startswith("U")).order_by(User.user_id.desc()).first()
-    if last_user:
+    all_users = db.query(User.user_id).filter(User.user_id.startswith("U")).all()
+    max_num = 0
+    for (u_id,) in all_users:
         try:
-            num = int(last_user.user_id[1:])
-            new_id = f"U{num + 1:03d}"
+            num = int(u_id[1:])
+            if num > max_num:
+                max_num = num
         except ValueError:
-            new_id = "U001"
-    else:
-        new_id = "U001"
+            pass
+    new_id = f"U{max_num + 1:03d}"
 
     # 4. Hash the password with bcrypt
     hashed_password = get_password_hash(patient_in.password)
@@ -175,16 +176,32 @@ def delete_patient(
             detail=f"ไม่พบข้อมูลผู้ป่วยรหัส HN {HN}"
         )
 
-    # 2. Delete the linked User login account
-    if patient.user_id:
-        user = db.query(User).filter(User.user_id == patient.user_id).first()
+    # 2. Cascade delete all related child records associated with this patient HN
+    # 2.1 Delete appointments
+    db.query(Appointment).filter(Appointment.HN == HN).delete(synchronize_session=False)
+
+    # 2.2 Delete wound records for all wounds belonging to this HN
+    wounds = db.query(Wound).filter(Wound.HN == HN).all()
+    for w in wounds:
+        db.query(WoundRecord).filter(WoundRecord.wound_id == w.wound_id).delete(synchronize_session=False)
+
+    # 2.3 Delete wounds
+    db.query(Wound).filter(Wound.HN == HN).delete(synchronize_session=False)
+
+    # 2.4 Save linked user_id
+    user_id = patient.user_id
+
+    # 2.5 Delete patient record
+    db.delete(patient)
+
+    # 2.6 Delete linked user login account
+    if user_id:
+        user = db.query(User).filter(User.user_id == user_id).first()
         if user:
             db.delete(user)
 
-    # 3. Delete the patient clinical record
-    db.delete(patient)
     db.commit()
-    return {"message": f"ลบข้อมูลผู้ป่วยรหัส HN {HN} และบัญชีผู้ใช้ระบบสำเร็จ"}
+    return {"message": f"ลบข้อมูลผู้ป่วยรหัส HN {HN} และประวัติข้อมูลทั้งหมดสำเร็จ"}
 
 @router.get("/{HN}/detail")
 def get_patient_full_detail(

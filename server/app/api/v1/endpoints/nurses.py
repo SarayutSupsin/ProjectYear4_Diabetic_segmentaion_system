@@ -66,15 +66,16 @@ def create_nurse(
             detail=f"ชื่อผู้ใช้งาน {nurse_in.username} ถูกใช้งานไปแล้วในระบบ"
         )
 
-    last_user = db.query(User).filter(User.user_id.startswith("U")).order_by(User.user_id.desc()).first()
-    if last_user:
+    all_users = db.query(User.user_id).filter(User.user_id.startswith("U")).all()
+    max_num = 0
+    for (u_id,) in all_users:
         try:
-            num = int(last_user.user_id[1:])
-            new_id = f"U{num + 1:03d}"
+            num = int(u_id[1:])
+            if num > max_num:
+                max_num = num
         except ValueError:
-            new_id = "U001"
-    else:
-        new_id = "U001"
+            pass
+    new_id = f"U{max_num + 1:03d}"
 
     hashed_password = get_password_hash(nurse_in.password)
 

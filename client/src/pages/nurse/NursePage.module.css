@@ -335,7 +335,7 @@
 .sectionTitle {
   font-size: 14px;
   font-weight: 700;
-  color: #475569;
+  color: #1e293b;
   margin-bottom: 16px;
 }
 
@@ -348,22 +348,28 @@
 
 .queueItem {
   display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 16px;
-  border-radius: 12px;
-  background-color: #f8fafc;
-  border-left: 4px solid #0d9488;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: var(--transition);
+}
+
+.queueItem:hover {
+  border-color: #cbd5e1;
 }
 
 .queueTime {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
-  color: #0d9488;
+  color: #2563eb;
   white-space: nowrap;
-  background-color: #f0fdfa;
+  background-color: #eff6ff;
   padding: 4px 8px;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .queuePatient {
@@ -783,6 +789,11 @@
 .chartWrapper {
   margin-top: 16px;
   padding: 10px 0;
+}
+
+.chartWrapper *:focus,
+.chartWrapper *:focus-visible {
+  outline: none !important;
 }
 
 /* Wound records Timeline style */
@@ -1930,22 +1941,25 @@
 
 .woundSelectItemCard {
   background-color: #f8fafc;
-  border: 1.5px solid #e2e8f0;
+  border: 2px solid #e2e8f0;
   border-radius: 12px;
   padding: 12px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.2s ease-in-out;
 }
 
-.woundSelectItemCard:hover,
+.woundSelectItemCard:hover {
+  border-color: #93c5fd;
+  background-color: #ffffff;
+}
+
 .woundSelectItemCard.active {
   border-color: #2563eb;
-  /* Highlight active wound in brand blue */
   background-color: #ffffff;
-  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1);
 }
 
 .woundSelectText {
@@ -2263,12 +2277,12 @@
   width: 100%;
   box-sizing: border-box;
   padding: 10px 12px;
-  font-size: 14px;
+  font-size: 13px;
   border: 1.5px solid #cbd5e1;
   border-radius: 8px;
   background-color: #ffffff;
   color: #0f172a;
-  font-weight: 700;
+  font-weight: 600;
   text-align: center;
   cursor: pointer;
   height: 42px;
@@ -2458,11 +2472,12 @@
   background-color: #ffffff;
   color: #0f172a;
   font-weight: 600;
-  text-align: left;
+  text-align: center;
   cursor: pointer;
   height: 42px;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   transition: var(--transition);
 }
@@ -3151,11 +3166,9 @@
 .patientPage .sectionCard {
   padding: 26px 28px;
   border-radius: 18px;
-
   border: 1px solid #eef2f7;
-
-  box-shadow:
-    0 4px 15px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.05);
+  margin-bottom: 24px;
 }
 
 
@@ -3264,6 +3277,7 @@
   .patientPage .sectionCard {
     padding: 20px 16px;
     border-radius: 16px;
+    margin-bottom: 20px;
   }
 
   /* Wound selector grid (Mobile View) */
@@ -3278,12 +3292,13 @@
 
   /* Patient info & appointment grid layout (Mobile View) */
   .patientInfoGrid {
-    grid-template-columns: 1fr;
-    gap: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
   }
 
-  .patientInfoGrid>.sectionCard {
-    margin-bottom: 20px;
+  .patientInfoGrid > .sectionCard {
+    margin-bottom: 0;
   }
 
   .patientPage .locationVal {
@@ -3416,9 +3431,10 @@
 }
 
 .lightboxMetaValue {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 800;
   color: #0f172a;
+  letter-spacing: -0.02em;
 }
 
 /* Mobile Media Query Overrides (Placed at end of file to take highest CSS cascade priority) */
@@ -3477,3 +3493,173 @@
     font-size: 13px;
   }
 }
+
+/* Hybrid Interactive Calendar & View Switcher Styles */
+.hybridCalendarSection {
+  margin-top: 12px;
+}
+
+.calendarHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.viewModeToggle {
+  display: flex;
+  background-color: #f1f5f9;
+  padding: 3px;
+  border-radius: 8px;
+  gap: 2px;
+}
+
+.viewModeBtn {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.viewModeBtnActive {
+  background-color: #ffffff;
+  color: #2563eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.inlineCalendarCard {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.inlineMonthNavRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.inlineMonthNavBtn {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  color: #334155;
+  transition: all 0.15s ease;
+}
+
+.inlineMonthNavBtn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.inlineMonthTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.inlineWeekdayGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.inlineWeekdayLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  padding: 4px 0;
+}
+
+.inlineDaysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.inlineDayBtn {
+  aspect-ratio: 1;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.15s ease;
+  padding: 2px;
+}
+
+.inlineDayBtn:hover {
+  background-color: #f1f5f9;
+}
+
+.inlineDayToday {
+  background-color: #eff6ff;
+  border: 1.5px solid #2563eb !important;
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.inlineDayActive {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
+.calendarDot {
+  width: 5px;
+  height: 5px;
+  background-color: #2563eb;
+  border-radius: 50%;
+  position: absolute;
+  bottom: 3px;
+}
+
+.inlineDayActive .calendarDot {
+  background-color: #ffffff;
+}
+
+.selectedDayDetailsPanel {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px;
+  animation: fadeUp 0.25s ease-out;
+}
+
+.selectedDayHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 8px;
+}
+
+.selectedDayTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}

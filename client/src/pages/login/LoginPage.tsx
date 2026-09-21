@@ -39,7 +39,7 @@ export default function LoginPage() {
       } else if (msg.includes('รหัสผ่าน')) {
         setFieldErrors({ password: 'รหัสผ่านไม่ถูกต้อง' });
       } else {
-        setFieldErrors({ username: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
+        setFieldErrors({ username: msg || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ' });
       }
     } finally {
       setLoading(false);

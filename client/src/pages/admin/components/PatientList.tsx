@@ -49,9 +49,13 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
     setShowPatientModal(true);
   };
 
+  const [submittingPatient, setSubmittingPatient] = useState(false);
+
   const handlePatientSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (submittingPatient) return;
     try {
+      setSubmittingPatient(true);
       if (selectedPatient) {
         const updateData: any = { ...patientForm };
         if (!updateData.password) delete updateData.password;
@@ -63,6 +67,8 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
       fetchData();
     } catch (err: any) {
       alert(err.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูลผู้ป่วย');
+    } finally {
+      setSubmittingPatient(false);
     }
   };
 
@@ -320,8 +326,10 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
               </div>
 
               <div className={styles.modalActions}>
-                <button type="button" onClick={() => setShowPatientModal(false)} className={styles.cancelBtn}>ยกเลิก</button>
-                <button type="submit" className={styles.saveBtn}>บันทึกข้อมูล</button>
+                <button type="button" onClick={() => setShowPatientModal(false)} className={styles.cancelBtn} disabled={submittingPatient}>ยกเลิก</button>
+                <button type="submit" className={styles.saveBtn} disabled={submittingPatient}>
+                  {submittingPatient ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
+                </button>
               </div>
             </form>
           </div>

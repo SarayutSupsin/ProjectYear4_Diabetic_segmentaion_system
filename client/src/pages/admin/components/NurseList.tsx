@@ -51,9 +51,13 @@ export default function NurseList({ nursesList, fetchData }: NurseListProps) {
     setShowNurseModal(true);
   };
 
+  const [submittingNurse, setSubmittingNurse] = useState(false);
+
   const handleNurseSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (submittingNurse) return;
     try {
+      setSubmittingNurse(true);
       if (selectedNurse) {
         const updateData: any = { ...nurseForm };
         if (!updateData.password) delete updateData.password;
@@ -65,6 +69,8 @@ export default function NurseList({ nursesList, fetchData }: NurseListProps) {
       fetchData();
     } catch (err: any) {
       alert(err.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูลพยาบาล');
+    } finally {
+      setSubmittingNurse(false);
     }
   };
 
@@ -278,8 +284,10 @@ export default function NurseList({ nursesList, fetchData }: NurseListProps) {
               </div>
 
               <div className={styles.modalActions}>
-                <button type="button" onClick={() => setShowNurseModal(false)} className={styles.cancelBtn}>ยกเลิก</button>
-                <button type="submit" className={styles.saveBtn}>บันทึกข้อมูล</button>
+                <button type="button" onClick={() => setShowNurseModal(false)} className={styles.cancelBtn} disabled={submittingNurse}>ยกเลิก</button>
+                <button type="submit" className={styles.saveBtn} disabled={submittingNurse}>
+                  {submittingNurse ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
+                </button>
               </div>
             </form>
           </div>
