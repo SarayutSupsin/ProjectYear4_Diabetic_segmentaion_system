@@ -2,13 +2,15 @@ import { useState, useEffect } from 'react';
 import styles from '../NursePage.module.css';
 import { api, BACKEND_URL } from '../../../services/api';
 import type { Patient, Wound, WoundRecord } from '../../../types';
-import { AlertTriangle, Search, Camera, ClipboardList, Plus, Info, Check } from 'lucide-react';
+import { AlertTriangle, Search, ClipboardList, Plus, Info, Check } from 'lucide-react';
 import { TbPhotoPlus } from 'react-icons/tb';
 import { FaCaretLeft, FaCaretDown } from 'react-icons/fa';
 
 interface WoundScanProps {
   preselectedHN: string | null;
-  onViewPatientWounds: (HN: string) => void;
+  preselectedWoundId?: string | null;
+  onSelectWoundId?: (id: string) => void;
+  onViewPatientWounds: (HN: string, woundId?: string) => void;
   activeTab?: string;
 }
 
@@ -17,14 +19,14 @@ interface BodyPartItem {
   body_part_name: string;
 }
 
-export default function WoundScan({ preselectedHN, onViewPatientWounds, activeTab }: WoundScanProps) {
+export default function WoundScan({ preselectedHN, preselectedWoundId, onSelectWoundId, onViewPatientWounds, activeTab }: WoundScanProps) {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [bodyParts, setBodyParts] = useState<BodyPartItem[]>([]);
   const [wounds, setWounds] = useState<Wound[]>([]);
 
   // Selection states
   const [selectedHN, setSelectedHN] = useState<string>('');
-  const [selectedWoundId, setSelectedWoundId] = useState<string>('');
+  const [selectedWoundId, setSelectedWoundId] = useState<string>(preselectedWoundId || '');
 
   // Custom styled dropdown controls (prevents native phone overlay popups)
   const [showPatientDropdown, setShowPatientDropdown] = useState(false);
@@ -62,8 +64,8 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds, activeTa
         setNewBodyPartId(bodyPartsData[0].body_part_id);
       }
 
-      // Pre-select patient if provided from detail view
-      if (preselectedHN) {
+      // Pre-select patient if provided from detail view and no patient selected yet
+      if (preselectedHN && !selectedHN) {
         setSelectedHN(preselectedHN);
       }
     } catch (err) {
@@ -79,8 +81,14 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds, activeTa
       setWounds(woundsList);
 
       const activeWounds = woundsList.filter(w => w.is_active !== false);
-      if (activeWounds.length > 0) {
+      const targetId = (HN === preselectedHN && preselectedWoundId) ? preselectedWoundId : selectedWoundId;
+      if (targetId && activeWounds.some(w => w.wound_id === targetId)) {
+        setSelectedWoundId(targetId);
+        if (onSelectWoundId && HN === preselectedHN) onSelectWoundId(targetId);
+        setIsNewWound(false);
+      } else if (activeWounds.length > 0) {
         setSelectedWoundId(activeWounds[0].wound_id);
+        if (onSelectWoundId && HN === preselectedHN) onSelectWoundId(activeWounds[0].wound_id);
         setIsNewWound(false);
       } else {
         setSelectedWoundId('');
@@ -107,16 +115,22 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds, activeTa
     if (activeTab === 'upload') {
       fetchInitialData();
     }
-  }, [preselectedHN, activeTab]);
+  }, [activeTab]);
 
   useEffect(() => {
-    if (selectedHN) {
+    if (preselectedHN) {
+      setSelectedHN(preselectedHN);
+    }
+  }, [preselectedHN]);
+
+  useEffect(() => {
+    if (selectedHN && activeTab === 'upload') {
       fetchPatientWounds(selectedHN);
-    } else {
+    } else if (!selectedHN) {
       setWounds([]);
       setSelectedWoundId('');
     }
-  }, [selectedHN]);
+  }, [selectedHN, activeTab, preselectedWoundId]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -345,6 +359,7 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds, activeTa
                         onClick={() => {
                           setIsNewWound(false);
                           setSelectedWoundId(w.wound_id);
+                          if (onSelectWoundId) onSelectWoundId(w.wound_id);
                           setShowWoundDropdown(false);
                         }}
                       >
@@ -561,7 +576,10 @@ export default function WoundScan({ preselectedHN, onViewPatientWounds, activeTa
               <button
                 onClick={() => {
                   setShowResultModal(false);
-                  onViewPatientWounds(selectedHN);
+                  if (onSelectWoundId && selectedWoundId) {
+                    onSelectWoundId(selectedWoundId);
+                  }
+                  onViewPatientWounds(selectedHN, selectedWoundId);
                 }}
                 className={styles.confirmBtn}
                 disabled={loading}

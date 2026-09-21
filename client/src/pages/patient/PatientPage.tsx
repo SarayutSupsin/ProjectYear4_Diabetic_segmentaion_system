@@ -4,7 +4,7 @@ import styles from '../nurse/NursePage.module.css'; // Re-use consistent layout 
 import { api, BACKEND_URL } from '../../services/api';
 import type { Patient, Wound, WoundRecord, Appointment } from '../../types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Maximize2, X } from 'lucide-react';
+import { Maximize2, X, Calendar, Clock, ClipboardList } from 'lucide-react';
 
 export default function PatientPage() {
   const { user, logout } = useAuth();
@@ -21,6 +21,12 @@ export default function PatientPage() {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [previewRecord, setPreviewRecord] = useState<WoundRecord | null>(null);
   const [previewTab, setPreviewTab] = useState<'combined' | 'mask'>('combined');
+
+  // Interactive Hybrid Calendar states
+  const [apptViewMode, setApptViewMode] = useState<'calendar' | 'list'>('list');
+  const [showAllAppts, setShowAllAppts] = useState(false);
+  const [currentCalendarMonth, setCurrentCalendarMonth] = useState(new Date());
+  const [selectedInlineDate, setSelectedInlineDate] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,12 +48,15 @@ export default function PatientPage() {
         throw new Error('ไม่พบข้อมูลประวัติคนไข้ของคุณในฐานข้อมูลโรงพยาบาล');
       }
 
-      setPatient(patientData);
-      setWounds(woundsData);
-      setAppointments(appointmentsList);
+      const safeWounds = woundsData || [];
+      const safeAppointments = appointmentsList || [];
 
-      if (woundsData.length > 0) {
-        setSelectedWoundId(woundsData[0].wound_id);
+      setPatient(patientData);
+      setWounds(safeWounds);
+      setAppointments(safeAppointments);
+
+      if (safeWounds.length > 0) {
+        setSelectedWoundId(safeWounds[0].wound_id);
       }
     } catch (err: any) {
       console.error(err);
@@ -83,6 +92,35 @@ export default function PatientPage() {
     const m = months[parseInt(parts[1]) - 1];
     const d = parseInt(parts[2]);
     return `${d} ${m} ${y}`;
+  };
+
+  const thaiMonths = [
+    'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+  ];
+
+  const generateCalendarDays = () => {
+    const year = currentCalendarMonth.getFullYear();
+    const month = currentCalendarMonth.getMonth();
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const totalDays = new Date(year, month + 1, 0).getDate();
+
+    const daysArr: (number | null)[] = [];
+    for (let i = 0; i < firstDayIndex; i++) {
+      daysArr.push(null);
+    }
+    for (let i = 1; i <= totalDays; i++) {
+      daysArr.push(i);
+    }
+    return daysArr;
+  };
+
+  const handlePrevMonth = () => {
+    setCurrentCalendarMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentCalendarMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
   };
 
 
@@ -181,7 +219,7 @@ export default function PatientPage() {
                     fontWeight: 600,
                     color: overallText.includes('ลดลง') ? '#16a34a' : overallText.includes('เพิ่มขึ้น') ? '#dc2626' : '#64748b'
                   }}>
-                    ผลรวม: {overallText}
+                    เทียบวันแรก: {overallText}
                   </span>
                 </div>
                 <span className={`${styles.statusBadgeRow} ${w.is_active === false ? styles.statusGray :
@@ -189,7 +227,7 @@ export default function PatientPage() {
                       woundStatus === 'แย่ลง' ? styles.statusRed :
                         styles.statusGray
                   }`}>
-                  {w.is_active === false ? 'ปิดเคสแล้ว' : woundStatus}
+                  {w.is_active === false ? 'ปิดเคสแล้ว' : `เทียบครั้งก่อน: ${woundStatus}`}
                 </span>
               </div>
             );
@@ -202,6 +240,10 @@ export default function PatientPage() {
   // Render helper for Wound Info Details Card
   const renderWoundInfo = () => {
     if (!selectedWoundId || !activeWound) return null;
+
+    const initialRec = records.length > 0 ? records[records.length - 1] : null;
+    const firstDate = initialRec ? formatDateTH(initialRec.record_date) : 'ยังไม่มีการบันทึก'
+    
     return (
       <div className={styles.sectionCard}>
         <h4 className={styles.sectionTitle}>ข้อมูลแผลของคุณ</h4>
@@ -219,8 +261,8 @@ export default function PatientPage() {
             </span>
           </div>
           <div className={styles.infoMetaRow}>
-            <span className={styles.infoMetaLabel}>วันที่ลงทะเบียนรักษา</span>
-            <span className={styles.infoMetaVal}>{patient ? formatDateTH(patient.admit_date) : '-'}</span>
+            <span className={styles.infoMetaLabel}>วันที่เริ่มบันทึกแผล</span>
+            <span className={styles.infoMetaVal}>{firstDate}</span>
           </div>
         </div>
       </div>
@@ -228,44 +270,193 @@ export default function PatientPage() {
   };
 
   // Render helper for Appointments Card
-  const renderAppointments = () => (
-    <div className={styles.sectionCard}>
-      <h4 className={styles.sectionTitle}>ตารางการนัดหมายติดตามผล</h4>
-      {myAppointments.length === 0 ? (
-        <p className={styles.emptyText}>คุณไม่มีข้อมูลการนัดหมายในช่วงนี้</p>
-      ) : (
-        <div className={styles.queueList}>
-          {myAppointments.map((appt, idx) => {
-            const isClosest = idx === 0;
-            return (
-              <div
-                key={appt.appointment_id}
-                className={styles.queueItem}
-                style={{
-                  borderLeftColor: isClosest ? '#0d9488' : '#cbd5e1',
-                  backgroundColor: isClosest ? '#f0fdfa' : '#f8fafc'
-                }}
-              >
-                <div className={styles.queueTime}>
-                  {isClosest ? '⏱️ ' : ''}เวลา: {appt.appointment_time.slice(0, 5)} น.
-                </div>
-                <div className={styles.queuePatient}>
-                  <span className={styles.boldText} style={{ display: 'block', fontSize: '13px', fontWeight: isClosest ? 600 : 500 }}>
-                    {isClosest ? '📅 ' : ''}วันที่นัด: {formatDateTH(appt.appointment_date)}
-                  </span>
-                  {appt.note && (
-                    <p className={styles.queueNote} style={{ marginTop: '4px', fontSize: '12px', color: '#475569' }}>
-                      หมายเหตุ: {appt.note}
+  const renderAppointments = () => {
+    const latestAppointment = myAppointments.length > 0 ? myAppointments[0] : null;
+
+    return (
+      <div className={styles.sectionCard}>
+        <div className={styles.calendarHeaderRow}>
+          <h4 className={styles.sectionTitle} style={{ margin: 0 }}>ตารางนัดหมาย</h4>
+          <div className={styles.viewModeToggle}>
+            <button
+              type="button"
+              className={`${styles.viewModeBtn} ${apptViewMode === 'calendar' ? styles.viewModeBtnActive : ''}`}
+              onClick={() => setApptViewMode('calendar')}
+            >
+              <Calendar size={13} /> ปฏิทิน
+            </button>
+            <button
+              type="button"
+              className={`${styles.viewModeBtn} ${apptViewMode === 'list' ? styles.viewModeBtnActive : ''}`}
+              onClick={() => setApptViewMode('list')}
+            >
+              <ClipboardList size={13} /> รายการ
+            </button>
+          </div>
+        </div>
+
+        {/* Upcoming Appointment Highlight Banner */}
+        {latestAppointment ? (
+          <div className={styles.currentAppointmentCard} style={{ marginBottom: '14px' }}>
+            <span className={styles.apptLabel}>นัดครั้งถัดไป</span>
+            <h5 className={styles.apptDetails} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Calendar size={15} style={{ color: '#2563eb' }} /> {formatDateTH(latestAppointment.appointment_date)}  <Clock size={15} style={{ color: '#2563eb' }} /> {latestAppointment.appointment_time ? latestAppointment.appointment_time.slice(0, 5) : '09:00'} น.
+            </h5>
+            {latestAppointment.note && (
+              <p className={styles.apptNote}>{latestAppointment.note}</p>
+            )}
+          </div>
+        ) : (
+          <p className={styles.emptyText} style={{ margin: '8px 0 14px 0', color: '#64748b', fontSize: '13px' }}>
+            คุณไม่มีรายการนัดหมายในช่วงนี้
+          </p>
+        )}
+
+        {/* VIEW MODE 1: Interactive Inline Calendar View */}
+        {apptViewMode === 'calendar' && (
+          <div className={styles.hybridCalendarSection}>
+            <div className={styles.inlineCalendarCard}>
+              <div className={styles.inlineMonthNavRow}>
+                <button type="button" onClick={handlePrevMonth} className={styles.inlineMonthNavBtn}>◀</button>
+                <span className={styles.inlineMonthTitle}>
+                  {thaiMonths[currentCalendarMonth.getMonth()]} {currentCalendarMonth.getFullYear() + 543}
+                </span>
+                <button type="button" onClick={handleNextMonth} className={styles.inlineMonthNavBtn}>▶</button>
+              </div>
+
+              <div className={styles.inlineWeekdayGrid}>
+                {['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'].map((day, idx) => (
+                  <div key={idx} className={styles.inlineWeekdayLabel} style={{ color: idx === 0 ? '#ef4444' : '#64748b' }}>
+                    {day}
+                  </div>
+                ))}
+              </div>
+
+              <div className={styles.inlineDaysGrid}>
+                {generateCalendarDays().map((day, index) => {
+                  if (day === null) {
+                    return <div key={`empty-${index}`} style={{ aspectRatio: '1' }} />;
+                  }
+
+                  const dateStr = `${currentCalendarMonth.getFullYear()}-${String(currentCalendarMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                  const now = new Date();
+                  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+                  const isToday = dateStr === todayStr;
+                  const isSelected = selectedInlineDate === dateStr;
+
+                  const dayAppts = (myAppointments || []).filter(a => a && a.appointment_date && a.appointment_date.startsWith(dateStr));
+                  const hasAppt = dayAppts.length > 0;
+
+                  return (
+                    <button
+                      key={`day-${day}`}
+                      type="button"
+                      onClick={() => {
+                        setSelectedInlineDate(prev => prev === dateStr ? null : dateStr);
+                      }}
+                      className={`${styles.inlineDayBtn} ${isToday ? styles.inlineDayToday : ''} ${isSelected ? styles.inlineDayActive : ''}`}
+                    >
+                      <span>{day}</span>
+                      {hasAppt && <span className={styles.calendarDot} />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Selected Day Details Panel */}
+            {selectedInlineDate && (() => {
+              const dayAppts = (myAppointments || []).filter(a => a && a.appointment_date && a.appointment_date.startsWith(selectedInlineDate));
+              return (
+                <div className={styles.selectedDayDetailsPanel}>
+                  <div className={styles.selectedDayHeader}>
+                    <span className={styles.selectedDayTitle}>
+                      คิวนัดวันที่ {formatDateTH(selectedInlineDate)}
+                    </span>
+                  </div>
+                  {dayAppts.length === 0 ? (
+                    <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>
+                      ไม่มีรายการนัดหมายในวันนี้
                     </p>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {dayAppts.map(appt => (
+                        <div key={appt.appointment_id} style={{ backgroundColor: '#ffffff', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
+                          <div style={{ fontSize: '12px', fontWeight: 700, color: '#2563eb' }}>
+                            เวลา: {appt.appointment_time ? appt.appointment_time.slice(0, 5) : '09:00'} น.
+                          </div>
+                          {appt.note && (
+                            <div style={{ fontSize: '12px', color: '#475569', marginTop: '4px' }}>
+                              หมายเหตุ: {appt.note}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
+              );
+            })()}
+          </div>
+        )}
+
+        {/* VIEW MODE 2: Collapsible List View */}
+        {apptViewMode === 'list' && (
+          <div style={{ animation: 'fadeUp 0.3s' }}>
+            {myAppointments.length > 1 && (
+              <button
+                type="button"
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  fontSize: '12px',
+                  backgroundColor: '#f1f5f9',
+                  color: '#475569',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  marginBottom: showAllAppts ? '12px' : '16px',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+                onClick={() => setShowAllAppts(!showAllAppts)}
+              >
+                {showAllAppts
+                  ? 'ซ่อนรายการนัดหมายเพิ่มเติม'
+                  : `ดูรายการนัดหมายเพิ่มเติมอีก (${myAppointments.length - 1})`
+                }
+              </button>
+            )}
+
+            {showAllAppts && myAppointments.length > 1 && (
+              <div className={styles.queueList} style={{ marginBottom: '16px', animation: 'fadeUp 0.25s' }}>
+                {myAppointments.slice(1).map((appt) => (
+                  <div key={appt.appointment_id} className={styles.queueItem}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', gap: '8px' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 600, color: '#1e293b' }}>
+                        วันที่นัด: {formatDateTH(appt.appointment_date)}
+                      </span>
+                      <div className={styles.queueTime}>
+                        เวลา: {appt.appointment_time ? appt.appointment_time.slice(0, 5) : '09:00'} น.
+                      </div>
+                    </div>
+                    {appt.note && (
+                      <div style={{ fontSize: '12px', color: '#475569', backgroundColor: '#f8fafc', padding: '6px 10px', borderRadius: '6px', border: '1px dashed #cbd5e1', marginTop: '2px' }}>
+                        หมายเหตุ: {appt.note}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   // Render helper for Wound History Cards Grid
   const renderHistory = () => {
@@ -334,9 +525,9 @@ export default function PatientPage() {
             : '0.0';
 
           const chartCoordinates = chronologicalRecords.map(r => {
-            const cleanDate = r.record_date.split('T')[0];
-            const parts = cleanDate.split('-');
-            let shortDate = r.record_date;
+            const cleanDate = r?.record_date ? r.record_date.split('T')[0] : '';
+            const parts = cleanDate ? cleanDate.split('-') : [];
+            let shortDate = r?.record_date || '-';
             if (parts.length === 3) {
               const yy = String(parseInt(parts[0]) + 543).slice(-2);
               const mm = parts[1];
@@ -346,17 +537,36 @@ export default function PatientPage() {
             return {
               id: r.record_id,
               dateStr: shortDate,
-              fullDateStr: formatDateTH(r.record_date),
+              fullDateStr: formatDateTH(r?.record_date),
               size: r.area_cm2
             };
           });
+
+          const parseSafeDate = (dStr?: string) => {
+            if (!dStr) return null;
+            const normalized = dStr.includes(' ') ? dStr.replace(' ', 'T') : dStr;
+            const d = new Date(normalized);
+            return isNaN(d.getTime()) ? null : d;
+          };
+
+          const activeWoundObj = wounds.find(w => w.wound_id === selectedWoundId);
+          const startD = parseSafeDate(initialRec?.record_date) || parseSafeDate(activeWoundObj?.created_at) || new Date();
+          let endD: Date;
+          if (activeWoundObj?.is_active === false && activeWoundObj?.closed_at) {
+            endD = parseSafeDate(activeWoundObj.closed_at) || parseSafeDate(latestRec?.record_date) || new Date();
+          } else {
+            endD = parseSafeDate(latestRec?.record_date) || new Date();
+          }
+
+          const diffMs = endD.getTime() - startD.getTime();
+          const treatmentDurationDays = (isNaN(diffMs) || diffMs < 0) ? 1 : Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
 
           return (
             <>
               <div className={styles.chartWrapper} style={{ marginBottom: '16px' }}>
                 <ResponsiveContainer width="100%" height={280}>
                   <LineChart data={chartCoordinates} margin={{ top: 15, right: 20, left: 10, bottom: 25 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#dbeafe" />
                     <XAxis
                       dataKey="id"
                       tickFormatter={(value) => {
@@ -393,77 +603,83 @@ export default function PatientPage() {
               </div>
 
               <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '16px', marginTop: '8px' }}>
-                <h5 style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b', marginBottom: '12px' }}>
-                  สรุปประเมินพัฒนาการของแผล
-                </h5>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-                  <div style={{ padding: '10px 8px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 600 }}>ขนาดแผลแรกเริ่ม</div>
-                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', marginTop: '4px' }}>
-                      {initialRec.area_cm2} cm²
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', gap: '6px' }}>
+                  <h5 style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b', margin: 0, letterSpacing: '-0.01em', whiteSpace: 'nowrap', flexShrink: 1 }}>
+                    สรุปพัฒนาการแผล
+                  </h5>
+                  <div style={{
+                    fontSize: '11px',
+                    fontWeight: 500,
+                    backgroundColor: '#f8fafc',
+                    color: '#475569',
+                    padding: '4px 8px',
+                    borderRadius: '8px',
+                    border: '1px solid #e2e8f0',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0
+                  }}>
+                    <Calendar size={13} style={{ color: '#0f172a' }} />
+                    <span>ระยะเวลารักษา:</span>
+                    <strong style={{ color: '#0f172a', fontWeight: 700 }}>{treatmentDurationDays} วัน</strong>
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+
+                  {/* บล็อกที่ 1: ขนาดแผลแรกเริ่ม */}
+                  <div style={{ padding: '12px 10px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>ขนาดแผลแรกเริ่ม</div>
+                    <div style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', marginTop: '4px', letterSpacing: '-0.02em' }}>
+                      {initialRec.area_cm2} <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>cm²</span>
                     </div>
-                    <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '2px' }}>
+                    <div style={{ fontSize: '10px', color: '#94a3b8', marginTop: '4px' }}>
                       {formatDateTH(initialRec.record_date)}
                     </div>
                   </div>
 
-                  <div style={{ padding: '10px 8px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 600 }}>ขนาดแผลล่าสุด</div>
-                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', marginTop: '4px' }}>
-                      {latestRec.area_cm2} cm²
+                  {/* บล็อกที่ 2: ขนาดแผลล่าสุด */}
+                  <div style={{ padding: '12px 10px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>ขนาดแผลล่าสุด</div>
+                    <div style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', marginTop: '4px', letterSpacing: '-0.02em' }}>
+                      {latestRec.area_cm2} <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>cm²</span>
                     </div>
-                    <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '2px' }}>
+                    <div style={{ fontSize: '10px', color: '#94a3b8', marginTop: '4px' }}>
                       {formatDateTH(latestRec.record_date)}
                     </div>
                   </div>
 
+                  {/* บล็อกที่ 3: แนวโน้มการรักษา */}
                   <div style={{
-                    padding: '10px 8px',
+                    padding: '12px 10px',
                     backgroundColor: diff < 0 ? '#f0fdf4' : diff > 0 ? '#fef2f2' : '#f8fafc',
-                    borderRadius: '8px',
+                    borderRadius: '10px',
                     border: diff < 0 ? '1px solid #bbf7d0' : diff > 0 ? '1px solid #fecaca' : '1px solid #e2e8f0'
                   }}>
                     <div style={{
-                      fontSize: '10px',
+                      fontSize: '11px',
                       color: diff < 0 ? '#16a34a' : diff > 0 ? '#dc2626' : '#64748b',
                       fontWeight: 600
                     }}>
-                      แนวโน้มการรักษา
+                      แนวโน้มการรักษา (เทียบวันแรก)
                     </div>
                     <div style={{
-                      fontSize: '14px',
-                      fontWeight: 700,
-                      color: diff < 0 ? '#15803d' : diff > 0 ? '#b91c1c' : '#475569',
-                      marginTop: '4px'
+                      fontSize: '15px',
+                      fontWeight: 800,
+                      color: diff < 0 ? '#15803d' : diff > 0 ? '#b91c1c' : '#0f172a',
+                      marginTop: '4px',
+                      letterSpacing: '-0.02em'
                     }}>
                       {diff < 0 ? `ดีขึ้น ${percentChange}%` : diff > 0 ? `แย่ลง ${percentChange}%` : 'คงที่'}
                     </div>
+                    {diff > 0 && (
+                      <div style={{ fontSize: '9px', color: '#dc2626', marginTop: '4px', fontWeight: 500, lineHeight: '1.2' }}>
+                        * ขนาดแผลขยายตัวใหญ่กว่าวันแรกที่ลงทะเบียนตรวจรักษา
+                      </div>
+                    )}
                   </div>
-                </div>
 
-                <div style={{ marginTop: '12px', padding: '12px 12px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#475569' }}>
-                      อัตราการสมานแผลสะสม
-                    </span>
-                    <span style={{ fontSize: '12px', fontWeight: 700, color: diff < 0 ? '#16a34a' : diff > 0 ? '#dc2626' : '#64748b' }}>
-                      {diff < 0 ? `หดตัวลดลง ${percentChange}%` : diff > 0 ? `ขยายตัวเพิ่มขึ้น ${percentChange}%` : 'คงที่'}
-                    </span>
-                  </div>
-                  <div style={{ width: '100%', height: '8px', backgroundColor: '#e2e8f0', borderRadius: '9999px', overflow: 'hidden' }}>
-                    <div style={{
-                      width: diff < 0 ? `${Math.min(100, parseFloat(percentChange))}%` : '0%',
-                      height: '100%',
-                      backgroundColor: '#10b981',
-                      borderRadius: '9999px',
-                      transition: 'width 0.5s ease-in-out'
-                    }} />
-                  </div>
-                  {diff > 0 && (
-                    <div style={{ fontSize: '9px', color: '#dc2626', marginTop: '4px', fontWeight: 500 }}>
-                      * ขนาดแผลขยายตัวใหญ่กว่าวันแรกที่ลงทะเบียนตรวจรักษา
-                    </div>
-                  )}
                 </div>
               </div>
             </>
@@ -523,9 +739,9 @@ export default function PatientPage() {
       {renderWoundSelector()}
 
       {/* --- TAB 1: ข้อมูลแผล & ตารางนัดหมาย --- */}
-      {subTab === 'info' && selectedWoundId && activeWound && (
+      {subTab === 'info' && (
         <div className={styles.patientInfoGrid}>
-          {renderWoundInfo()}
+          {selectedWoundId && activeWound && renderWoundInfo()}
           {renderAppointments()}
         </div>
       )}
@@ -614,33 +830,10 @@ export default function PatientPage() {
               </button>
             </div>
 
-            {/* Segmented Tab Switcher inside Lightbox */}
-            <div className={styles.segmentedTabsBar} style={{ padding: '3px', borderRadius: '8px', height: 'auto' }}>
-              <button
-                type="button"
-                className={`${styles.segmentTabBtn} ${previewTab === 'combined' ? styles.active : ''}`}
-                style={{ padding: '6px 12px', fontSize: '12px', borderRadius: '6px', minHeight: 'unset' }}
-                onClick={() => setPreviewTab('combined')}
-              >
-                ภาพวิเคราะห์แผล
-              </button>
-              <button
-                type="button"
-                className={`${styles.segmentTabBtn} ${previewTab === 'mask' ? styles.active : ''}`}
-                style={{ padding: '6px 12px', fontSize: '12px', borderRadius: '6px', minHeight: 'unset' }}
-                onClick={() => setPreviewTab('mask')}
-              >
-                Segmentation Mask
-              </button>
-            </div>
-
             {/* Large Enlarged Image View */}
             <div className={styles.lightboxImageWrapper}>
               <img
-                src={previewTab === 'combined'
-                  ? `${BACKEND_URL}/${previewRecord.image_path}`
-                  : `${BACKEND_URL}/${previewRecord.image_path.replace('/combined/', '/mask/').replace('_combined.jpg', '_mask.png')}`
-                }
+                src={`${BACKEND_URL}/${previewRecord.image_path}`}
                 alt="Enlarged wound inspection preview"
                 className={styles.lightboxImg}
                 onError={(e) => {
@@ -649,24 +842,27 @@ export default function PatientPage() {
               />
             </div>
 
-            {/* Detailed Metrics Grid */}
-            <div className={styles.lightboxMetaGrid}>
-              <div className={styles.lightboxMetaBlock}>
-                <span className={styles.lightboxMetaLabel}>ขนาดพื้นที่แผลจริง</span>
-                <span className={styles.lightboxMetaValue} style={{ color: '#0d9488' }}>
-                  {previewRecord.area_cm2} cm²
-                </span>
-              </div>
-              <div className={styles.lightboxMetaBlock}>
-                <span className={styles.lightboxMetaLabel}>ขนาดในพิกเซล</span>
-                <span className={styles.lightboxMetaValue}>
-                  {previewRecord.area_pixel ? previewRecord.area_pixel.toLocaleString() : '-'} px
-                </span>
-              </div>
+            {/* Detailed Metric Banner */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              backgroundColor: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              padding: '14px 18px',
+              borderRadius: '12px',
+              margin: '16px 0 12px 0'
+            }}>
+              <span style={{ fontSize: '13px', fontWeight: 600, color: '#64748b' }}>
+                ขนาดพื้นที่แผลจริง
+              </span>
+              <span style={{ fontSize: '18px', fontWeight: 800, color: '#0d9488', letterSpacing: '-0.02em' }}>
+                {previewRecord.area_cm2} cm²
+              </span>
             </div>
 
             {previewRecord.note && (
-              <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+              <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '8px' }}>
                 <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '2px' }}>
                   บันทึกการดูแลรักษา:
                 </span>

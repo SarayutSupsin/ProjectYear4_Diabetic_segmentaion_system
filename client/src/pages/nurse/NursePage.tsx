@@ -15,6 +15,8 @@ export default function NursePage() {
     const [tab, setTab] = useState<'dashboard' | 'search' | 'upload' | 'detail'>('dashboard');
     // State to keep track of the currently selected patient's Hospital Number (HN)
     const [selectedHN, setSelectedHN] = useState<string | null>(null);
+    // State to keep track of currently selected wound ID across tabs
+    const [selectedWoundId, setSelectedWoundId] = useState<string | null>(null);
     const [showProfileModal, setShowProfileModal] = useState(false);
 
     const formatDateTH = (dateStr?: string) => {
@@ -28,9 +30,12 @@ export default function NursePage() {
         return `${d} ${m} ${y}`;
     };
 
-    // Callback to switch tab to details view and set selected HN
-    const onViewPatientWounds = (HN: string) => {
+    // Callback to switch tab to details view and set selected HN (and optionally selected woundId)
+    const onViewPatientWounds = (HN: string, woundId?: string) => {
         setSelectedHN(HN);
+        if (woundId !== undefined) {
+            setSelectedWoundId(woundId);
+        }
         setTab('detail');
     };
     
@@ -134,6 +139,8 @@ export default function NursePage() {
                     <div style={{ display: tab === 'upload' ? 'block' : 'none' }}>
                         <WoundScan
                             preselectedHN={selectedHN}
+                            preselectedWoundId={selectedWoundId}
+                            onSelectWoundId={(id) => setSelectedWoundId(id)}
                             onViewPatientWounds={onViewPatientWounds}
                             activeTab={tab}
                         />
@@ -144,8 +151,11 @@ export default function NursePage() {
                         {selectedHN ? (
                             <WoundDetail
                                 HN={selectedHN}
+                                selectedWoundIdProp={selectedWoundId}
+                                onSelectWoundId={(id) => setSelectedWoundId(id)}
                                 onBackToSearch={() => {
                                     setSelectedHN(null);
+                                    setSelectedWoundId(null);
                                     setTab('search');
                                 }}
                                 onSwitchTab={(t) => setTab(t)}

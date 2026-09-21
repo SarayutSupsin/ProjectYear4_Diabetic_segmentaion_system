@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import styles from '../NursePage.module.css';
 import { api } from '../../../services/api';
 import type { Patient, Appointment } from '../../../types';
-import { ShieldAlert, AlertTriangle, Calendar, Clock, Scan, ChevronRight, ChevronDown } from 'lucide-react';
+import { ShieldAlert, AlertTriangle, Calendar, Clock, Scan, ChevronRight } from 'lucide-react';
 import { FaCaretLeft, FaCaretDown } from 'react-icons/fa';
 
 interface NurseDashboardProps {
