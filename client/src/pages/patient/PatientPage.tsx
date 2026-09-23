@@ -223,9 +223,9 @@ export default function PatientPage() {
                   </span>
                 </div>
                 <span className={`${styles.statusBadgeRow} ${w.is_active === false ? styles.statusGray :
-                    woundStatus === 'ดีขึ้น' ? styles.statusGreen :
-                      woundStatus === 'แย่ลง' ? styles.statusRed :
-                        styles.statusGray
+                  woundStatus === 'ดีขึ้น' ? styles.statusGreen :
+                    woundStatus === 'แย่ลง' ? styles.statusRed :
+                      styles.statusGray
                   }`}>
                   {w.is_active === false ? 'ปิดเคสแล้ว' : `เทียบครั้งก่อน: ${woundStatus}`}
                 </span>
@@ -243,7 +243,7 @@ export default function PatientPage() {
 
     const initialRec = records.length > 0 ? records[records.length - 1] : null;
     const firstDate = initialRec ? formatDateTH(initialRec.record_date) : 'ยังไม่มีการบันทึก'
-    
+
     return (
       <div className={styles.sectionCard}>
         <h4 className={styles.sectionTitle}>ข้อมูลแผลของคุณ</h4>
