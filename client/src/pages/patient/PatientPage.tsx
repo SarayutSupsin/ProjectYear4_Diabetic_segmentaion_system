@@ -5,7 +5,6 @@ import { api, BACKEND_URL } from '../../services/api';
 import type { Patient, Wound, WoundRecord, Appointment } from '../../types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Maximize2, X, Calendar, Clock, ClipboardList } from 'lucide-react';
-
 export default function PatientPage() {
   const { user, logout } = useAuth();
   const HN = user?.username || ''; // The username for patient accounts is their Hospital Number (HN)
@@ -20,7 +19,6 @@ export default function PatientPage() {
   const [subTab, setSubTab] = useState<'info' | 'history' | 'graph'>('info');
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [previewRecord, setPreviewRecord] = useState<WoundRecord | null>(null);
-  const [previewTab, setPreviewTab] = useState<'combined' | 'mask'>('combined');
 
   // Interactive Hybrid Calendar states
   const [apptViewMode, setApptViewMode] = useState<'calendar' | 'list'>('list');
@@ -476,7 +474,6 @@ export default function PatientPage() {
                     className={styles.thumbImageWrapper}
                     onClick={() => {
                       setPreviewRecord(record);
-                      setPreviewTab('combined');
                     }}
                     style={{ cursor: 'pointer', position: 'relative' }}
                     title="คลิกเพื่อขยายดูภาพใหญ่"
