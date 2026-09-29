@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import styles from '../NursePage.module.css';
 import { api } from '../../../services/api';
-import { ChevronRight, Search } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 interface PatientSearchProps {
   onViewPatientWounds: (HN: string) => void;
   activeTab: string;
@@ -87,19 +87,16 @@ export default function PatientSearch({ onViewPatientWounds, activeTab }: Patien
 
       {/* Search Input matching Fig 4.11 */}
       <div className={styles.filterBar}>
-        <div className={styles.searchBoxWrapper}>
-          <Search size={18} className={styles.searchIconInside} />
-          <input
-            type="text"
-            placeholder="ค้นหาชื่อ, HN..."
-            value={searchTerm}
-            onChange={e => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
-            className={styles.searchInputFull}
-          />
-        </div>
+        <input
+          type="text"
+          placeholder="ค้นหาชื่อ, HN..."
+          value={searchTerm}
+          onChange={e => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
+          className={styles.searchInputFull}
+        />
       </div>
 
       {/* Patient rows matching Fig 4.11 */}
@@ -126,8 +123,8 @@ export default function PatientSearch({ onViewPatientWounds, activeTab }: Patien
               {/* Right side block containing status badge and arrow icon side-by-side */}
               <div className={styles.patientRowRight}>
                 <span className={`${styles.statusBadgeRow} ${p.status === 'ดีขึ้น' ? styles.statusGreen :
-                    p.status === 'แย่ลง' ? styles.statusRed :
-                      styles.statusGray
+                  p.status === 'แย่ลง' ? styles.statusRed :
+                    styles.statusGray
                   }`}>
                   {p.status}
                 </span>
