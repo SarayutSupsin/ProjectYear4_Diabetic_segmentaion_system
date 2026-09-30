@@ -52,9 +52,7 @@ export default function LoginPage() {
       <div className={`${styles.loginCard} ${styles.fadeUp}`}>
         <div className={styles.loginHeader}>
           <div className={styles.loginLogo}>
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-            </svg>
+            <img src="/logo.svg" alt="DFU Monitor" />
           </div>
           <h2>DFU Monitor</h2>
           <p>ระบบวิเคราะห์และติดตามขนาดแผลเบาหวานที่เท้า</p>
