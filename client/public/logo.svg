@@ -2,8 +2,9 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
  "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
 <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
- width="512" height="512" viewBox="342 112 800 800"
+ width="512" height="512" viewBox="242 12 1000 1000"
  preserveAspectRatio="xMidYMid meet">
+ <rect x="-1000" y="-1000" width="4000" height="4000" fill="#04509E"/>
 <rect x="342" y="112" width="800" height="800" fill="#ffffff"/>
 <g transform="translate(0.000000,1045.000000) scale(0.100000,-0.100000)"
 fill="#04509E" stroke="none">
