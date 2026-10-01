@@ -1,20 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import styles from './NursePage.module.css';
 import NurseDashboard from './components/NurseDashboard';
 import PatientSearch from './components/PatientSearch';
 import WoundDetail from './components/WoundDetail';
 import WoundScan from './components/WoundScan';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { LayoutDashboard, Search, Scan } from 'lucide-react';
 import { TbNurse } from 'react-icons/tb';
 
 export default function NursePage() {
     const { user, logout } = useAuth();
-    // State to manage current tab selection
-    const [tab, setTab] = useState<'dashboard' | 'search' | 'upload' | 'detail'>('dashboard');
+    const navigate = useNavigate();
+    const { tab: tabParam, hn: hnParam } = useParams();
+    type NurseTab = 'dashboard' | 'search' | 'upload' | 'detail';
+    // tab มาจาก URL: /nurse/dashboard, /nurse/search, /nurse/upload, /nurse/detail/:hn
+    const tab: NurseTab = (['dashboard', 'search', 'upload', 'detail'] as const).find(t => t === tabParam) ?? 'dashboard';
     // State to keep track of the currently selected patient's Hospital Number (HN)
-    const [selectedHN, setSelectedHN] = useState<string | null>(null);
+    const [selectedHN, setSelectedHN] = useState<string | null>(hnParam ?? null);
+    useEffect(() => {
+        if (hnParam) setSelectedHN(hnParam);
+    }, [hnParam]);
+    const setTab = (t: NurseTab) => {
+        if (t === 'detail') navigate(selectedHN ? `/nurse/detail/${selectedHN}` : '/nurse/search');
+        else navigate(`/nurse/${t}`);
+    };
     // State to keep track of currently selected wound ID across tabs
     const [selectedWoundId, setSelectedWoundId] = useState<string | null>(null);
     const [showProfileModal, setShowProfileModal] = useState(false);
@@ -36,7 +47,7 @@ export default function NursePage() {
         if (woundId !== undefined) {
             setSelectedWoundId(woundId);
         }
-        setTab('detail');
+        navigate(`/nurse/detail/${HN}`);
     };
     
     return (
