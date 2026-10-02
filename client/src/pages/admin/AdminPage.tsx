@@ -8,6 +8,7 @@ import PatientList from './components/PatientList';
 import NurseList from './components/NurseList';
 import { Shield, LayoutDashboard, Users } from 'lucide-react';
 import { TbNurse } from 'react-icons/tb';
+import { useNavigate, useParams } from 'react-router-dom';
 
 interface NurseListItem {
   user_id: string;
@@ -21,7 +22,11 @@ interface NurseListItem {
 
 export default function AdminPage() {
   const { user, logout } = useAuth();
-  const [tab, setTab] = useState<'dashboard' | 'patients' | 'nurses'>('dashboard');
+  const navigate = useNavigate();
+  const { tab: tabParam } = useParams();
+  type AdminTab = 'dashboard' | 'patients' | 'nurses';
+  const tab: AdminTab = (['dashboard', 'patients', 'nurses'] as const).find(t => t === tabParam) ?? 'dashboard';
+  const setTab = (t: AdminTab) => navigate(`/admin/${t}`);
   const [showProfileModal, setShowProfileModal] = useState(false);
 
   const [patientsList, setPatientsList] = useState<Patient[]>([]);

@@ -1,20 +1,44 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import styles from './NursePage.module.css';
 import NurseDashboard from './components/NurseDashboard';
 import PatientSearch from './components/PatientSearch';
 import WoundDetail from './components/WoundDetail';
 import WoundScan from './components/WoundScan';
+import { useNavigate, useParams } from 'react-router-dom';
+import { api } from '../../services/api';
+import type { Patient } from '../../types';
 
 import { LayoutDashboard, Search, Scan } from 'lucide-react';
 import { TbNurse } from 'react-icons/tb';
 
 export default function NursePage() {
     const { user, logout } = useAuth();
-    // State to manage current tab selection
-    const [tab, setTab] = useState<'dashboard' | 'search' | 'upload' | 'detail'>('dashboard');
-    // State to keep track of the currently selected patient's Hospital Number (HN)
+    const navigate = useNavigate();
+    const { tab: tabParam, id: idParam } = useParams();
+    type NurseTab = 'dashboard' | 'search' | 'upload' | 'detail';
+    // tab มาจาก URL: /nurse/dashboard, /nurse/search, /nurse/upload, /nurse/detail/:รหัสสุ่ม
+    const tab: NurseTab = (['dashboard', 'search', 'upload', 'detail'] as const).find(t => t === tabParam) ?? 'dashboard';
+    // HN ใช้ภายในแอปเหมือนเดิม ส่วนใน URL ใช้ public_id (รหัสสุ่ม) แทน
     const [selectedHN, setSelectedHN] = useState<string | null>(null);
+    const [selectedPublicId, setSelectedPublicId] = useState<string | null>(idParam ?? null);
+
+    // เปิดจากลิงก์/รีเฟรช: แปลงรหัสสุ่มใน URL กลับเป็น HN
+    useEffect(() => {
+        if (!idParam) return;
+        if (idParam === selectedPublicId && selectedHN) return; // รู้ค่าแล้ว ไม่ต้องถามซ้ำ
+        api.get<Patient>(`/patients/public/${idParam}`)
+            .then(p => {
+                setSelectedHN(p.HN);
+                setSelectedPublicId(p.public_id);
+            })
+            .catch(() => navigate('/nurse/search', { replace: true }));
+    }, [idParam]);
+
+    const setTab = (t: NurseTab) => {
+        if (t === 'detail') navigate(selectedPublicId ? `/nurse/detail/${selectedPublicId}` : '/nurse/search');
+        else navigate(`/nurse/${t}`);
+    };
     // State to keep track of currently selected wound ID across tabs
     const [selectedWoundId, setSelectedWoundId] = useState<string | null>(null);
     const [showProfileModal, setShowProfileModal] = useState(false);
@@ -30,13 +54,19 @@ export default function NursePage() {
         return `${d} ${m} ${y}`;
     };
 
-    // Callback to switch tab to details view and set selected HN (and optionally selected woundId)
-    const onViewPatientWounds = (HN: string, woundId?: string) => {
-        setSelectedHN(HN);
-        if (woundId !== undefined) {
-            setSelectedWoundId(woundId);
+    const onViewPatientWounds = async (HN: string, woundId?: string) => {
+        try {
+            // ขอ public_id ของผู้ป่วยคนนี้ เพื่อใช้ใน URL
+            const p = await api.get<Patient>(`/patients/${HN}`);
+            setSelectedHN(HN);
+            setSelectedPublicId(p.public_id);
+            if (woundId !== undefined) {
+                setSelectedWoundId(woundId);
+            }
+            navigate(`/nurse/detail/${p.public_id}`);
+        } catch (err) {
+            console.error('Failed to open patient detail', err);
         }
-        setTab('detail');
     };
     
     return (
@@ -155,6 +185,7 @@ export default function NursePage() {
                                 onSelectWoundId={(id) => setSelectedWoundId(id)}
                                 onBackToSearch={() => {
                                     setSelectedHN(null);
+                                    setSelectedPublicId(null);
                                     setSelectedWoundId(null);
                                     setTab('search');
                                 }}
