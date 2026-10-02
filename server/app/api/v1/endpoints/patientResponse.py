@@ -242,4 +242,24 @@ def get_patient_full_detail(
         "body_parts": body_parts
     }
 
+@router.get("/public/{public_id}", response_model=PatientResponse)
+def get_patient_by_public_id(
+    public_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    # ใช้ในหน้าเว็บ: แปลงรหัสสุ่มใน URL กลับเป็นข้อมูลผู้ป่วย (เฉพาะ ADMIN / NURSE)
+    if current_user.role_id not in ["ADMIN", "NURSE"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="ขออภัย เฉพาะบุคลากรทางการแพทย์เท่านั้นที่มีสิทธิ์เข้าถึงข้อมูลนี้"
+        )
+    patient = db.query(Patient).filter(Patient.public_id == public_id).first()
+    if not patient:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="ไม่พบข้อมูลผู้ป่วย"
+        )
+    return patient
+
 
