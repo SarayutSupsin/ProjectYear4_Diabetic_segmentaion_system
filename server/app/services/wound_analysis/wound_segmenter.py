@@ -78,4 +78,7 @@ def segment_wound(img):
         "confidence": confidence
     }
 
-    
+
+
+
+     

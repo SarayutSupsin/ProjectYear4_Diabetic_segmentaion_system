@@ -190,10 +190,18 @@ $$\mathcal{L}_{\text{Total}} = \mathcal{L}_{\text{BCE}} + \mathcal{L}_{\text{Dic
 
 ## 6. การคำนวณพื้นที่แผลจริงทางกายภาพ ($\text{cm}^2$) และความมั่นใจ (Confidence Score)
 
-### 6.1 สูตรคำนวณพื้นที่แผล ($\text{cm}^2$)
-เมื่อภาพ Binary Mask ถูกปรับให้อยู่ในระนาบตรงด้วยอัตราส่วนคงที่ $S = 100\text{ px/cm}$ (หรือ 1 พิกเซล $= 0.01\text{ cm} \times 0.01\text{ cm} = 0.0001\text{ cm}^2$):
+### 6.1 แนวคิดและสมการคำนวณพื้นที่แผลจริง ($\text{cm}^2$)
+การคำนวณพื้นที่แผลทางกายภาพดำเนินการเป็น 3 ขั้นตอนหลัก อิงจากสติกเกอร์อ้างอิงขนาดมาตรฐาน $2.0 \times 2.0\text{ cm}$:
 
-$$\text{Area}_{\text{cm}^2} = \frac{\sum_{(x,y)} M_{\text{warped}}(x,y) > 0}{S^2} = \frac{N_{\text{wound\_pixels}}}{10,000} \quad [\text{cm}^2]$$
+1. **ขั้นที่ 1: กำหนดพื้นที่วัตถุอ้างอิงมาตรฐาน (Reference Area)**:
+   $$\text{Area}_{\text{QR\_ref}} = 2.0\text{ cm} \times 2.0\text{ cm} = 4.0\text{ cm}^2$$
+
+2. **ขั้นที่ 2: คำนวณอัตราส่วนสเกลต่อพิกเซล (Scale Factor)**:
+   $$\text{Scale Factor} = \frac{4.0}{N_{\text{QR\_pixels}}} \quad [\text{cm}^2/\text{px}]$$
+   *(ตัวอย่าง: หากพื้นที่ QR Code บนภาพถ่ายมีค่า $N_{\text{QR\_pixels}} = 94,249\text{ px}$ จะได้ $\text{Scale Factor} = \frac{4}{94,249} \approx 0.0000424\text{ cm}^2/\text{px}$)*
+
+3. **ขั้นที่ 3: คำนวณพื้นที่บาดแผลทางกายภาพจริง (Physical Wound Area)**:
+   $$\text{Area}_{\text{physical}} = N_{\text{wound\_pixels}} \times \text{Scale Factor} \quad [\text{cm}^2]$$
 
 ### 6.2 การคำนวณค่าความมั่นใจของโมเดล (Confidence Score)
 คำนวณจากค่าเฉลี่ยของความน่าจะเป็น (Probability) เฉพาะพิกเซลที่ถูกทำนายว่าเป็นบาดแผล ($P(x,y) > \tau$):
