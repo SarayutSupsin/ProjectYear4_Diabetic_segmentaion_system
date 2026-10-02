@@ -25,6 +25,7 @@ class PatientUpdate(BaseModel):
 
 class PatientResponse(PatientBase):
     user_id: Optional[str] = None
+    public_id: Optional[str] = None
 
     class Config:
         from_attributes = True

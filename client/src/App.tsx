@@ -60,7 +60,7 @@ export default function App() {
         <Route path="/admin/:tab" element={<RequireRole role="ADMIN"><AdminPage /></RequireRole>} />
 
         <Route path="/nurse" element={<Navigate to="/nurse/dashboard" replace />} />
-        <Route path="/nurse/:tab/:hn?" element={<RequireRole role="NURSE"><NursePage /></RequireRole>} />
+        <Route path="/nurse/:tab/:id?" element={<RequireRole role="NURSE"><NursePage /></RequireRole>} />
 
         <Route path="/patient" element={<RequireRole role="PATIENT"><PatientPage /></RequireRole>} />
 
