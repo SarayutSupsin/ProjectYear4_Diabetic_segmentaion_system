@@ -18,6 +18,7 @@ export interface Nurse {
 
 export interface Patient {
   HN: string;
+  public_id: string;
   first_name: string;
   last_name: string;
   birth_date: string;
