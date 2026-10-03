@@ -12,7 +12,8 @@ class WoundRecord(Base):
     area_pixel = Column(Integer, nullable=False)
     area_cm2 = Column(Float, nullable=False)
     record_date = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
+    confidence = Column(Float, nullable=True)
     note = Column(Text, nullable=True)
-    
+
     wound = relationship("Wound", back_populates="records")
     nurse = relationship("User", back_populates="records_added")
