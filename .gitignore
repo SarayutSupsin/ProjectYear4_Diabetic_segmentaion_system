@@ -32,7 +32,10 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-*static
+# Static files
+server/static/*
+!server/static/wounds/
+!server/static/wounds/**
 
 # Dependencies
 node_modules/
