@@ -42,7 +42,6 @@ export default function WoundDetail({ HN, selectedWoundIdProp, onSelectWoundId, 
   const [newBodyPartId, setNewBodyPartId] = useState('');
   const [newSide, setNewSide] = useState('เท้าซ้าย');
   const [creatingWound, setCreatingWound] = useState(false);
-  const [showMaskRecordIds, setShowMaskRecordIds] = useState<number[]>([]);
   const [previewRecord, setPreviewRecord] = useState<WoundRecord | null>(null);
   const [previewTab, setPreviewTab] = useState<'combined' | 'mask'>('combined');
   const [showAllAppts, setShowAllAppts] = useState(false);
@@ -542,10 +541,10 @@ export default function WoundDetail({ HN, selectedWoundIdProp, onSelectWoundId, 
                       </span>
                     </div>
                     <span className={`${styles.statusBadgeRow} ${w.is_active === false
-                        ? styles.statusGray
-                        : statusOfWound === 'ดีขึ้น' ? styles.statusGreen :
-                          statusOfWound === 'แย่ลง' ? styles.statusRed :
-                            styles.statusGray
+                      ? styles.statusGray
+                      : statusOfWound === 'ดีขึ้น' ? styles.statusGreen :
+                        statusOfWound === 'แย่ลง' ? styles.statusRed :
+                          styles.statusGray
                       }`}>
                       {w.is_active === false ? 'ปิดเคสแล้ว' : `เทียบครั้งก่อน: ${statusOfWound}`}
                     </span>
@@ -629,9 +628,9 @@ export default function WoundDetail({ HN, selectedWoundIdProp, onSelectWoundId, 
               <div className={styles.infoMetaRow}>
                 <span className={styles.infoMetaLabel}>วันที่เริ่มบันทึกแผล</span>
                 <span className={styles.infoMetaVal}>
-                  {records.length > 0 
-                   ? formatDateTH(records[records.length - 1].record_date)
-                   : 'ยังไม่มีการบันทึก'
+                  {records.length > 0
+                    ? formatDateTH(records[records.length - 1].record_date)
+                    : 'ยังไม่มีการบันทึก'
                   }
                 </span>
               </div>
@@ -900,10 +899,7 @@ export default function WoundDetail({ HN, selectedWoundIdProp, onSelectWoundId, 
           ) : (
             <div className={styles.woundHistoryImagesScrollRow}>
               {records.map(record => {
-                const isMask = showMaskRecordIds.includes(record.record_id);
-                const imageUrl = isMask
-                  ? `${BACKEND_URL}/${record.image_path.replace('/combined/', '/mask/').replace('_combined.jpg', '_mask.png')}`
-                  : `${BACKEND_URL}/${record.image_path}`;
+                const imageUrl = `${BACKEND_URL}/${record.image_path}`;
                 return (
                   <div key={record.record_id} className={styles.historyThumbCard}>
                     <div
@@ -1473,10 +1469,18 @@ export default function WoundDetail({ HN, selectedWoundIdProp, onSelectWoundId, 
                   {previewRecord.area_pixel ? previewRecord.area_pixel.toLocaleString() : '-'} px
                 </span>
               </div>
+              {previewTab === 'mask' && previewRecord.confidence !== undefined && previewRecord.confidence !== null && (
+                <div className={styles.lightboxMetaBlock}>
+                  <span className={styles.lightboxMetaLabel}>ความเชื่อมั่นโมเดล</span>
+                  <span className={styles.lightboxMetaValue} style={{ color: '#2563eb' }}>
+                    {(previewRecord.confidence * 100).toFixed(2)}%
+                  </span>
+                </div>
+              )}
             </div>
 
             {previewRecord.note && (
-              <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+              <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '12px' }}>
                 <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '2px' }}>
                   บันทึกการดูแลรักษา:
                 </span>

@@ -220,6 +220,7 @@ async def upload_wound_image_and_evaluate(
         image_path=f"static/wounds/combined/{combined_filename}",
         area_pixel=pixel_area_rectified,
         area_cm2=round(wound_area_cm2, 4),
+        confidence=round(segment_data["confidence"], 4),
         note=note      
     )
 

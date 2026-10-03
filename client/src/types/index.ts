@@ -53,6 +53,7 @@ export interface WoundRecord {
   area_cm2: number;
   record_date: string;
   note?: string;
+  confidence?: number;
 }
 
 export interface Appointment {

@@ -27,6 +27,7 @@ class WoundRecordResponse(BaseModel):
     image_path: str
     area_pixel: int
     area_cm2: float
+    confidence: Optional[float] = None
     record_date: datetime
     note: Optional[str] = None
 
