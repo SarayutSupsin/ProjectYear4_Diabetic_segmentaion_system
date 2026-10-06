@@ -1,4 +1,4 @@
-export const BACKEND_URL = '';
+export const BACKEND_URL = import.meta.env.VITE_API_URL || '';
 const BASE_URL = `${BACKEND_URL}/api/v1`;
 
 // Helper function for resolving image URLs (supports full R2/S3 URLs and local paths)

@@ -33,6 +33,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 static/
+document/
 
 # Dependencies
 node_modules/
