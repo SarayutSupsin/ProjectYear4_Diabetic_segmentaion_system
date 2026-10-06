@@ -4,6 +4,8 @@ from PIL import Image
 import cv2
 import numpy as np
 import segmentation_models_pytorch as smp
+import os
+import urllib.request
 from app.core.config import settings
 
 # System variable to cache the model in RAM, preventing redundant file loading.
@@ -12,6 +14,26 @@ _model_cache = {}
 def get_segmenation_model(model_path: str, device: str):
     if model_path in _model_cache:
         return _model_cache[model_path]
+
+    # Check if model_path is a Git LFS pointer text file or missing
+    is_lfs_pointer = False
+    if os.path.exists(model_path):
+        try:
+            with open(model_path, "rb") as f:
+                header = f.read(25)
+                if header.startswith(b"version https://git-lfs"):
+                    is_lfs_pointer = True
+        except Exception:
+            pass
+
+    if not os.path.exists(model_path) or is_lfs_pointer:
+        download_target = "/tmp/unet_efficientnet_b4_dfu.pth"
+        if not os.path.exists(download_target) or os.path.getsize(download_target) < 1000:
+            public_url = f"{settings.R2_PUBLIC_DEV_URL.rstrip('/')}/models/unet_efficientnet_b4_dfu.pth"
+            print(f"Downloading model weights from R2: {public_url} -> {download_target}")
+            os.makedirs(os.path.dirname(download_target), exist_ok=True)
+            urllib.request.urlretrieve(public_url, download_target)
+        model_path = download_target
 
     model = smp.Unet(
         encoder_name="efficientnet-b4",
