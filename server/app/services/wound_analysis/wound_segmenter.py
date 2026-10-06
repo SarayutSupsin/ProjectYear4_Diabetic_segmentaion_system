@@ -7,6 +7,7 @@ import segmentation_models_pytorch as smp
 import os
 import urllib.request
 from app.core.config import settings
+from app.services.r2_storage import get_r2_client
 
 # System variable to cache the model in RAM, preventing redundant file loading.
 _model_cache = {}
@@ -29,10 +30,20 @@ def get_segmenation_model(model_path: str, device: str):
     if not os.path.exists(model_path) or is_lfs_pointer:
         download_target = "/tmp/unet_efficientnet_b4_dfu.pth"
         if not os.path.exists(download_target) or os.path.getsize(download_target) < 1000:
-            public_url = f"{settings.R2_PUBLIC_DEV_URL.rstrip('/')}/models/unet_efficientnet_b4_dfu.pth"
-            print(f"Downloading model weights from R2: {public_url} -> {download_target}")
             os.makedirs(os.path.dirname(download_target), exist_ok=True)
-            urllib.request.urlretrieve(public_url, download_target)
+            r2_client = get_r2_client()
+            if r2_client and settings.R2_BUCKET_NAME:
+                print(f"Downloading model weights from R2 via boto3 S3 API -> {download_target}")
+                r2_client.download_file(settings.R2_BUCKET_NAME, "models/unet_efficientnet_b4_dfu.pth", download_target)
+            else:
+                public_url = f"{settings.R2_PUBLIC_DEV_URL.rstrip('/')}/models/unet_efficientnet_b4_dfu.pth"
+                print(f"Downloading model weights from R2 via urllib: {public_url} -> {download_target}")
+                req = urllib.request.Request(
+                    public_url,
+                    headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+                )
+                with urllib.request.urlopen(req) as response, open(download_target, 'wb') as out_file:
+                    out_file.write(response.read())
         model_path = download_target
 
     model = smp.Unet(
