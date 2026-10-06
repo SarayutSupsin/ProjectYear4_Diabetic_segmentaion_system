@@ -1,6 +1,16 @@
 export const BACKEND_URL = '';
 const BASE_URL = `${BACKEND_URL}/api/v1`;
 
+// Helper function for resolving image URLs (supports full R2/S3 URLs and local paths)
+export const getImageUrl = (path?: string | null): string => {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  return BACKEND_URL ? `${BACKEND_URL}/${cleanPath}` : `/${cleanPath}`;
+};
+
 // Helper function for managing authentication tokens
 export const getAuthToken = () => localStorage.getItem('token');
 export const setAuthToken = (token: string) => localStorage.setItem('token', token);

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import styles from '../nurse/NursePage.module.css'; // Re-use consistent layout styles
-import { api, BACKEND_URL } from '../../services/api';
+import { api, getImageUrl } from '../../services/api';
 import type { Patient, Wound, WoundRecord, Appointment } from '../../types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Maximize2, X, Calendar, Clock, ClipboardList } from 'lucide-react';
@@ -467,7 +467,7 @@ export default function PatientPage() {
         ) : (
           <div className={styles.woundHistoryImagesScrollRow}>
             {records.map(record => {
-              const imageUrl = `${BACKEND_URL}/${record.image_path}`;
+              const imageUrl = getImageUrl(record.image_path);
               return (
                 <div key={record.record_id} className={styles.historyThumbCard}>
                   <div
@@ -830,7 +830,7 @@ export default function PatientPage() {
             {/* Large Enlarged Image View */}
             <div className={styles.lightboxImageWrapper}>
               <img
-                src={`${BACKEND_URL}/${previewRecord.image_path}`}
+                src={getImageUrl(previewRecord.image_path)}
                 alt="Enlarged wound inspection preview"
                 className={styles.lightboxImg}
                 onError={(e) => {

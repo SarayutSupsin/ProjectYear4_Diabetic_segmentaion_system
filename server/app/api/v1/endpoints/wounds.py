@@ -13,6 +13,7 @@ from app.core.config import settings
 from app.services.wound_analysis.qr_detector import detect_qr
 from app.services.wound_analysis.image_warper import warp_image_and_mask
 from app.services.wound_analysis.wound_segmenter import segment_wound
+from app.services.r2_storage import upload_image_to_r2
 
 import cv2
 import numpy as np
@@ -179,7 +180,7 @@ async def upload_wound_image_and_evaluate(
 
     wound_area_cm2 = pixel_area_rectified * scale_factor
 
-    # Step 5: Save the processed frontal-view image files to the folder for web viewing.
+    # Step 5: Save the processed frontal-view image files directly to Cloudflare R2 Storage.
     patient_hn = wound.HN.replace("/", "-")
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename_base = f"{patient_hn}_{wound_id}_{timestamp}"
@@ -189,35 +190,24 @@ async def upload_wound_image_and_evaluate(
     combined_filename = f"{filename_base}_combined.jpg"
     warped_filename = f"{filename_base}_warped.jpg"
 
-    original_dir = os.path.join(settings.STATIC_DIR, "original")
-    mask_dir = os.path.join(settings.STATIC_DIR, "mask")
-    combined_dir = os.path.join(settings.STATIC_DIR, "combined")
-    warped_dir = os.path.join(settings.STATIC_DIR, "warped")
-
-    os.makedirs(original_dir, exist_ok=True)
-    os.makedirs(mask_dir, exist_ok=True)
-    os.makedirs(combined_dir, exist_ok=True)
-    os.makedirs(warped_dir, exist_ok=True)
-
-    # original
-    cv2.imwrite(os.path.join(original_dir, original_filename), img)
-    # mask
-    cv2.imwrite(os.path.join(mask_dir, mask_filename), segment_data["mask"])
-    # combined
+    # Prepare combined contour image
     combined_img = img.copy()
     contours, _ = cv2.findContours(segment_data["mask"], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cv2.drawContours(combined_img, contours, -1, (0, 255, 0), 2)
     qr_pts = np.array(qr_data["polygon"], dtype=np.int32).reshape((-1, 1, 2))
     cv2.polylines(combined_img, [qr_pts], isClosed=True, color=(0, 0, 255), thickness=3)
-    cv2.imwrite(os.path.join(combined_dir, combined_filename), combined_img)
-    # warped
-    cv2.imwrite(os.path.join(warped_dir, warped_filename), warped_img)
 
-    # Step6: Record wound assessment results into the database system (WoundRecord).
+    # Upload all 4 images to Cloudflare R2
+    upload_image_to_r2(img, "original", original_filename)
+    upload_image_to_r2(segment_data["mask"], "mask", mask_filename)
+    combined_url = upload_image_to_r2(combined_img, "combined", combined_filename)
+    upload_image_to_r2(warped_img, "warped", warped_filename)
+
+    # Step 6: Record wound assessment results into the database system (WoundRecord).
     record = WoundRecord(
         wound_id=wound_id,
         user_id=current_user.user_id,
-        image_path=f"static/wounds/combined/{combined_filename}",
+        image_path=combined_url,
         area_pixel=pixel_area_rectified,
         area_cm2=round(wound_area_cm2, 4),
         confidence=round(segment_data["confidence"], 4),

@@ -27,6 +27,13 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
+    # Cloudflare R2 Storage Parameters
+    R2_BUCKET_NAME: str = "dfu-wound-images-prod"
+    R2_ENDPOINT_URL: str = ""
+    R2_ACCESS_KEY_ID: str = ""
+    R2_SECRET_ACCESS_KEY: str = ""
+    R2_PUBLIC_DEV_URL: str = ""
+
     @property
     def DEVICE(self) -> str:
         import torch

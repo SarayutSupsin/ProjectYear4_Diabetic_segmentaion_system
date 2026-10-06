@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import styles from '../NursePage.module.css';
-import { api, BACKEND_URL } from '../../../services/api';
+import { api, getImageUrl } from '../../../services/api';
 import type { Patient, Wound, WoundRecord } from '../../../types';
 import { AlertTriangle, Search, ClipboardList, Plus, Info, Check } from 'lucide-react';
 import { TbPhotoPlus } from 'react-icons/tb';
@@ -542,8 +542,8 @@ export default function WoundScan({ preselectedHN, preselectedWoundId, onSelectW
             <div className={styles.resultImageContainer}>
               <img
                 src={resultTab === 'combined'
-                  ? `${BACKEND_URL}/${analysisResult.image_path}`
-                  : `${BACKEND_URL}/${analysisResult.image_path.replace('/combined/', '/mask/').replace('_combined.jpg', '_mask.png')}`
+                  ? getImageUrl(analysisResult.image_path)
+                  : getImageUrl(analysisResult.image_path.replace('/combined/', '/mask/').replace('_combined.jpg', '_mask.png'))
                 }
                 alt="Wound segmentation mask result"
                 className={styles.resultImage}

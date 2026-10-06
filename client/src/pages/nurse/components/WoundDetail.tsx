@@ -1,6 +1,6 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import styles from '../NursePage.module.css';
-import { api, BACKEND_URL } from '../../../services/api';
+import { api, getImageUrl } from '../../../services/api';
 import type { Patient, Wound, WoundRecord, Appointment } from '../../../types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Calendar, Clock, AlertTriangle, Plus, X, Save, CheckCircle, XCircle, ChevronLeft, Maximize2, ClipboardList } from 'lucide-react';
@@ -899,7 +899,7 @@ export default function WoundDetail({ HN, selectedWoundIdProp, onSelectWoundId, 
           ) : (
             <div className={styles.woundHistoryImagesScrollRow}>
               {records.map(record => {
-                const imageUrl = `${BACKEND_URL}/${record.image_path}`;
+                const imageUrl = getImageUrl(record.image_path);
                 return (
                   <div key={record.record_id} className={styles.historyThumbCard}>
                     <div
@@ -1444,8 +1444,8 @@ export default function WoundDetail({ HN, selectedWoundIdProp, onSelectWoundId, 
             <div className={styles.lightboxImageWrapper}>
               <img
                 src={previewTab === 'combined'
-                  ? `${BACKEND_URL}/${previewRecord.image_path}`
-                  : `${BACKEND_URL}/${previewRecord.image_path.replace('/combined/', '/mask/').replace('_combined.jpg', '_mask.png')}`
+                  ? getImageUrl(previewRecord.image_path)
+                  : getImageUrl(previewRecord.image_path.replace('/combined/', '/mask/').replace('_combined.jpg', '_mask.png'))
                 }
                 alt="Enlarged wound inspection preview"
                 className={styles.lightboxImg}
