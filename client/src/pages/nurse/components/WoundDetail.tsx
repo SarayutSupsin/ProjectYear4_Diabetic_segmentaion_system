@@ -1469,24 +1469,31 @@ export default function WoundDetail({ HN, selectedWoundIdProp, onSelectWoundId, 
                   {previewRecord.area_pixel ? previewRecord.area_pixel.toLocaleString() : '-'} px
                 </span>
               </div>
-              {previewTab === 'mask' && previewRecord.confidence !== undefined && previewRecord.confidence !== null && (
-                <div className={styles.lightboxMetaBlock}>
-                  <span className={styles.lightboxMetaLabel}>ความเชื่อมั่นโมเดล</span>
-                  <span className={styles.lightboxMetaValue} style={{ color: '#2563eb' }}>
-                    {(previewRecord.confidence * 100).toFixed(2)}%
-                  </span>
-                </div>
-              )}
             </div>
 
-            {previewRecord.note && (
-              <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '12px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '2px' }}>
-                  บันทึกการดูแลรักษา:
-                </span>
-                <p style={{ margin: 0, fontSize: '13px', color: '#1e293b' }}>
-                  {previewRecord.note}
-                </p>
+            {/* Info & Notes Box (Confidence Score & Care Note) */}
+            {((previewTab === 'mask' && previewRecord.confidence !== undefined && previewRecord.confidence !== null) || previewRecord.note) && (
+              <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {previewTab === 'mask' && previewRecord.confidence !== undefined && previewRecord.confidence !== null && (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: previewRecord.note ? '6px' : '0', borderBottom: previewRecord.note ? '1px solid #f1f5f9' : 'none' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>
+                      ความเชื่อมั่นโมเดล AI:
+                    </span>
+                    <span style={{ fontSize: '13px', fontWeight: 700, color: '#2563eb' }}>
+                      {(previewRecord.confidence * 100).toFixed(2)}%
+                    </span>
+                  </div>
+                )}
+                {previewRecord.note && (
+                  <div>
+                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '2px' }}>
+                      บันทึกการดูแลรักษา:
+                    </span>
+                    <p style={{ margin: 0, fontSize: '13px', color: '#1e293b' }}>
+                      {previewRecord.note}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>
