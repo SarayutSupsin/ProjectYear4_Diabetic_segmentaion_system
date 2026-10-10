@@ -1472,15 +1472,15 @@ export default function WoundDetail({ HN, selectedWoundIdProp, onSelectWoundId, 
             </div>
 
             {/* Bottom Info Grid (Care Note & Model Confidence using matching lightboxMetaGrid style) */}
-            {((previewRecord.confidence !== undefined && previewRecord.confidence !== null) || previewRecord.note) && (
+            {((previewTab === 'mask' && previewRecord.confidence !== undefined && previewRecord.confidence !== null) || previewRecord.note) && (
               <div className={styles.lightboxMetaGrid} style={{ marginTop: '12px' }}>
-                <div className={styles.lightboxMetaBlock}>
+                <div className={styles.lightboxMetaBlock} style={{ gridColumn: (previewTab === 'mask' && previewRecord.confidence !== undefined && previewRecord.confidence !== null) ? 'span 1' : 'span 2' }}>
                   <span className={styles.lightboxMetaLabel}>บันทึกการดูแลรักษา</span>
                   <span className={styles.lightboxMetaValue} style={{ fontSize: '13px', fontWeight: 500, color: '#1e293b' }}>
                     {previewRecord.note || 'ไม่มีบันทึกเพิ่มเติม'}
                   </span>
                 </div>
-                {previewRecord.confidence !== undefined && previewRecord.confidence !== null && (
+                {previewTab === 'mask' && previewRecord.confidence !== undefined && previewRecord.confidence !== null && (
                   <div className={styles.lightboxMetaBlock}>
                     <span className={styles.lightboxMetaLabel}>ความเชื่อมั่นโมเดล</span>
                     <span className={styles.lightboxMetaValue} style={{ color: '#2563eb' }}>
