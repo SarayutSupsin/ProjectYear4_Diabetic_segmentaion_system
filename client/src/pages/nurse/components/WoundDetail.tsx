@@ -1455,7 +1455,7 @@ export default function WoundDetail({ HN, selectedWoundIdProp, onSelectWoundId, 
               />
             </div>
 
-            {/* Detailed Metrics Grid */}
+            {/* Top Metrics Grid */}
             <div className={styles.lightboxMetaGrid}>
               <div className={styles.lightboxMetaBlock}>
                 <span className={styles.lightboxMetaLabel}>ขนาดพื้นที่แผลจริง</span>
@@ -1471,23 +1471,19 @@ export default function WoundDetail({ HN, selectedWoundIdProp, onSelectWoundId, 
               </div>
             </div>
 
-            {/* Info & Notes Box (Confidence Score & Care Note Side-by-Side) */}
+            {/* Bottom Info Grid (Care Note & Model Confidence using matching lightboxMetaGrid style) */}
             {((previewTab === 'mask' && previewRecord.confidence !== undefined && previewRecord.confidence !== null) || previewRecord.note) && (
-              <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                <div style={{ flex: 1 }}>
-                  <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '2px' }}>
-                    บันทึกการดูแลรักษา:
-                  </span>
-                  <p style={{ margin: 0, fontSize: '13px', color: '#1e293b' }}>
+              <div className={styles.lightboxMetaGrid} style={{ marginTop: '12px' }}>
+                <div className={styles.lightboxMetaBlock}>
+                  <span className={styles.lightboxMetaLabel}>บันทึกการดูแลรักษา</span>
+                  <span className={styles.lightboxMetaValue} style={{ fontSize: '13px', fontWeight: 500, color: '#1e293b' }}>
                     {previewRecord.note || 'ไม่มีบันทึกเพิ่มเติม'}
-                  </p>
+                  </span>
                 </div>
                 {previewTab === 'mask' && previewRecord.confidence !== undefined && previewRecord.confidence !== null && (
-                  <div style={{ textAlign: 'right', flexShrink: 0, paddingLeft: '12px', borderLeft: '1px solid #cbd5e1' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '2px' }}>
-                      ความเชื่อมั่นโมเดล
-                    </span>
-                    <span style={{ fontSize: '14px', fontWeight: 700, color: '#2563eb' }}>
+                  <div className={styles.lightboxMetaBlock}>
+                    <span className={styles.lightboxMetaLabel}>ความเชื่อมั่นโมเดล</span>
+                    <span className={styles.lightboxMetaValue} style={{ color: '#2563eb' }}>
                       {(previewRecord.confidence * 100).toFixed(2)}%
                     </span>
                   </div>
