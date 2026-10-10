@@ -551,17 +551,21 @@ export default function WoundScan({ preselectedHN, preselectedWoundId, onSelectW
             </div>
 
             <div className={styles.resultMetricsRow}>
-              <div className={styles.resultMetricBlock}>
-                <span className={styles.resultMetricVal}>{analysisResult.area_cm2} cm²</span>
+              <div className={styles.resultMetricBlock} style={{ padding: '10px 6px' }}>
+                <span className={styles.resultMetricVal} style={{ whiteSpace: 'nowrap', fontSize: resultTab === 'mask' ? '15px' : '18px' }}>
+                  {analysisResult.area_cm2} cm²
+                </span>
                 <span className={styles.resultMetricLabel}>พื้นที่แผลจริง</span>
               </div>
-              <div className={styles.resultMetricBlock}>
-                <span className={styles.resultMetricVal}>{analysisResult.area_pixel.toLocaleString()} px</span>
+              <div className={styles.resultMetricBlock} style={{ padding: '10px 6px' }}>
+                <span className={styles.resultMetricVal} style={{ whiteSpace: 'nowrap', fontSize: resultTab === 'mask' ? '15px' : '18px' }}>
+                  {analysisResult.area_pixel.toLocaleString()} px
+                </span>
                 <span className={styles.resultMetricLabel}>พื้นที่แผล</span>
               </div>
               {resultTab === 'mask' && analysisResult.confidence !== undefined && analysisResult.confidence !== null && (
-                <div className={styles.resultMetricBlock}>
-                  <span className={styles.resultMetricVal} style={{ color: '#0284c7' }}>
+                <div className={styles.resultMetricBlock} style={{ padding: '10px 6px' }}>
+                  <span className={styles.resultMetricVal} style={{ color: '#0284c7', whiteSpace: 'nowrap', fontSize: '15px' }}>
                     {(analysisResult.confidence * 100).toFixed(2)}%
                   </span>
                   <span className={styles.resultMetricLabel}>ความเชื่อมั่น AI</span>
