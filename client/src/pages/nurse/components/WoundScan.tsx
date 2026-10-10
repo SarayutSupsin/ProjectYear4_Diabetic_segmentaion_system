@@ -539,7 +539,7 @@ export default function WoundScan({ preselectedHN, preselectedWoundId, onSelectW
               </button>
             </div>
 
-            <div className={styles.resultImageContainer}>
+            <div className={styles.resultImageContainer} style={{ height: '240px', minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <img
                 src={resultTab === 'combined'
                   ? getImageUrl(analysisResult.image_path)
