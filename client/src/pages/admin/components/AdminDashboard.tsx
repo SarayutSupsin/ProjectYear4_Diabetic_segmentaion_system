@@ -83,7 +83,7 @@ export default function AdminDashboard({ patientsList, nursesList, formatDateTH,
             {patientsList.length === 0 ? (
               <p className={styles.emptyText}>ยังไม่มีข้อมูลผู้ป่วยในระบบ</p>
             ) : (
-              patientsList.slice(-5).reverse().map(p => {
+              patientsList.slice(0, 5).map(p => {
                 const age = calculateAge(p.birth_date);
                 return (
                   <div key={p.HN} className={styles.recentItem}>
@@ -120,7 +120,7 @@ export default function AdminDashboard({ patientsList, nursesList, formatDateTH,
             {nursesList.length === 0 ? (
               <p className={styles.emptyText}>ยังไม่มีรายชื่อบัญชีพยาบาลในระบบ</p>
             ) : (
-              nursesList.slice(-5).reverse().map(n => (
+              nursesList.slice(0, 5).map(n => (
                 <div key={n.user_id} className={styles.recentItem}>
                   <div className={styles.itemAvatar} style={{ backgroundColor: '#f0fdf4', color: '#0f766e' }}>
                     {(n.first_name ? n.first_name[0] : n.username[0]).toUpperCase()}
