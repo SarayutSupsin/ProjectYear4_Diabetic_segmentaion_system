@@ -92,7 +92,12 @@ def get_patients(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="ขออภัย เฉพาะบุคลากรทางการแพทย์เท่านั้นที่มีสิทธิ์ดูรายชื่อผู้ป่วยทั้งหมด"
         )
-    patients = db.query(Patient).all()
+    patients = (
+        db.query(Patient)
+        .join(User, Patient.user_id == User.user_id)
+        .order_by(User.created_at.desc())
+        .all()
+    )
     return patients
 
 @router.get("/{HN}", response_model=PatientResponse)

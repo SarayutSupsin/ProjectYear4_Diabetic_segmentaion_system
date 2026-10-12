@@ -27,7 +27,12 @@ def list_nurses(
             detail="ขออภัย เฉพาะผู้ดูแลระบบ (Admin) เท่านั้นที่มีสิทธิ์ดูรายชื่อพยาบาล"
         )
 
-    users_query = db.query(User).filter(User.role_id == "NURSE").all()
+    users_query = (
+        db.query(User)
+        .filter(User.role_id == "NURSE")
+        .order_by(User.created_at.desc())
+        .all()
+    )
     nurses_list = []
     
     for u in users_query:

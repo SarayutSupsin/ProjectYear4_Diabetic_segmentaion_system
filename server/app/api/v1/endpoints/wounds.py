@@ -260,11 +260,12 @@ def get_all_patients_wound_statuses(
         
     patients = (
         db.query(Patient)
+        .join(User, Patient.user_id == User.user_id)
         .options(
             joinedload(Patient.wounds)
             .joinedload(Wound.records)
         )
-        .order_by(Patient.admit_date.desc())
+        .order_by(User.created_at.desc())
         .all()
     )
     results = []
