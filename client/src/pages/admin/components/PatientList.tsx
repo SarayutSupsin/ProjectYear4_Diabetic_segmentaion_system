@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import styles from '../AdminPage.module.css';
 import { api } from '../../../services/api';
 import type { Patient } from '../../../types';
-import { Search, UserPlus, AlertTriangle } from 'lucide-react';
+import { Search, UserPlus, AlertTriangle, AlertCircle } from 'lucide-react';
 
 interface PatientListProps {
   patientsList: Patient[];
@@ -14,6 +14,7 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
   const [searchPatient, setSearchPatient] = useState('');
   const [showPatientModal, setShowPatientModal] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [modalError, setModalError] = useState<string | null>(null);
 
   const [patientForm, setPatientForm] = useState({
     HN: '',
@@ -30,12 +31,14 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
 
   const openAddPatient = () => {
     setSelectedPatient(null);
+    setModalError(null);
     setPatientForm({ HN: '', first_name: '', last_name: '', birth_date: '', gender: 'Male', phone: '', admit_date: '', password: '' });
     setShowPatientModal(true);
   };
 
   const openEditPatient = (p: Patient) => {
     setSelectedPatient(p);
+    setModalError(null);
     setPatientForm({
       HN: p.HN,
       first_name: p.first_name,
@@ -54,6 +57,18 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
   const handlePatientSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (submittingPatient) return;
+    setModalError(null);
+
+    // Validate password length
+    if (!selectedPatient && patientForm.password.length < 5) {
+      setModalError('รหัสผ่านต้องมีความยาวอย่างน้อย 5 ตัวอักษร');
+      return;
+    }
+    if (selectedPatient && patientForm.password && patientForm.password.length < 5) {
+      setModalError('รหัสผ่านใหม่ต้องมีความยาวอย่างน้อย 5 ตัวอักษร');
+      return;
+    }
+
     try {
       setSubmittingPatient(true);
       if (selectedPatient) {
@@ -66,7 +81,7 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
       setShowPatientModal(false);
       fetchData();
     } catch (err: any) {
-      alert(err.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูลผู้ป่วย');
+      setModalError(err.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูลผู้ป่วย');
     } finally {
       setSubmittingPatient(false);
     }
@@ -231,6 +246,14 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
         <div className={styles.modalBackdrop}>
           <div className={styles.modalCard} style={{ animation: 'fadeUp 0.4s' }}>
             <h3>{selectedPatient ? 'แก้ไขข้อมูลผู้ป่วย' : 'ลงทะเบียนผู้ป่วยใหม่'}</h3>
+
+            {modalError && (
+              <div className={styles.modalErrorBanner}>
+                <AlertCircle size={18} />
+                <span>{modalError}</span>
+              </div>
+            )}
+
             <form onSubmit={handlePatientSubmit} className={styles.modalForm}>
               <div className={styles.formRow2}>
                 <div className={styles.formGroup}>
@@ -255,6 +278,11 @@ export default function PatientList({ patientsList, fetchData, formatDateTH }: P
                     className={styles.inputField}
                     placeholder={selectedPatient ? 'เว้นว่างหากไม่เปลี่ยน' : 'รหัสผ่านขั้นต่ำ 5 ตัว'}
                   />
+                  {patientForm.password.length > 0 && patientForm.password.length < 5 && (
+                    <span style={{ color: '#ef4444', fontSize: '11px', marginTop: '4px', display: 'block' }}>
+                      * รหัสผ่านต้องมีความยาวอย่างน้อย 5 ตัวอักษร
+                    </span>
+                  )}
                 </div>
               </div>
 

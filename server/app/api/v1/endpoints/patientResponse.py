@@ -29,7 +29,7 @@ def create_patient(
     if existing_patient:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"หมายเลข HN {patient_in.HN} มีอยู่ในระบบแล้ว"
+            detail=f"หมายเลข {patient_in.HN} มีอยู่ในระบบแล้ว"
         )
 
     existing_user = db.query(User).filter(User.username == patient_in.HN).first()

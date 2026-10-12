@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.db.session import get_db
-from app.models import User, Nurse
+from app.models import User, Nurse, WoundRecord
 from app.schemas.nurse import (
     NurseCreate, 
     NurseUserResponse, 
@@ -182,6 +182,14 @@ def delete_nurse(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"ไม่พบบัญชีพยาบาลรหัส {user_id}"
+        )
+
+    # Check if nurse has existing wound records
+    has_records = db.query(WoundRecord).filter(WoundRecord.user_id == user_id).first()
+    if has_records:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="ไม่สามารถลบบัญชีพยาบาลนี้ได้ เนื่องจากมีประวัติการบันทึกข้อมูลบาดแผลในระบบ"
         )
 
     nurse_profile = db.query(Nurse).filter(Nurse.user_id == user_id).first()

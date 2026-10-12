@@ -36,10 +36,30 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     headers,
   });
 
-  // 3. Handle errors when the backend returns an error status.
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.detail || 'เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์');
+    let errorMessage = 'เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์';
+
+    if (typeof errorData.detail === 'string') {
+      errorMessage = errorData.detail;
+    } else if (Array.isArray(errorData.detail) && errorData.detail.length > 0) {
+      errorMessage = errorData.detail
+        .map((err: any) => {
+          if (err.msg && err.loc) {
+            const field = err.loc[err.loc.length - 1];
+            if (field === 'password') return 'รหัสผ่านต้องมีความยาวอย่างน้อย 5 ตัวอักษร';
+            if (field === 'birth_date') return 'รูปแบบวันเกิดไม่ถูกต้อง';
+            if (field === 'admit_date') return 'รูปแบบวันที่เข้ารักษาไม่ถูกต้อง';
+            return `${field}: ${err.msg}`;
+          }
+          return err.msg || JSON.stringify(err);
+        })
+        .join(', ');
+    } else if (errorData.message) {
+      errorMessage = errorData.message;
+    }
+
+    throw new Error(errorMessage);
   }
 
   return response.json() as Promise<T>;

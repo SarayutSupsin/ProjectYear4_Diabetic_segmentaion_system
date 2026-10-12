@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'; // ใช้ type คลุม FormEvent อย่างถูกต้อง
 import styles from '../AdminPage.module.css';
 import { api } from '../../../services/api';
-import { Search, UserPlus, AlertTriangle } from 'lucide-react';
+import { Search, UserPlus, AlertTriangle, AlertCircle } from 'lucide-react';
 
 interface NurseListItem {
   user_id: string;
@@ -32,15 +32,20 @@ export default function NurseList({ nursesList, fetchData }: NurseListProps) {
   });
 
   const [nurseToDelete, setNurseToDelete] = useState<NurseListItem | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deletingNurse, setDeletingNurse] = useState(false);
+  const [modalError, setModalError] = useState<string | null>(null);
 
   const openAddNurse = () => {
     setSelectedNurse(null);
+    setModalError(null);
     setNurseForm({ username: '', first_name: '', last_name: '', department: 'ห้องทำแผล', password: '' });
     setShowNurseModal(true);
   };
 
   const openEditNurse = (n: NurseListItem) => {
     setSelectedNurse(n);
+    setModalError(null);
     setNurseForm({
       username: n.username,
       first_name: n.first_name || '',
@@ -56,6 +61,18 @@ export default function NurseList({ nursesList, fetchData }: NurseListProps) {
   const handleNurseSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (submittingNurse) return;
+    setModalError(null);
+
+    // Validate password length
+    if (!selectedNurse && nurseForm.password.length < 5) {
+      setModalError('รหัสผ่านต้องมีความยาวอย่างน้อย 5 ตัวอักษร');
+      return;
+    }
+    if (selectedNurse && nurseForm.password && nurseForm.password.length < 5) {
+      setModalError('รหัสผ่านใหม่ต้องมีความยาวอย่างน้อย 5 ตัวอักษร');
+      return;
+    }
+
     try {
       setSubmittingNurse(true);
       if (selectedNurse) {
@@ -68,20 +85,24 @@ export default function NurseList({ nursesList, fetchData }: NurseListProps) {
       setShowNurseModal(false);
       fetchData();
     } catch (err: any) {
-      alert(err.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูลพยาบาล');
+      setModalError(err.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูลพยาบาล');
     } finally {
       setSubmittingNurse(false);
     }
   };
 
   const handleNurseDelete = async () => {
-    if (!nurseToDelete) return;
+    if (!nurseToDelete || deletingNurse) return;
     try {
+      setDeletingNurse(true);
+      setDeleteError(null);
       await api.delete(`/nurses/${nurseToDelete.user_id}`);
       setNurseToDelete(null);
       fetchData();
     } catch (err: any) {
-      alert(err.message || 'ไม่สามารถลบบัญชีพยาบาลรายนี้ได้');
+      setDeleteError(err.message || 'ไม่สามารถลบบัญชีพยาบาลรายนี้ได้');
+    } finally {
+      setDeletingNurse(false);
     }
   };
 
@@ -222,6 +243,14 @@ export default function NurseList({ nursesList, fetchData }: NurseListProps) {
         <div className={styles.modalBackdrop}>
           <div className={styles.modalCard} style={{ animation: 'fadeUp 0.4s' }}>
             <h3>{selectedNurse ? 'แก้ไขบัญชีพยาบาล' : 'ลงทะเบียนพยาบาลใหม่'}</h3>
+
+            {modalError && (
+              <div className={styles.modalErrorBanner}>
+                <AlertCircle size={18} />
+                <span>{modalError}</span>
+              </div>
+            )}
+
             <form onSubmit={handleNurseSubmit} className={styles.modalForm}>
               <div className={styles.formGroup}>
                 <label>ชื่อบัญชีเข้าใช้งาน (Username) *</label>
@@ -246,6 +275,11 @@ export default function NurseList({ nursesList, fetchData }: NurseListProps) {
                   className={styles.inputField}
                   placeholder={selectedNurse ? 'เว้นว่างหากไม่เปลี่ยน' : 'รหัสผ่านขั้นต่ำ 5 ตัว'}
                 />
+                {nurseForm.password.length > 0 && nurseForm.password.length < 5 && (
+                  <span style={{ color: '#ef4444', fontSize: '11px', marginTop: '4px', display: 'block' }}>
+                    * รหัสผ่านต้องมีความยาวอย่างน้อย 5 ตัวอักษร
+                  </span>
+                )}
               </div>
 
               <div className={styles.formRow2}>
@@ -303,9 +337,50 @@ export default function NurseList({ nursesList, fetchData }: NurseListProps) {
             </span>
             <h3>ลบบัญชีพยาบาล</h3>
             <p>คุณต้องการลบบัญชีพยาบาลของ <b>{nurseToDelete.first_name} {nurseToDelete.last_name}</b> (Username: {nurseToDelete.username}) ออกจากระบบใช่หรือไม่?</p>
+
+            {deleteError && (
+              <div className={styles.modalErrorBanner}>
+                <AlertCircle size={18} />
+                <span>{deleteError}</span>
+              </div>
+            )}
+
             <div className={styles.modalActions}>
-              <button onClick={() => setNurseToDelete(null)} className={styles.cancelBtn}>ยกเลิก</button>
-              <button onClick={handleNurseDelete} className={styles.confirmDeleteBtn}>ยืนยันการลบ</button>
+              {deleteError ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNurseToDelete(null);
+                    setDeleteError(null);
+                  }}
+                  className={styles.cancelBtn}
+                  style={{ width: '100%' }}
+                >
+                  ปิดหน้าต่าง
+                </button>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNurseToDelete(null);
+                      setDeleteError(null);
+                    }}
+                    className={styles.cancelBtn}
+                    disabled={deletingNurse}
+                  >
+                    ยกเลิก
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleNurseDelete}
+                    className={styles.confirmDeleteBtn}
+                    disabled={deletingNurse}
+                  >
+                    {deletingNurse ? 'กำลังตรวจสอบ...' : 'ยืนยันการลบ'}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

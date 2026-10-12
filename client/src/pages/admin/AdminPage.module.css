@@ -442,6 +442,27 @@
   margin: 12px 0 20px;
 }
 
+.modalErrorBanner {
+  background-color: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  text-align: left;
+  margin: 12px 0 16px;
+  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.modalErrorBanner svg {
+  color: #dc2626;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
 .confirmDeleteBtn {
   padding: 10px 24px;
   background-color: var(--error);
