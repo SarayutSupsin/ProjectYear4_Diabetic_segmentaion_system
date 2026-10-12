@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import styles from '../NursePage.module.css';
 import { api } from '../../../services/api';
-import { ChevronRight } from 'lucide-react';
+import { Search, ChevronRight } from 'lucide-react';
 interface PatientSearchProps {
   onViewPatientWounds: (HN: string) => void;
   activeTab: string;
@@ -87,16 +87,19 @@ export default function PatientSearch({ onViewPatientWounds, activeTab }: Patien
 
       {/* Search Input matching Fig 4.11 */}
       <div className={styles.filterBar}>
-        <input
-          type="text"
-          placeholder="ค้นหาชื่อ, HN..."
-          value={searchTerm}
-          onChange={e => {
-            setSearchTerm(e.target.value);
-            setCurrentPage(1);
-          }}
-          className={styles.searchInputFull}
-        />
+        <div className={styles.searchBoxWrapper}>
+          <Search size={18} className={styles.searchIcon} />
+          <input
+            type="text"
+            placeholder="ค้นหาด้วยชื่อ-นามสกุล หรือ รหัส HN..."
+            value={searchTerm}
+            onChange={e => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            className={styles.searchInputFull}
+          />
+        </div>
       </div>
 
       {/* Patient rows matching Fig 4.11 */}
