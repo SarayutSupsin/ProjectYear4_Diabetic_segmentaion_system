@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.db.session import get_db
-from app.models import User, Nurse, WoundRecord
+from app.models import User, Nurse, WoundRecord, Appointment
 from app.schemas.nurse import (
     NurseCreate, 
     NurseUserResponse, 
@@ -186,10 +186,11 @@ def delete_nurse(
 
     # Check if nurse has existing wound records
     has_records = db.query(WoundRecord).filter(WoundRecord.user_id == user_id).first()
-    if has_records:
+    has_appointments = db.query(Appointment).filter(Appointment.nurse_user_id == user_id).first()
+    if has_records or has_appointments:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="ไม่สามารถลบบัญชีพยาบาลนี้ได้ เนื่องจากมีประวัติการบันทึกข้อมูลบาดแผลในระบบ"
+            detail="ไม่สามารถลบบัญชีพยาบาลนี้ได้ เนื่องจากมีประวัติการบันทึกข้อมูลผู้ป่วยในระบบ"
         )
 
     nurse_profile = db.query(Nurse).filter(Nurse.user_id == user_id).first()
