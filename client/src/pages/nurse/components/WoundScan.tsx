@@ -33,7 +33,7 @@ export default function WoundScan({ preselectedHN, preselectedWoundId, onSelectW
   const [showWoundDropdown, setShowWoundDropdown] = useState(false);
   const [patientSearchTerm, setPatientSearchTerm] = useState('');
 
-  // New wound case creation inside scanner view (Fig 4.18)
+  // New wound case creation inside scanner view
   const [isNewWound, setIsNewWound] = useState(false);
   const [newBodyPartId, setNewBodyPartId] = useState('');
   const [newSide, setNewSide] = useState<'เท้าซ้าย' | 'เท้าขวา'>('เท้าซ้าย');
@@ -42,7 +42,7 @@ export default function WoundScan({ preselectedHN, preselectedWoundId, onSelectW
   const [file, setFile] = useState<File | null>(null);
   const [note, setNote] = useState('');
 
-  // Modal flow controls (Fig 4.19 - 4.20)
+  // Modal flow controls
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
@@ -164,7 +164,7 @@ export default function WoundScan({ preselectedHN, preselectedWoundId, onSelectW
 
       let woundId = selectedWoundId;
 
-      // If nurse selected '+ เพิ่มแผลใหม่' (Fig 4.18), create wound first
+      // If nurse selected '+ เพิ่มแผลใหม่' create wound first
       if (isNewWound) {
         const sideString = newSide === 'เท้าซ้าย' ? 'เท้าซ้าย' : 'เท้าขวา';
 
@@ -507,7 +507,7 @@ export default function WoundScan({ preselectedHN, preselectedWoundId, onSelectW
                 className={styles.confirmBtn}
                 style={{ backgroundColor: '#2563eb' }}
               >
-                ยืนยัน วิเคราะห์เลย
+                ยืนยันการวิเคราะห์
               </button>
             </div>
           </div>
