@@ -27,7 +27,7 @@ def detect_qr(img):
                 pts_sq = np.squeeze(pts)
                 if len(pts_sq) == 4:
                     polygon = [[float(p[0]), float(p[1])] for p in pts_sq]
-            
+    #ตวรจจับqr code ทั้ง 4 มุม    
     if polygon is None or len(polygon) != 4:
         return None
 
